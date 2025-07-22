@@ -1,0 +1,2 @@
+../utilities/fsl_str.c:863:5:StrFormatPrintf	80	static
+../utilities/fsl_str.c:1539:5:StrFormatScanf	56	static

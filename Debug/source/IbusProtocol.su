@@ -1,0 +1,9 @@
+../source/IbusProtocol.cpp:6:1:IbusProtocol::IbusProtocol()	16	static
+../source/IbusProtocol.cpp:95:36:const std::vector<short unsigned int>& IbusProtocol::getChannels() const	0	static
+../source/IbusProtocol.cpp:103:5:int IbusProtocol::getParsedMessageCount() const	0	static
+../source/IbusProtocol.cpp:111:5:int IbusProtocol::getErrorCount() const	0	static
+../source/IbusProtocol.cpp:119:6:bool IbusProtocol::isLastMessageValid() const	0	static
+../source/IbusProtocol.cpp:127:6:void IbusProtocol::resetMessage(bool)	16	static
+../source/IbusProtocol.cpp:142:6:void IbusProtocol::updateChecksum(unsigned char)	0	static
+C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/bits/vector.tcc:445:7:) [with _Args = {const unsigned char&}; _Tp = unsigned char; _Alloc = std::allocator<unsigned char>]	40	static
+../source/IbusProtocol.cpp:14:6:void IbusProtocol::processByte(unsigned char)	24	static

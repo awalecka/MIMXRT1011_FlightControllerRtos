@@ -1,0 +1,13 @@
+../drivers/fsl_lpi2c_cmsis.c:111:27:LPI2Cx_GetVersion	8	static
+../drivers/fsl_lpi2c_cmsis.c:117:29:LPI2Cx_GetCapabilities	0	static
+../drivers/fsl_lpi2c_cmsis.c:130:13:KSDK_LPI2C_MASTER_EdmaCallback	0	static
+../drivers/fsl_lpi2c_cmsis.c:1144:16:LPI2C1_Master_EdmaUninitialize	0	static
+../drivers/fsl_lpi2c_cmsis.c:1177:23:LPI2C1_Master_EdmaGetStatus	0	static
+../drivers/fsl_lpi2c_cmsis.c:1167:16:LPI2C1_Master_EdmaGetDataCount	16	static
+../drivers/fsl_dmamux.h:91:20:DMAMUX_DisableChannel.part.0	8	static
+../drivers/fsl_dmamux.h:110:20:DMAMUX_SetSource.part.0	8	static
+../drivers/fsl_lpi2c_cmsis.c:1162:16:LPI2C1_Master_EdmaReceive	32	static
+../drivers/fsl_lpi2c_cmsis.c:1157:16:LPI2C1_Master_EdmaTransmit	32	static
+../drivers/fsl_lpi2c_cmsis.c:1136:16:LPI2C1_Master_EdmaInitialize	32	static
+../drivers/fsl_lpi2c_cmsis.c:1172:16:LPI2C1_Master_EdmaControl	16	static
+../drivers/fsl_lpi2c_cmsis.c:1152:16:LPI2C1_Master_EdmaPowerControl	48	static

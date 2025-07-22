@@ -1,0 +1,3 @@
+../board/clock_config.c:137:6:BOARD_BootClockRUN	16	static
+../board/clock_config.c:39:6:BOARD_InitBootClocks	0	static
+../board/clock_config.c:431:6:BOARD_BootClockRUN_400M	16	static

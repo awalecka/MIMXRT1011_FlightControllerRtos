@@ -1,0 +1,2 @@
+../source/tasks.cpp:13:6:void flight_task(void*)	368	static
+../source/tasks.cpp:82:6:void idle_task(void*)	8	static

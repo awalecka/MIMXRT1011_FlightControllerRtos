@@ -1,0 +1,11 @@
+../component/serial_manager/fsl_component_serial_manager.c:1279:25:SerialManager_Init	16	static
+../component/serial_manager/fsl_component_serial_manager.c:1496:25:SerialManager_Deinit	8	static
+../component/serial_manager/fsl_component_serial_manager.c:1575:25:SerialManager_OpenWriteHandle	16	static
+../component/serial_manager/fsl_component_serial_manager.c:1612:25:SerialManager_CloseWriteHandle	8	static
+../component/serial_manager/fsl_component_serial_manager.c:1646:25:SerialManager_OpenReadHandle	24	static
+../component/serial_manager/fsl_component_serial_manager.c:1686:25:SerialManager_CloseReadHandle	8	static
+../component/serial_manager/fsl_component_serial_manager.c:1718:25:SerialManager_WriteBlocking	4	static
+../component/serial_manager/fsl_component_serial_manager.c:1727:25:SerialManager_ReadBlocking	4	static
+../component/serial_manager/fsl_component_serial_manager.c:1974:25:SerialManager_EnterLowpower	0	static
+../component/serial_manager/fsl_component_serial_manager.c:2030:25:SerialManager_ExitLowpower	0	static
+../component/serial_manager/fsl_component_serial_manager.c:2094:6:SerialManager_SetLowpowerCriticalCb	0	static

@@ -1,0 +1,4 @@
+../board/peripherals.c:176:10:LPI2C1_GetFreq	0	static
+../board/peripherals.c:236:10:LPUART1_GetFreq	0	static
+../board/peripherals.c:302:6:BOARD_InitPeripherals	16	static
+../board/peripherals.c:319:6:BOARD_InitBootPeripherals	0	static

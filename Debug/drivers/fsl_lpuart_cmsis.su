@@ -1,0 +1,17 @@
+../drivers/fsl_lpuart_cmsis.c:478:27:LPUARTx_GetVersion	8	static
+../drivers/fsl_lpuart_cmsis.c:483:31:LPUARTx_GetCapabilities	0	static
+../drivers/fsl_lpuart_cmsis.c:488:16:LPUARTx_SetModemControl	0	static
+../drivers/fsl_lpuart_cmsis.c:493:31:LPUARTx_GetModemStatus	0	static
+../drivers/fsl_lpuart_cmsis.c:794:13:KSDK_LPUART_EdmaCallback	0	static
+../drivers/fsl_lpuart_cmsis.c:1776:16:LPUART1_EdmaInitialize	0	static
+../drivers/fsl_lpuart_cmsis.c:1784:16:LPUART1_EdmaUninitialize	0	static
+../drivers/fsl_lpuart_cmsis.c:1807:16:LPUART1_EdmaTransfer	0	static
+../drivers/fsl_dmamux.h:91:20:DMAMUX_DisableChannel.part.0	8	static
+../drivers/fsl_dmamux.h:110:20:DMAMUX_SetSource.part.0	8	static
+../drivers/fsl_lpuart_cmsis.c:1827:25:LPUART1_EdmaGetStatus	8	static
+../drivers/fsl_lpuart_cmsis.c:1817:17:LPUART1_EdmaGetRxCount	16	static
+../drivers/fsl_lpuart_cmsis.c:1812:17:LPUART1_EdmaGetTxCount	16	static
+../drivers/fsl_lpuart_cmsis.c:1802:16:LPUART1_EdmaReceive	24	static
+../drivers/fsl_lpuart_cmsis.c:1797:16:LPUART1_EdmaSend	24	static
+../drivers/fsl_lpuart_cmsis.c:1792:16:LPUART1_EdmaPowerControl	48	static
+../drivers/fsl_lpuart_cmsis.c:1822:16:LPUART1_EdmaControl	48	static
