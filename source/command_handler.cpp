@@ -18,6 +18,8 @@
 #include "IbusProtocol.h" // Assumes IbusProtocol.h is in the include path
 #include "peripherals.h"  // For LPUART1_PERIPHERAL definition
 #include "fsl_debug_console.h"
+#include "board.h"
+#include "utils.h"
 
 // --- Global Variables ---
 
@@ -118,8 +120,14 @@ void command_handler_task(void *pvParameters) {
 
             // 9. Check if a complete and valid message has been parsed.
             if (ibusParser.isLastMessageValid()) {
-                const auto& channels = ibusParser.getChannels();
-                // TODO: Do something useful with the channel data.
+
+                const std::vector<unsigned short>& channels = ibusParser.getChannels();
+                PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_0, kPWM_PwmA, kPWM_EdgeAligned, map_ushort(channels[0], 1000, 2000, 50, 100));
+                PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_0, kPWM_PwmB, kPWM_EdgeAligned, map_ushort(channels[1], 1000, 2000, 50, 100));
+                PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_2, kPWM_PwmA, kPWM_EdgeAligned, map_ushort(channels[2], 1000, 2000, 50, 100));
+                PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_2, kPWM_PwmB, kPWM_EdgeAligned, map_ushort(channels[3], 1000, 2000, 50, 100));
+                PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_3, kPWM_PwmA, kPWM_EdgeAligned, map_ushort(channels[4], 1000, 2000, 50, 100));
+                PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_3, kPWM_PwmB, kPWM_EdgeAligned, map_ushort(channels[5], 1000, 2000, 50, 100));
             }
 
             // 10. Re-trigger the asynchronous reception for the next message.

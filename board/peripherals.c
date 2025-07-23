@@ -251,6 +251,422 @@ static void LPUART1_init(void) {
 }
 
 /***********************************************************************************************************************
+ * PWM1 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'PWM1'
+- type: 'pwm'
+- mode: 'general'
+- custom_name_enabled: 'false'
+- type_id: 'pwm_2.6.0'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'PWM1'
+- config_sets:
+  - fsl_pwm:
+    - clockSource: 'SystemClock'
+    - clockSourceFreq: 'ClocksTool_DefaultInit'
+    - submodules:
+      - 0:
+        - sm: 'kPWM_Module_0'
+        - sm_id: 'SM0'
+        - config:
+          - clockSource: 'kPWM_BusClock'
+          - prescale: 'kPWM_Prescale_Divide_64'
+          - pwmFreq: '50 Hz'
+          - pairOperation: 'kPWM_Independent'
+          - operationMode: 'kPWM_EdgeAligned'
+          - initializationControl: 'kPWM_Initialize_LocalSync'
+          - reloadLogic: 'kPWM_ReloadImmediate'
+          - reloadSelect: 'kPWM_LocalReload'
+          - reloadFrequency: 'kPWM_LoadEveryOportunity'
+          - forceTrigger: 'kPWM_Force_Local'
+          - enableDebugMode: 'false'
+          - outputTrigger_sel: ''
+          - loadOK: 'false'
+          - startCounter: 'false'
+          - interrupt_sel: ''
+          - dma_used: 'false'
+          - dma:
+            - pwmDMA_activate: 'false'
+            - captureDMA_enable: ''
+            - captureDMA_source: 'kPWM_DMARequestDisable'
+            - captureDMA_watermark_control: 'kPWM_FIFOWatermarksOR'
+        - channels:
+          - 0:
+            - channel_id: 'A'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 1:
+            - channel_id: 'B'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 2:
+            - channel_id: 'X'
+            - functionSel: 'notUsed'
+        - common_interruptEn: 'false'
+        - common_interrupt:
+          - IRQn: 'PWM1_0_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'false'
+          - priority: '0'
+          - enable_custom_name: 'false'
+      - 1:
+        - sm: 'kPWM_Module_2'
+        - sm_id: 'SM2'
+        - config:
+          - clockSource: 'kPWM_BusClock'
+          - prescale: 'kPWM_Prescale_Divide_64'
+          - pwmFreq: '50 hz'
+          - pairOperation: 'kPWM_Independent'
+          - operationMode: 'kPWM_EdgeAligned'
+          - initializationControl: 'kPWM_Initialize_LocalSync'
+          - reloadLogic: 'kPWM_ReloadImmediate'
+          - reloadSelect: 'kPWM_LocalReload'
+          - reloadFrequency: 'kPWM_LoadEveryOportunity'
+          - forceTrigger: 'kPWM_Force_Local'
+          - enableDebugMode: 'false'
+          - outputTrigger_sel: ''
+          - loadOK: 'false'
+          - startCounter: 'false'
+          - interrupt_sel: ''
+          - dma_used: 'false'
+          - dma:
+            - pwmDMA_activate: 'false'
+            - captureDMA_enable: ''
+            - captureDMA_source: 'kPWM_DMARequestDisable'
+            - captureDMA_watermark_control: 'kPWM_FIFOWatermarksOR'
+        - channels:
+          - 0:
+            - channel_id: 'A'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 1:
+            - channel_id: 'B'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 2:
+            - channel_id: 'X'
+            - functionSel: 'notUsed'
+        - common_interruptEn: 'false'
+        - common_interrupt:
+          - IRQn: 'PWM1_1_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'false'
+          - priority: '0'
+          - enable_custom_name: 'false'
+      - 2:
+        - sm: 'kPWM_Module_3'
+        - sm_id: 'SM3'
+        - config:
+          - clockSource: 'kPWM_BusClock'
+          - prescale: 'kPWM_Prescale_Divide_64'
+          - pwmFreq: '50 hz'
+          - pairOperation: 'kPWM_Independent'
+          - operationMode: 'kPWM_EdgeAligned'
+          - initializationControl: 'kPWM_Initialize_LocalSync'
+          - reloadLogic: 'kPWM_ReloadImmediate'
+          - reloadSelect: 'kPWM_LocalReload'
+          - reloadFrequency: 'kPWM_LoadEveryOportunity'
+          - forceTrigger: 'kPWM_Force_Local'
+          - enableDebugMode: 'false'
+          - outputTrigger_sel: ''
+          - loadOK: 'false'
+          - startCounter: 'false'
+          - interrupt_sel: ''
+          - dma_used: 'false'
+          - dma:
+            - pwmDMA_activate: 'false'
+            - captureDMA_enable: ''
+            - captureDMA_source: 'kPWM_DMARequestDisable'
+            - captureDMA_watermark_control: 'kPWM_FIFOWatermarksOR'
+        - channels:
+          - 0:
+            - channel_id: 'A'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 1:
+            - channel_id: 'B'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 2:
+            - channel_id: 'X'
+            - functionSel: 'notUsed'
+        - common_interruptEn: 'false'
+        - common_interrupt:
+          - IRQn: 'PWM1_2_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'false'
+          - priority: '0'
+          - enable_custom_name: 'false'
+    - faultChannels:
+      - 0:
+        - commonFaultSetting:
+          - clockSource: 'kPWM_BusClock'
+          - faultFilterPeriod: '1'
+          - faultFilterCount: '3'
+          - faultGlitchStretch: 'false'
+        - faults:
+          - 0:
+            - fault_id: 'Fault0'
+            - faultClearingMode: 'kPWM_Automatic'
+            - faultLevelR: 'low'
+            - enableCombinationalPathR: 'filtered'
+            - recoverMode: 'kPWM_NoRecovery'
+            - fault_int_source: 'false'
+          - 1:
+            - fault_id: 'Fault1'
+            - faultClearingMode: 'kPWM_Automatic'
+            - faultLevelR: 'low'
+            - enableCombinationalPathR: 'filtered'
+            - recoverMode: 'kPWM_NoRecovery'
+            - fault_int_source: 'false'
+          - 2:
+            - fault_id: 'Fault2'
+            - faultClearingMode: 'kPWM_Automatic'
+            - faultLevelR: 'low'
+            - enableCombinationalPathR: 'filtered'
+            - recoverMode: 'kPWM_NoRecovery'
+            - fault_int_source: 'false'
+          - 3:
+            - fault_id: 'Fault3'
+            - faultClearingMode: 'kPWM_Automatic'
+            - faultLevelR: 'low'
+            - enableCombinationalPathR: 'filtered'
+            - recoverMode: 'kPWM_NoRecovery'
+            - fault_int_source: 'false'
+    - fault_error_interruptEn: 'false'
+    - fault_error_interrupt:
+      - IRQn: 'PWM1_FAULT_IRQn'
+      - enable_interrrupt: 'enabled'
+      - enable_priority: 'false'
+      - priority: '0'
+      - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+/* PWM main configuration */
+pwm_config_t PWM1_SM0_config = {
+  .clockSource = kPWM_BusClock,
+  .prescale = kPWM_Prescale_Divide_64,
+  .pairOperation = kPWM_Independent,
+  .initializationControl = kPWM_Initialize_LocalSync,
+  .reloadLogic = kPWM_ReloadImmediate,
+  .reloadSelect = kPWM_LocalReload,
+  .reloadFrequency = kPWM_LoadEveryOportunity,
+  .forceTrigger = kPWM_Force_Local,
+  .enableDebugMode = false,
+};
+
+pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
+  {
+    .pwmChannel = kPWM_PwmA,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+  {
+    .pwmChannel = kPWM_PwmB,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+};
+
+pwm_config_t PWM1_SM2_config = {
+  .clockSource = kPWM_BusClock,
+  .prescale = kPWM_Prescale_Divide_64,
+  .pairOperation = kPWM_Independent,
+  .initializationControl = kPWM_Initialize_LocalSync,
+  .reloadLogic = kPWM_ReloadImmediate,
+  .reloadSelect = kPWM_LocalReload,
+  .reloadFrequency = kPWM_LoadEveryOportunity,
+  .forceTrigger = kPWM_Force_Local,
+  .enableDebugMode = false,
+};
+
+pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
+  {
+    .pwmChannel = kPWM_PwmA,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+  {
+    .pwmChannel = kPWM_PwmB,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+};
+
+pwm_config_t PWM1_SM3_config = {
+  .clockSource = kPWM_BusClock,
+  .prescale = kPWM_Prescale_Divide_64,
+  .pairOperation = kPWM_Independent,
+  .initializationControl = kPWM_Initialize_LocalSync,
+  .reloadLogic = kPWM_ReloadImmediate,
+  .reloadSelect = kPWM_LocalReload,
+  .reloadFrequency = kPWM_LoadEveryOportunity,
+  .forceTrigger = kPWM_Force_Local,
+  .enableDebugMode = false,
+};
+
+pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
+  {
+    .pwmChannel = kPWM_PwmA,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+  {
+    .pwmChannel = kPWM_PwmB,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+};
+
+const pwm_fault_input_filter_param_t PWM1_faultInputFilter_config = {
+  .faultFilterPeriod = 1U,
+  .faultFilterCount = 3U,
+  .faultGlitchStretch = false
+};
+const pwm_fault_param_t PWM1_Fault0_fault_config = {
+  .faultClearingMode = kPWM_Automatic,
+  .faultLevel = false,
+  .enableCombinationalPath = true,
+  .recoverMode = kPWM_NoRecovery
+};
+const pwm_fault_param_t PWM1_Fault1_fault_config = {
+  .faultClearingMode = kPWM_Automatic,
+  .faultLevel = false,
+  .enableCombinationalPath = true,
+  .recoverMode = kPWM_NoRecovery
+};
+const pwm_fault_param_t PWM1_Fault2_fault_config = {
+  .faultClearingMode = kPWM_Automatic,
+  .faultLevel = false,
+  .enableCombinationalPath = true,
+  .recoverMode = kPWM_NoRecovery
+};
+const pwm_fault_param_t PWM1_Fault3_fault_config = {
+  .faultClearingMode = kPWM_Automatic,
+  .faultLevel = false,
+  .enableCombinationalPath = true,
+  .recoverMode = kPWM_NoRecovery
+};
+
+static void PWM1_init(void) {
+  /* Initialize PWM submodule SM0 main configuration */
+  PWM_Init(PWM1_PERIPHERAL, PWM1_SM0, &PWM1_SM0_config);
+  /* Initialize PWM submodule SM2 main configuration */
+  PWM_Init(PWM1_PERIPHERAL, PWM1_SM2, &PWM1_SM2_config);
+  /* Initialize PWM submodule SM3 main configuration */
+  PWM_Init(PWM1_PERIPHERAL, PWM1_SM3, &PWM1_SM3_config);
+  /* Initialize fault input filter configuration */
+  PWM_SetupFaultInputFilter(PWM1_PERIPHERAL, &PWM1_faultInputFilter_config);
+  /* Initialize fault channel 0 fault Fault0 configuration */
+  PWM_SetupFaults(PWM1_PERIPHERAL, PWM1_F0_FAULT0, &PWM1_Fault0_fault_config);
+  /* Initialize fault channel 0 fault Fault1 configuration */
+  PWM_SetupFaults(PWM1_PERIPHERAL, PWM1_F0_FAULT1, &PWM1_Fault1_fault_config);
+  /* Initialize fault channel 0 fault Fault2 configuration */
+  PWM_SetupFaults(PWM1_PERIPHERAL, PWM1_F0_FAULT2, &PWM1_Fault2_fault_config);
+  /* Initialize fault channel 0 fault Fault3 configuration */
+  PWM_SetupFaults(PWM1_PERIPHERAL, PWM1_F0_FAULT3, &PWM1_Fault3_fault_config);
+  /* Initialize deadtime logic input for the channel A */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM0, PWM1_SM0_A, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel B */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM0, PWM1_SM0_B, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel A */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM2, PWM1_SM2_A, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel B */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM2, PWM1_SM2_B, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel A */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_A, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel B */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_B, kPWM_UsePwm);
+  /* Setup PWM output setting for submodule SM0 */
+  PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM0, PWM1_SM0_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM0_COUNTER_FREQ_HZ, PWM1_SM0_SM_CLK_SOURCE_FREQ_HZ);
+  /* Setup PWM output setting for submodule SM2 */
+  PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM2, PWM1_SM2_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM2_COUNTER_FREQ_HZ, PWM1_SM2_SM_CLK_SOURCE_FREQ_HZ);
+  /* Setup PWM output setting for submodule SM3 */
+  PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM3_COUNTER_FREQ_HZ, PWM1_SM3_SM_CLK_SOURCE_FREQ_HZ);
+}
+
+/***********************************************************************************************************************
  * DebugConsole initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -309,6 +725,7 @@ void BOARD_InitPeripherals(void)
   DMA0_init();
   LPI2C1_init();
   LPUART1_init();
+  PWM1_init();
   /* Common post-initialization */
   BOARD_InitPeripherals_CommonPostInit();
 }

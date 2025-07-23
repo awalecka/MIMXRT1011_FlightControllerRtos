@@ -43,11 +43,11 @@ TaskHandle_t g_logging_task_handle = NULL;
 QueueHandle_t g_sensor_data_queue = NULL;
 
 // Task priorities
-#define STATE_MANAGER_TASK_PRIORITY     (tskIDLE_PRIORITY + 3)
-#define FLIGHT_TASK_PRIORITY            (tskIDLE_PRIORITY + 2)
-#define IDLE_TASK_PRIORITY              (tskIDLE_PRIORITY + 2)
-#define COMMAND_HANDLER_TASK_PRIORITY   (tskIDLE_PRIORITY + 1)
+#define STATE_MANAGER_TASK_PRIORITY     (tskIDLE_PRIORITY + 4)
+#define FLIGHT_TASK_PRIORITY            (tskIDLE_PRIORITY + 3)
+#define COMMAND_HANDLER_TASK_PRIORITY   (tskIDLE_PRIORITY + 2)
 #define LOGGING_TASK_PRIORITY           (tskIDLE_PRIORITY + 1)
+#define IDLE_TASK_PRIORITY              (tskIDLE_PRIORITY + 1)
 #define HEARTBEAT_TASK_PRIORITY         (tskIDLE_PRIORITY + 1)
 
 // --- Static Allocation for Tasks and Queues ---
@@ -73,6 +73,11 @@ static StaticTask_t xCmdHandlerTaskControlBlock;
 static StackType_t xHeartbeatStack[HEARTBEAT_STACK_SIZE];
 static StaticTask_t xHeartbeatTaskControlBlock;
 
+// Logging Task
+#define LOGGING_STACK_SIZE (configMINIMAL_STACK_SIZE + 512)
+static StackType_t xLoggingStack[LOGGING_STACK_SIZE];
+static StaticTask_t xLoggingTaskControlBlock;
+
 // --- Static Allocation for State-Specific Tasks ---
 
 // Idle Task
@@ -84,13 +89,6 @@ static StaticTask_t xIdleTaskTCB;
 #define FLIGHT_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 1024)
 static StackType_t xFlightStack[FLIGHT_TASK_STACK_SIZE];
 static StaticTask_t xFlightTaskTCB;
-
-#if 0
-// Logging Task
-#define LOGGING_STACK_SIZE (configMINIMAL_STACK_SIZE + 512)
-static StackType_t xLoggingStack[LOGGING_STACK_SIZE];
-static StaticTask_t xLoggingTaskControlBlock;
-#endif
 
 /*
  * @brief   Application entry point.
@@ -126,6 +124,21 @@ int main(void) {
         return -1;
     }
 
+    // Create the command handler task using static allocation
+    g_command_handler_task_handle = xTaskCreateStatic(command_handler_task, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, xCmdHandlerStack, &xCmdHandlerTaskControlBlock);
+    if (g_command_handler_task_handle == NULL) {
+        PRINTF("Failed to create command handler task.\r\n");
+        return -1;
+    }
+
+
+    // Create the logging task
+    g_logging_task_handle = xTaskCreateStatic(logging_task, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, xLoggingStack, &xLoggingTaskControlBlock);
+    if (g_logging_task_handle == NULL) {
+        PRINTF("Failed to create logging task.\r\n");
+        return -1;
+    }
+
     // Create state-specific tasks using static allocation, but keep them suspended initially.
     g_idle_task_handle = xTaskCreateStatic(idle_task, "IdleTask", IDLE_TASK_STACK_SIZE, NULL, IDLE_TASK_PRIORITY, xIdleStack, &xIdleTaskTCB);
     if (g_idle_task_handle == NULL) {
@@ -141,22 +154,6 @@ int main(void) {
     vTaskSuspend(g_idle_task_handle);
     vTaskSuspend(g_flight_task_handle);
 
-
-    // Create the command handler task using static allocation
-    g_command_handler_task_handle = xTaskCreateStatic(command_handler_task, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, xCmdHandlerStack, &xCmdHandlerTaskControlBlock);
-    if (g_command_handler_task_handle == NULL) {
-        PRINTF("Failed to create command handler task.\r\n");
-        return -1;
-    }
-
-#if 0
-    // Create the logging task
-    g_logging_task_handle = xTaskCreateStatic(logging_task, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, xLoggingStack, &xLoggingTaskControlBlock);
-    if (g_logging_task_handle == NULL) {
-        PRINTF("Failed to create logging task.\r\n");
-        return -1;
-    }
-#endif
     vTaskStartScheduler();
 
     // Should not reach here

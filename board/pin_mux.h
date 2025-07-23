@@ -53,6 +53,42 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_SAI1_RXD0_PIN                                          3U   /*!< PORT pin number */
 #define BOARD_INITPINS_SAI1_RXD0_PIN_MASK                             (1U << 3U)   /*!< PORT pin mask */
 
+/* GPIO_SD_01 (number 75), PWM1 */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM0B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM0B_SIGNAL                                            B   /*!< Signal name */
+#define BOARD_INITPINS_PWM0B_CHANNEL                                          0U   /*!< Signal channel */
+
+/* GPIO_SD_02 (number 74), PWM1 */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM0A_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM0A_SIGNAL                                            A   /*!< Signal name */
+#define BOARD_INITPINS_PWM0A_CHANNEL                                          0U   /*!< Signal channel */
+
+/* GPIO_05 (number 8), PWM2B */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM2B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM2B_SIGNAL                                            B   /*!< Signal name */
+#define BOARD_INITPINS_PWM2B_CHANNEL                                          2U   /*!< Signal channel */
+
+/* GPIO_06 (number 6), PWM2A */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM2A_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM2A_SIGNAL                                            A   /*!< Signal name */
+#define BOARD_INITPINS_PWM2A_CHANNEL                                          2U   /*!< Signal channel */
+
+/* GPIO_07 (number 5), PWM3B */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM3B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM3B_SIGNAL                                            B   /*!< Signal name */
+#define BOARD_INITPINS_PWM3B_CHANNEL                                          3U   /*!< Signal channel */
+
+/* GPIO_08 (number 4), PWM3A */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM3A_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM3A_SIGNAL                                            A   /*!< Signal name */
+#define BOARD_INITPINS_PWM3A_CHANNEL                                          3U   /*!< Signal channel */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

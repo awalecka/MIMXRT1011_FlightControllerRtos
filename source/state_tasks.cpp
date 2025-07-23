@@ -12,14 +12,11 @@
 
 void flight_task(void *pvParameters) {
 
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    const TickType_t xFlightLoopFrequency = pdMS_TO_TICKS(10); // 100Hz
     sensor_log_data_raw_t current_sensor_data_raw;
     sensor_log_data_vehicle_t current_sensor_data_vehicle;
     FusionAhrs ahrs;
-    //RLS_MagnetometerCalibration<float> calibrator;
-    //Eigen::Vector3f calMagnetometer;
-
-    TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xFlightLoopFrequency = pdMS_TO_TICKS(10); // 100Hz
 
     PRINTF("Flight State \r\n");
 
@@ -54,21 +51,18 @@ void flight_task(void *pvParameters) {
         const FusionVector accelerometer = {current_sensor_data_vehicle.acc_data.x, current_sensor_data_vehicle.acc_data.y, current_sensor_data_vehicle.acc_data.z};
         const FusionVector magnetometer  = {current_sensor_data_vehicle.mag_data.x, current_sensor_data_vehicle.mag_data.y, current_sensor_data_vehicle.mag_data.z};
         FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, 0.01f);
-        volatile FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
+        //volatile FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
 
         //PRINTF("%f \t %f \t %f \r\n", current_sensor_data_vehicle.acc_data.x, current_sensor_data_vehicle.acc_data.y, current_sensor_data_vehicle.acc_data.z);
         //PRINTF("%f \t %f \t %f \r\n", current_sensor_data_vehicle.gyro_data.x, current_sensor_data_vehicle.gyro_data.y, current_sensor_data_vehicle.gyro_data.z);
         //PRINTF("%f \t %f \t %f \r\n", current_sensor_data_vehicle.mag_data.x, current_sensor_data_vehicle.mag_data.y, current_sensor_data_vehicle.mag_data.z);
         //PRINTF("%d \t %d \t %d \r\n", current_sensor_data_raw.mag_data.x, current_sensor_data_raw.mag_data.y, current_sensor_data_raw.mag_data.z);
-        PRINTF("%f \t %f \t %f \r\n", euler.angle.roll, euler.angle.pitch, euler.angle.yaw);
+        //PRINTF("%f \t %f \t %f \r\n", euler.angle.roll, euler.angle.pitch, euler.angle.yaw);
 
 
         // Update Motor Outputs
-
-
-        // Add timestamp and send data to the logging queue
-        //current_sensor_data.timestamp = xTaskGetTickCount();
-        //xQueueSend(g_sensor_data_queue, &current_sensor_data, (TickType_t)0);
+        current_sensor_data_vehicle.timestamp = xTaskGetTickCount();
+        xQueueSend(g_sensor_data_queue, &current_sensor_data_vehicle, (TickType_t)0);
 
     }
 }

@@ -1,4 +1,4 @@
-../source/command_handler.cpp:46:6:void ibus_uart_callback(uint32_t)	16	static
+../source/command_handler.cpp:48:6:void ibus_uart_callback(uint32_t)	16	static
 ../source/IbusProtocol.h:16:7:IbusProtocol::~IbusProtocol()	8	static
-../source/command_handler.cpp:74:6:void command_handler_task(void*)	40	static
-../source/command_handler.cpp:131:1:cpp)	8	static
+../source/command_handler.cpp:76:6:void command_handler_task(void*)	48	static
+../source/command_handler.cpp:139:1:cpp)	8	static
