@@ -89,6 +89,26 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_PWM3A_SIGNAL                                            A   /*!< Signal name */
 #define BOARD_INITPINS_PWM3A_CHANNEL                                          3U   /*!< Signal channel */
 
+/* GPIO_09 (number 3), UART1_RXD */
+/* Routed pin properties */
+#define BOARD_INITPINS_UART1_RXD_PERIPHERAL                              LPUART1   /*!< Peripheral name */
+#define BOARD_INITPINS_UART1_RXD_SIGNAL                                      RXD   /*!< Signal name */
+
+/* GPIO_10 (number 2), UART1_TXD */
+/* Routed pin properties */
+#define BOARD_INITPINS_UART1_TXD_PERIPHERAL                              LPUART1   /*!< Peripheral name */
+#define BOARD_INITPINS_UART1_TXD_SIGNAL                                      TXD   /*!< Signal name */
+
+/* GPIO_12 (number 80), UART3_TXD */
+/* Routed pin properties */
+#define BOARD_INITPINS_UART3_TXD_PERIPHERAL                              LPUART3   /*!< Peripheral name */
+#define BOARD_INITPINS_UART3_TXD_SIGNAL                                      TXD   /*!< Signal name */
+
+/* GPIO_11 (number 1), UART3_RXD */
+/* Routed pin properties */
+#define BOARD_INITPINS_UART3_RXD_PERIPHERAL                              LPUART3   /*!< Peripheral name */
+#define BOARD_INITPINS_UART3_RXD_SIGNAL                                      RXD   /*!< Signal name */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

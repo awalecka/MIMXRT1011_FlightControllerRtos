@@ -28,6 +28,8 @@ pin_labels:
 - {pin_num: '6', pin_signal: GPIO_06, label: PWM2A, identifier: PWM2A}
 - {pin_num: '5', pin_signal: GPIO_07, label: PWM3B, identifier: PWM3B}
 - {pin_num: '4', pin_signal: GPIO_08, label: PWM3A, identifier: PWM3A}
+- {pin_num: '80', pin_signal: GPIO_12, label: UART3_TXD, identifier: UART3_TXD}
+- {pin_num: '1', pin_signal: GPIO_11, label: UART3_RXD, identifier: UART3_RXD}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -53,8 +55,8 @@ BOARD_InitPins:
 - options: {callFromInitBoot: 'true', coreID: core0, enableClock: 'true'}
 - pin_list:
   - {pin_num: '48', peripheral: ARM, signal: arm_trace_swo, pin_signal: GPIO_AD_09}
-  - {pin_num: '12', peripheral: LPI2C1, signal: SDA, pin_signal: GPIO_01, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
-  - {pin_num: '11', peripheral: LPI2C1, signal: SCL, pin_signal: GPIO_02, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
+  - {pin_num: '12', peripheral: LPI2C1, signal: SDA, pin_signal: GPIO_01, slew_rate: Fast, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
+  - {pin_num: '11', peripheral: LPI2C1, signal: SCL, pin_signal: GPIO_02, slew_rate: Fast, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
   - {pin_num: '10', peripheral: GPIO1, signal: 'gpiomux_io, 03', pin_signal: GPIO_03, direction: OUTPUT}
   - {pin_num: '75', peripheral: PWM1, signal: 'B, 0', pin_signal: GPIO_SD_01, identifier: PWM0B, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '74', peripheral: PWM1, signal: 'A, 0', pin_signal: GPIO_SD_02, identifier: PWM0A, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
@@ -66,6 +68,10 @@ BOARD_InitPins:
   - {peripheral: PWM1, signal: 'FAULT, 1', pin_signal: LOGIC_HIGH}
   - {peripheral: PWM1, signal: 'FAULT, 2', pin_signal: LOGIC_HIGH}
   - {peripheral: PWM1, signal: 'FAULT, 3', pin_signal: LOGIC_HIGH}
+  - {pin_num: '3', peripheral: LPUART1, signal: RXD, pin_signal: GPIO_09, slew_rate: Fast, software_input_on: Enable}
+  - {pin_num: '2', peripheral: LPUART1, signal: TXD, pin_signal: GPIO_10, slew_rate: Fast, software_input_on: Enable}
+  - {pin_num: '80', peripheral: LPUART3, signal: TXD, pin_signal: GPIO_12, slew_rate: Fast, software_input_on: Enable}
+  - {pin_num: '1', peripheral: LPUART3, signal: RXD, pin_signal: GPIO_11, slew_rate: Fast, software_input_on: Enable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -95,6 +101,10 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinMux(IOMUXC_GPIO_06_FLEXPWM1_PWM2_A, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_07_FLEXPWM1_PWM3_B, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_08_FLEXPWM1_PWM3_A, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_09_LPUART1_RXD, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_10_LPUART1_TXD, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_11_LPUART3_RXD, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_12_LPUART3_TXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_AD_09_ARM_TRACE_SWO, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_02_FLEXPWM1_PWM0_A, 1U); 
@@ -106,12 +116,16 @@ void BOARD_InitPins(void) {
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault1); 
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault2); 
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault3); 
-  IOMUXC_SetPinConfig(IOMUXC_GPIO_01_LPI2C1_SDA, 0xD8A0U); 
-  IOMUXC_SetPinConfig(IOMUXC_GPIO_02_LPI2C1_SCL, 0xD8A0U); 
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_01_LPI2C1_SDA, 0xD8A1U); 
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_02_LPI2C1_SCL, 0xD8A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_05_FLEXPWM1_PWM2_B, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_06_FLEXPWM1_PWM2_A, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_07_FLEXPWM1_PWM3_B, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_08_FLEXPWM1_PWM3_A, 0x10A1U); 
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_09_LPUART1_RXD, 0x10A1U); 
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_10_LPUART1_TXD, 0x10A1U); 
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_11_LPUART3_RXD, 0x10A1U); 
+  IOMUXC_SetPinConfig(IOMUXC_GPIO_12_LPUART3_TXD, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_SD_02_FLEXPWM1_PWM0_A, 0x10A1U); 
 }

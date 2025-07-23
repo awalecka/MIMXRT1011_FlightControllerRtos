@@ -40,6 +40,8 @@
                <pin_label pin_num="6" pin_signal="GPIO_06" label="PWM2A" identifier="PWM2A"/>
                <pin_label pin_num="5" pin_signal="GPIO_07" label="PWM3B" identifier="PWM3B"/>
                <pin_label pin_num="4" pin_signal="GPIO_08" label="PWM3A" identifier="PWM3A"/>
+               <pin_label pin_num="80" pin_signal="GPIO_12" label="UART3_TXD" identifier="UART3_TXD"/>
+               <pin_label pin_num="1" pin_signal="GPIO_11" label="UART3_RXD" identifier="UART3_RXD"/>
             </pin_labels>
             <external_user_signals>
                <properties/>
@@ -70,6 +72,16 @@
                         <data>true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="Peripheral" resourceId="LPUART1" description="Peripheral LPUART1 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="LPUART3" description="Peripheral LPUART3 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins:BOARD_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
@@ -95,6 +107,7 @@
                   <pin peripheral="ARM" signal="arm_trace_swo" pin_num="48" pin_signal="GPIO_AD_09"/>
                   <pin peripheral="LPI2C1" signal="SDA" pin_num="12" pin_signal="GPIO_01">
                      <pin_features>
+                        <pin_feature name="slew_rate" value="Fast"/>
                         <pin_feature name="software_input_on" value="Enable"/>
                         <pin_feature name="open_drain" value="Enable"/>
                         <pin_feature name="pull_up_down_config" value="Pull_Up_22K_Ohm"/>
@@ -102,6 +115,7 @@
                   </pin>
                   <pin peripheral="LPI2C1" signal="SCL" pin_num="11" pin_signal="GPIO_02">
                      <pin_features>
+                        <pin_feature name="slew_rate" value="Fast"/>
                         <pin_feature name="software_input_on" value="Enable"/>
                         <pin_feature name="open_drain" value="Enable"/>
                         <pin_feature name="pull_up_down_config" value="Pull_Up_22K_Ohm"/>
@@ -160,6 +174,30 @@
                   <pin peripheral="PWM1" signal="FAULT, 1" pin_num="" pin_signal="LOGIC_HIGH"/>
                   <pin peripheral="PWM1" signal="FAULT, 2" pin_num="" pin_signal="LOGIC_HIGH"/>
                   <pin peripheral="PWM1" signal="FAULT, 3" pin_num="" pin_signal="LOGIC_HIGH"/>
+                  <pin peripheral="LPUART1" signal="RXD" pin_num="3" pin_signal="GPIO_09">
+                     <pin_features>
+                        <pin_feature name="slew_rate" value="Fast"/>
+                        <pin_feature name="software_input_on" value="Enable"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="LPUART1" signal="TXD" pin_num="2" pin_signal="GPIO_10">
+                     <pin_features>
+                        <pin_feature name="slew_rate" value="Fast"/>
+                        <pin_feature name="software_input_on" value="Enable"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="LPUART3" signal="TXD" pin_num="80" pin_signal="GPIO_12">
+                     <pin_features>
+                        <pin_feature name="slew_rate" value="Fast"/>
+                        <pin_feature name="software_input_on" value="Enable"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="LPUART3" signal="RXD" pin_num="1" pin_signal="GPIO_11">
+                     <pin_features>
+                        <pin_feature name="slew_rate" value="Fast"/>
+                        <pin_feature name="software_input_on" value="Enable"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
          </functions_list>
@@ -595,6 +633,11 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="UART_CLK_ROOT" description="UART_CLK_ROOT is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="NVIC" uuid="151b12a1-0054-4ebe-8847-b2f9af0b9797" type="nvic" type_id="nvic" mode="general" peripheral="NVIC" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
@@ -616,7 +659,7 @@
                         </array>
                      </config_set>
                   </instance>
-                  <instance name="LPI2C1" uuid="fd50a162-0575-4919-9901-4b6725d5e201" type="lpi2c_cmsis" type_id="lpi2c_cmsis_2.2.0" mode="edma" peripheral="LPI2C1" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                  <instance name="LPI2C1_Sensors" uuid="fd50a162-0575-4919-9901-4b6725d5e201" type="lpi2c_cmsis" type_id="lpi2c_cmsis_2.2.0" mode="edma" peripheral="LPI2C1" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
                      <config_set name="fsl_i2c_cmsis">
                         <setting name="mode" value="kMaster"/>
                         <setting name="clockSource" value="Lpi2cClock"/>
@@ -662,7 +705,7 @@
                         <struct name="debug_console_codegenerator"/>
                      </config_set>
                   </instance>
-                  <instance name="LPUART1" uuid="9b9a0e0e-11d2-4a71-90fd-5810fb68e2a5" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="edma" peripheral="LPUART1" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                  <instance name="LPUART1_Ibus" uuid="9b9a0e0e-11d2-4a71-90fd-5810fb68e2a5" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="edma" peripheral="LPUART1" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
                      <config_set name="general">
                         <struct name="main_config">
                            <setting name="operationMode" value="ARM_USART_MODE_ASYNCHRONOUS"/>
@@ -689,12 +732,12 @@
                         <struct name="edma_channels">
                            <struct name="edma_rx_channel">
                               <setting name="uid" value="1752722497548"/>
-                              <setting name="eDMAn" value="2"/>
+                              <setting name="eDMAn" value="3"/>
                               <setting name="eDMA_source" value="kDmaRequestMuxLPUART1Rx"/>
                            </struct>
                            <struct name="edma_tx_channel">
                               <setting name="uid" value="1752722497552"/>
-                              <setting name="eDMAn" value="3"/>
+                              <setting name="eDMAn" value="2"/>
                               <setting name="eDMA_source" value="kDmaRequestMuxLPUART1Tx"/>
                            </struct>
                         </struct>
@@ -714,6 +757,8 @@
                            <struct name="1"/>
                            <struct name="2"/>
                            <struct name="3"/>
+                           <struct name="4"/>
+                           <struct name="5"/>
                         </array>
                         <array name="edma_channels"/>
                         <struct name="errInterruptConfig">
@@ -1055,6 +1100,44 @@
                            <setting name="enable_priority" value="false"/>
                            <setting name="priority" value="0"/>
                            <setting name="enable_custom_name" value="false"/>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="LPUART3_GPS" uuid="24f6a800-641a-4fe7-8c64-547d9ab37b1f" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="edma" peripheral="LPUART3" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
+                     <config_set name="general">
+                        <struct name="main_config">
+                           <setting name="operationMode" value="ARM_USART_MODE_ASYNCHRONOUS"/>
+                           <setting name="clockSource" value="LpuartClock"/>
+                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="power_state" value="ARM_POWER_FULL"/>
+                           <setting name="baudRate_Bps" value="115200"/>
+                           <setting name="dataBits" value="ARM_USART_DATA_BITS_8"/>
+                           <setting name="parityBit" value="ARM_USART_PARITY_NONE"/>
+                           <setting name="stopBit" value="ARM_USART_STOP_BITS_1"/>
+                           <setting name="enableRX" value="false"/>
+                           <setting name="enableRXBuffer" value="true"/>
+                           <setting name="enableTX" value="false"/>
+                           <setting name="signalEventFunctionId" value="NULL"/>
+                           <setting name="enableGetFreqFnCustomName" value="false"/>
+                           <setting name="getFreqFunctionCustomID" value="LPUART2_GetFreq"/>
+                           <setting name="enableInitPinsFnCustomName" value="false"/>
+                           <setting name="initPinFunctionCustomID" value="LPUART2_InitPins"/>
+                           <setting name="enableDeinitPinsFnCustomName" value="false"/>
+                           <setting name="deinitPinFunctionCustomID" value="LPUART2_DeinitPins"/>
+                        </struct>
+                     </config_set>
+                     <config_set name="fsl_cmsis_uart">
+                        <struct name="edma_channels">
+                           <struct name="edma_rx_channel">
+                              <setting name="uid" value="1753237697539"/>
+                              <setting name="eDMAn" value="5"/>
+                              <setting name="eDMA_source" value="kDmaRequestMuxLPUART3Rx"/>
+                           </struct>
+                           <struct name="edma_tx_channel">
+                              <setting name="uid" value="1753237697540"/>
+                              <setting name="eDMAn" value="4"/>
+                              <setting name="eDMA_source" value="kDmaRequestMuxLPUART3Tx"/>
+                           </struct>
                         </struct>
                      </config_set>
                   </instance>

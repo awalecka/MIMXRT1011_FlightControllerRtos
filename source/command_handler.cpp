@@ -25,7 +25,7 @@
 
 // Use the peripheral definition from the MCUXpresso configuration tools.
 // This ensures that we are using the correctly configured LPUART instance.
-static ARM_DRIVER_USART& ibusUart = LPUART1_PERIPHERAL;
+static ARM_DRIVER_USART& ibusUart = LPUART1_IBUS_PERIPHERAL;
 
 // IBUS protocol parser instance
 static IbusProtocol ibusParser;

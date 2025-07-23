@@ -36,13 +36,13 @@ extern "C" {
 #define INT_0_IRQHANDLER DMA0_IRQHandler
 /* LPI2C1 defines */
 /* Definition of peripheral driver */
-#define LPI2C1_CMSIS_DRIVER Driver_I2C1
+#define LPI2C1_SENSORS_CMSIS_DRIVER Driver_I2C1
 /* Definition of the clock source frequency */
-#define LPI2C1_CLOCK_SOURCE_FREQ 60000000UL
+#define LPI2C1_SENSORS_CLOCK_SOURCE_FREQ 60000000UL
 /* Definition of peripheral ID */
-#define LPUART1_PERIPHERAL Driver_USART1
+#define LPUART1_IBUS_PERIPHERAL Driver_USART1
 /* Definition of the clock source frequency */
-#define LPUART1_CLOCK_SOURCE_FREQ 80000000UL
+#define LPUART1_IBUS_CLOCK_SOURCE_FREQ 80000000UL
 /* Definition of peripheral ID */
 #define PWM1_PERIPHERAL PWM1
 /* Definition of submodule 0 ID */
@@ -95,6 +95,10 @@ extern "C" {
 #define PWM1_F0_FAULT2 kPWM_Fault_2
 /* Definition of fault Fault3 ID */
 #define PWM1_F0_FAULT3 kPWM_Fault_3
+/* Definition of peripheral ID */
+#define LPUART3_GPS_PERIPHERAL Driver_USART3
+/* Definition of the clock source frequency */
+#define LPUART3_GPS_CLOCK_SOURCE_FREQ 80000000UL
 /* Debug console is initialized in the peripheral tool */
 #define BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL 
 
@@ -120,14 +124,16 @@ extern const pwm_fault_param_t PWM1_Fault3_fault_config;
 /***********************************************************************************************************************
  * Global functions
  **********************************************************************************************************************/
-/* Signal event function for component LPI2C1*/
+/* Signal event function for component LPI2C1_Sensors*/
 extern void i2c_sync_event_callback(uint32_t event);
-/* Get clock source frequency function for component LPI2C1 */
+/* Get clock source frequency function for component LPI2C1_Sensors */
 uint32_t LPI2C1_GetFreq(void);
-/* Signal event function for component LPUART1*/
+/* Signal event function for component LPUART1_Ibus*/
 extern void ibus_uart_callback(uint32_t event);
-/* Get clock source frequency function for component LPUART1 */
+/* Get clock source frequency function for component LPUART1_Ibus */
 uint32_t LPUART1_GetFreq(void);
+/* Get clock source frequency function for component LPUART3_GPS */
+uint32_t LPUART3_GetFreq(void);
 
 /***********************************************************************************************************************
  * Initialization functions

@@ -24,6 +24,10 @@
 #define RTE_USART1 1
 /* Enable USART DMA */
 #define RTE_USART1_DMA_EN 1
+/* Enable peripheral */
+#define RTE_USART3 1
+/* Enable USART DMA */
+#define RTE_USART3_DMA_EN 1
 
 /***********************************************************************************************************************
  * Driver configuration
@@ -50,21 +54,39 @@
 /* Enable RX buffer */
 #define USART1_RX_BUFFER_ENABLE 1
 /* Selected DMA channel number. */
-#define RTE_USART1_DMA_RX_CH 2
-/* LPUART1 DMA source request. */
+#define RTE_USART1_DMA_RX_CH 3
+/* LPUART1_Ibus DMA source request. */
 #define RTE_USART1_DMA_RX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART1Rx
 /* DMAMUX device that is used for muxing of the request. */
 #define RTE_USART1_DMA_RX_DMAMUX_BASE DMAMUX
 /* Used DMA device. */
 #define RTE_USART1_DMA_RX_DMA_BASE DMA0
 /* Selected DMA channel number. */
-#define RTE_USART1_DMA_TX_CH 3
-/* LPUART1 DMA source request. */
+#define RTE_USART1_DMA_TX_CH 2
+/* LPUART1_Ibus DMA source request. */
 #define RTE_USART1_DMA_TX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART1Tx
 /* DMAMUX device that is used for muxing of the request. */
 #define RTE_USART1_DMA_TX_DMAMUX_BASE DMAMUX
 /* Used DMA device. */
 #define RTE_USART1_DMA_TX_DMA_BASE DMA0
+/* Enable RX buffer */
+#define USART3_RX_BUFFER_ENABLE 1
+/* Selected DMA channel number. */
+#define RTE_USART3_DMA_RX_CH 5
+/* LPUART3_GPS DMA source request. */
+#define RTE_USART3_DMA_RX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART3Rx
+/* DMAMUX device that is used for muxing of the request. */
+#define RTE_USART3_DMA_RX_DMAMUX_BASE DMAMUX
+/* Used DMA device. */
+#define RTE_USART3_DMA_RX_DMA_BASE DMA0
+/* Selected DMA channel number. */
+#define RTE_USART3_DMA_TX_CH 4
+/* LPUART3_GPS DMA source request. */
+#define RTE_USART3_DMA_TX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART3Tx
+/* DMAMUX device that is used for muxing of the request. */
+#define RTE_USART3_DMA_TX_DMAMUX_BASE DMAMUX
+/* Used DMA device. */
+#define RTE_USART3_DMA_TX_DMA_BASE DMA0
 
 
 #endif /* __RTE_DEVICE_H */

@@ -10,8 +10,7 @@
 #include "i2c_sync.h"
 
 // CMSIS I2C Driver Instance
-extern ARM_DRIVER_I2C LPI2C1_CMSIS_DRIVER;
-
+extern ARM_DRIVER_I2C LPI2C1_SENSORS_CMSIS_DRIVER;
 
 /**
  * @brief Main state machine controller task.
@@ -26,10 +25,10 @@ void state_manager_task(void *pvParameters) {
     // --- BOOT SEQUENCE ---
     PRINTF("State: BOOT\r\n");
 
-    if (LSM6DSOX_Init(&g_sensor_handle, &LPI2C1_CMSIS_DRIVER, LSM6DSOX_I2C_ADDR) != 0 ||
+    if (LSM6DSOX_Init(&g_sensor_handle, &LPI2C1_SENSORS_CMSIS_DRIVER, LSM6DSOX_I2C_ADDR) != 0 ||
         LSM6DSOX_SetAccConfig(&g_sensor_handle, LSM6DSOX_ACC_ODR_52Hz, LSM6DSOX_ACC_FS_2G) != 0 ||
         LSM6DSOX_SetGyroConfig(&g_sensor_handle, LSM6DSOX_GYRO_ODR_52Hz, LSM6DSOX_GYRO_FS_250DPS) != 0 ||
-		LIS3MDL_Init(&g_mag_handle, &LPI2C1_CMSIS_DRIVER, LIS3MDL_I2C_ADDR) != 0 ||
+		LIS3MDL_Init(&g_mag_handle, &LPI2C1_SENSORS_CMSIS_DRIVER, LIS3MDL_I2C_ADDR) != 0 ||
 		LIS3MDL_SetConfig(&g_mag_handle, LIS3MDL_ODR_80_HZ_HP, LIS3MDL_FS_4_GAUSS) != 0)
     {
 
