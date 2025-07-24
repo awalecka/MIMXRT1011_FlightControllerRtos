@@ -15,6 +15,7 @@
 #include "fsl_lpi2c_cmsis.h"
 #include "fsl_lpuart_cmsis.h"
 #include "fsl_pwm.h"
+#include "fsl_lpspi_cmsis.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -99,6 +100,10 @@ extern "C" {
 #define LPUART3_GPS_PERIPHERAL Driver_USART3
 /* Definition of the clock source frequency */
 #define LPUART3_GPS_CLOCK_SOURCE_FREQ 80000000UL
+/* Definition of peripheral ID */
+#define LPSPI1_SD_PERIPHERAL Driver_SPI1
+/* Definition of the clock source frequency */
+#define LPSPI1_SD_CLOCK_SOURCE_FREQ 105600000UL
 /* Debug console is initialized in the peripheral tool */
 #define BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL 
 
@@ -134,6 +139,8 @@ extern void ibus_uart_callback(uint32_t event);
 uint32_t LPUART1_GetFreq(void);
 /* Get clock source frequency function for component LPUART3_GPS */
 uint32_t LPUART3_GetFreq(void);
+/* Get clock source frequency function for component LPSPI1_SD */
+uint32_t LPSPI1_GetFreq(void);
 
 /***********************************************************************************************************************
  * Initialization functions

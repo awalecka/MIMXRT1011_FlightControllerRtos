@@ -14,6 +14,9 @@ C_SRCS += \
 ../drivers/fsl_lpi2c.c \
 ../drivers/fsl_lpi2c_cmsis.c \
 ../drivers/fsl_lpi2c_edma.c \
+../drivers/fsl_lpspi.c \
+../drivers/fsl_lpspi_cmsis.c \
+../drivers/fsl_lpspi_edma.c \
 ../drivers/fsl_lpuart.c \
 ../drivers/fsl_lpuart_cmsis.c \
 ../drivers/fsl_lpuart_edma.c \
@@ -31,6 +34,9 @@ C_DEPS += \
 ./drivers/fsl_lpi2c.d \
 ./drivers/fsl_lpi2c_cmsis.d \
 ./drivers/fsl_lpi2c_edma.d \
+./drivers/fsl_lpspi.d \
+./drivers/fsl_lpspi_cmsis.d \
+./drivers/fsl_lpspi_edma.d \
 ./drivers/fsl_lpuart.d \
 ./drivers/fsl_lpuart_cmsis.d \
 ./drivers/fsl_lpuart_edma.d \
@@ -48,6 +54,9 @@ OBJS += \
 ./drivers/fsl_lpi2c.o \
 ./drivers/fsl_lpi2c_cmsis.o \
 ./drivers/fsl_lpi2c_edma.o \
+./drivers/fsl_lpspi.o \
+./drivers/fsl_lpspi_cmsis.o \
+./drivers/fsl_lpspi_edma.o \
 ./drivers/fsl_lpuart.o \
 ./drivers/fsl_lpuart_cmsis.o \
 ./drivers/fsl_lpuart_edma.o \
@@ -67,7 +76,7 @@ drivers/%.o: ../drivers/%.c drivers/subdir.mk
 clean: clean-drivers
 
 clean-drivers:
-	-$(RM) ./drivers/fsl_clock.d ./drivers/fsl_clock.o ./drivers/fsl_common.d ./drivers/fsl_common.o ./drivers/fsl_common_arm.d ./drivers/fsl_common_arm.o ./drivers/fsl_dmamux.d ./drivers/fsl_dmamux.o ./drivers/fsl_edma.d ./drivers/fsl_edma.o ./drivers/fsl_flexio.d ./drivers/fsl_flexio.o ./drivers/fsl_gpio.d ./drivers/fsl_gpio.o ./drivers/fsl_lpi2c.d ./drivers/fsl_lpi2c.o ./drivers/fsl_lpi2c_cmsis.d ./drivers/fsl_lpi2c_cmsis.o ./drivers/fsl_lpi2c_edma.d ./drivers/fsl_lpi2c_edma.o ./drivers/fsl_lpuart.d ./drivers/fsl_lpuart.o ./drivers/fsl_lpuart_cmsis.d ./drivers/fsl_lpuart_cmsis.o ./drivers/fsl_lpuart_edma.d ./drivers/fsl_lpuart_edma.o ./drivers/fsl_pwm.d ./drivers/fsl_pwm.o ./drivers/fsl_xbara.d ./drivers/fsl_xbara.o
+	-$(RM) ./drivers/fsl_clock.d ./drivers/fsl_clock.o ./drivers/fsl_common.d ./drivers/fsl_common.o ./drivers/fsl_common_arm.d ./drivers/fsl_common_arm.o ./drivers/fsl_dmamux.d ./drivers/fsl_dmamux.o ./drivers/fsl_edma.d ./drivers/fsl_edma.o ./drivers/fsl_flexio.d ./drivers/fsl_flexio.o ./drivers/fsl_gpio.d ./drivers/fsl_gpio.o ./drivers/fsl_lpi2c.d ./drivers/fsl_lpi2c.o ./drivers/fsl_lpi2c_cmsis.d ./drivers/fsl_lpi2c_cmsis.o ./drivers/fsl_lpi2c_edma.d ./drivers/fsl_lpi2c_edma.o ./drivers/fsl_lpspi.d ./drivers/fsl_lpspi.o ./drivers/fsl_lpspi_cmsis.d ./drivers/fsl_lpspi_cmsis.o ./drivers/fsl_lpspi_edma.d ./drivers/fsl_lpspi_edma.o ./drivers/fsl_lpuart.d ./drivers/fsl_lpuart.o ./drivers/fsl_lpuart_cmsis.d ./drivers/fsl_lpuart_cmsis.o ./drivers/fsl_lpuart_edma.d ./drivers/fsl_lpuart_edma.o ./drivers/fsl_pwm.d ./drivers/fsl_pwm.o ./drivers/fsl_xbara.d ./drivers/fsl_xbara.o
 
 .PHONY: clean-drivers
 

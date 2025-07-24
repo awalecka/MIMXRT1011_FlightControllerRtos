@@ -82,6 +82,8 @@ instance:
       - 3: []
       - 4: []
       - 5: []
+      - 6: []
+      - 7: []
     - edma_channels: []
     - errInterruptConfig:
       - enableErrInterrupt: 'false'
@@ -737,6 +739,71 @@ static void LPUART3_GPS_init(void) {
 }
 
 /***********************************************************************************************************************
+ * LPSPI1_SD initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'LPSPI1_SD'
+- type: 'lpspi_cmsis'
+- mode: 'edma'
+- custom_name_enabled: 'true'
+- type_id: 'lpspi_cmsis_2.6.0'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'LPSPI1'
+- config_sets:
+  - general:
+    - main_config:
+      - spi_mode_user: 'ARM_SPI_MODE_MASTER'
+      - clockSource: 'LpspiClock'
+      - clockSourceFreq: 'ClocksTool_DefaultInit'
+      - clock_polarity: 'ARM_SPI_CPOL0_CPHA0'
+      - power_state: 'ARM_POWER_FULL'
+      - baudRate_Bps: '500000'
+      - data_bits: '8'
+      - bit_format: 'ARM_SPI_MSB_LSB'
+      - typeControlMaster: 'ARM_SPI_SS_MASTER_HW_OUTPUT'
+      - defaultValueInt: '0'
+      - spi_chip_select: 'PCS0'
+      - pcsToSckDelayInNanoSec: '0'
+      - lastSckToPcsDelayInNanoSec: '0'
+      - betweenTransferDelayInNanoSec: '0'
+      - signalEventFunctionId: 'NULL'
+      - enableGetFreqFnCustomName: 'false'
+      - getFreqFunctionCustomID: 'LPSPI1_GetFreq'
+      - enableInitPinsFnCustomName: 'false'
+      - initPinFunctionCustomID: 'LPSPI1_InitPins'
+      - enableDeinitPinsFnCustomName: 'false'
+      - deinitPinFunctionCustomID: 'LPSPI1_DeinitPins'
+  - fsl_spi:
+    - channels:
+      - receive:
+        - uid: '1753325606486'
+        - eDMAn: '6'
+        - eDMA_source: 'kDmaRequestMuxLPSPI1Rx'
+      - transmit:
+        - uid: '1753325606487'
+        - eDMAn: '7'
+        - eDMA_source: 'kDmaRequestMuxLPSPI1Tx'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+/* Get clock source frequency */
+uint32_t LPSPI1_GetFreq(void){
+  return LPSPI1_SD_CLOCK_SOURCE_FREQ;
+};
+
+static void LPSPI1_SD_init(void) {
+  /* Initialize CMSIS SPI */
+  LPSPI1_SD_PERIPHERAL.Initialize(NULL);
+  /* Power control of CMSIS SPI */
+  LPSPI1_SD_PERIPHERAL.PowerControl(ARM_POWER_FULL);
+  /* Control of CMSIS SPI */
+  LPSPI1_SD_PERIPHERAL.Control(ARM_SPI_MODE_MASTER | ARM_SPI_CPOL0_CPHA0 | ARM_SPI_DATA_BITS(8) | ARM_SPI_MSB_LSB | ARM_SPI_SS_MASTER_HW_OUTPUT, 500000);
+  /* Control of CMSIS SPI */
+  LPSPI1_SD_PERIPHERAL.Control(ARM_SPI_SET_DEFAULT_TX_VALUE, 0);
+}
+
+/***********************************************************************************************************************
  * DebugConsole initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -797,6 +864,7 @@ void BOARD_InitPeripherals(void)
   LPUART1_Ibus_init();
   PWM1_init();
   LPUART3_GPS_init();
+  LPSPI1_SD_init();
   /* Common post-initialization */
   BOARD_InitPeripherals_CommonPostInit();
 }

@@ -1,5 +1,6 @@
-../board/peripherals.c:178:10:LPI2C1_GetFreq	0	static
-../board/peripherals.c:238:10:LPUART1_GetFreq	0	static
-../board/peripherals.c:722:10:LPUART3_GetFreq	0	static
-../board/peripherals.c:788:6:BOARD_InitPeripherals	40	static
-../board/peripherals.c:807:6:BOARD_InitBootPeripherals	0	static
+../board/peripherals.c:180:10:LPI2C1_GetFreq	0	static
+../board/peripherals.c:240:10:LPUART1_GetFreq	0	static
+../board/peripherals.c:724:10:LPUART3_GetFreq	0	static
+../board/peripherals.c:791:10:LPSPI1_GetFreq	0	static
+../board/peripherals.c:855:6:BOARD_InitPeripherals	40	static
+../board/peripherals.c:875:6:BOARD_InitBootPeripherals	0	static

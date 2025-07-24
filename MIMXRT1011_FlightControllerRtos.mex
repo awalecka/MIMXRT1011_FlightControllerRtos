@@ -31,7 +31,7 @@
                <pin_label pin_num="66" pin_signal="GPIO_SD_09" label="FlexSPI_D0_A" identifier="FlexSPI_D0_A"/>
                <pin_label pin_num="68" pin_signal="GPIO_SD_07" label="FlexSPI_D1_A" identifier="FlexSPI_D1_A"/>
                <pin_label pin_num="67" pin_signal="GPIO_SD_08" label="FlexSPI_D2_A" identifier="FlexSPI_D2_A"/>
-               <pin_label pin_num="64" pin_signal="GPIO_SD_11" label="FlexSPI_D3_A" identifier="FlexSPI_D3_A"/>
+               <pin_label pin_num="64" pin_signal="GPIO_SD_11" label="SD_CD" identifier="FlexSPI_D3_A;SD_CD"/>
                <pin_label pin_num="69" pin_signal="GPIO_SD_06" label="FlexSPI_SS0" identifier="FlexSPI_SS0"/>
                <pin_label pin_num="10" pin_signal="GPIO_03" label="LED_D13" identifier="SAI1_RXD0"/>
                <pin_label pin_num="75" pin_signal="GPIO_SD_01" label="PWM0B" identifier="PWM1;PWM1B;PWM0B"/>
@@ -42,6 +42,10 @@
                <pin_label pin_num="4" pin_signal="GPIO_08" label="PWM3A" identifier="PWM3A"/>
                <pin_label pin_num="80" pin_signal="GPIO_12" label="UART3_TXD" identifier="UART3_TXD"/>
                <pin_label pin_num="1" pin_signal="GPIO_11" label="UART3_RXD" identifier="UART3_RXD"/>
+               <pin_label pin_num="57" pin_signal="GPIO_AD_03" label="SD_MISO" identifier="SD_MISO"/>
+               <pin_label pin_num="52" pin_signal="GPIO_AD_06" label="SD_CLK" identifier="SD_CLK"/>
+               <pin_label pin_num="56" pin_signal="GPIO_AD_04" label="SD_MOSI" identifier="SD_MOSI"/>
+               <pin_label pin_num="43" pin_signal="GPIO_AD_14" label="SD_CS" identifier="SD_CS"/>
             </pin_labels>
             <external_user_signals>
                <properties/>
@@ -78,6 +82,16 @@
                      </feature>
                   </dependency>
                   <dependency resourceType="Peripheral" resourceId="LPUART3" description="Peripheral LPUART3 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="GPIO2" description="Peripheral GPIO2 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="LPSPI1" description="Peripheral LPSPI1 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
                      <feature name="initialized" evaluation="equal">
                         <data>true</data>
                      </feature>
@@ -200,6 +214,15 @@
                         <pin_feature name="software_input_on" value="Enable"/>
                      </pin_features>
                   </pin>
+                  <pin peripheral="GPIO2" signal="gpio_io, 11" pin_num="64" pin_signal="GPIO_SD_11">
+                     <pin_features>
+                        <pin_feature name="identifier" value="SD_CD"/>
+                        <pin_feature name="direction" value="INPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="LPSPI1" signal="SDI" pin_num="57" pin_signal="GPIO_AD_03"/>
+                  <pin peripheral="LPSPI1" signal="SCK" pin_num="52" pin_signal="GPIO_AD_06"/>
+                  <pin peripheral="LPSPI1" signal="SDO" pin_num="56" pin_signal="GPIO_AD_04"/>
                </pins>
             </function>
          </functions_list>
@@ -505,6 +528,21 @@
                   <data type="Version" maxValue="2.8.9">2.6.0</data>
                </feature>
             </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.lpspi_cmsis" description="LPSPI CMSIS Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.lpspi_cmsis" description="An unsupported version of the LPSPI CMSIS Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="greaterOrEqual">
+                  <data type="Version" maxValue="2.9.9">2.6.0</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="Tool" resourceId="Pins" description="The Pins tool is required by the Peripherals tool, but it is disabled." problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data>true</data>
+               </feature>
+            </dependency>
             <dependency resourceType="Tool" resourceId="Clocks" description="The Clocks tool is required by the Peripherals tool, but it is disabled." problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data>true</data>
@@ -640,6 +678,26 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="LPSPI_CLK_ROOT" description="LPSPI_CLK_ROOT is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LPSPI1.lpspi_sck" description="Signal serial clock is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LPSPI1.lpspi_sin" description="Signal serial data input is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LPSPI1.lpspi_sout" description="Signal serial data output is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="NVIC" uuid="151b12a1-0054-4ebe-8847-b2f9af0b9797" type="nvic" type_id="nvic" mode="general" peripheral="NVIC" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
@@ -761,6 +819,8 @@
                            <struct name="3"/>
                            <struct name="4"/>
                            <struct name="5"/>
+                           <struct name="6"/>
+                           <struct name="7"/>
                         </array>
                         <array name="edma_channels"/>
                         <struct name="errInterruptConfig">
@@ -1139,6 +1199,47 @@
                               <setting name="uid" value="1753237697540"/>
                               <setting name="eDMAn" value="4"/>
                               <setting name="eDMA_source" value="kDmaRequestMuxLPUART3Tx"/>
+                           </struct>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="LPSPI1_SD" uuid="1ecd7f07-8ac0-4e79-bc72-30cfb44bdd12" type="lpspi_cmsis" type_id="lpspi_cmsis_2.6.0" mode="edma" peripheral="LPSPI1" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
+                     <config_set name="general">
+                        <struct name="main_config">
+                           <setting name="spi_mode_user" value="ARM_SPI_MODE_MASTER"/>
+                           <setting name="clockSource" value="LpspiClock"/>
+                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="clock_polarity" value="ARM_SPI_CPOL0_CPHA0"/>
+                           <setting name="power_state" value="ARM_POWER_FULL"/>
+                           <setting name="baudRate_Bps" value="500000"/>
+                           <setting name="data_bits" value="8"/>
+                           <setting name="bit_format" value="ARM_SPI_MSB_LSB"/>
+                           <setting name="typeControlMaster" value="ARM_SPI_SS_MASTER_HW_OUTPUT"/>
+                           <setting name="defaultValueInt" value="0"/>
+                           <setting name="spi_chip_select" value="PCS0"/>
+                           <setting name="pcsToSckDelayInNanoSec" value="0"/>
+                           <setting name="lastSckToPcsDelayInNanoSec" value="0"/>
+                           <setting name="betweenTransferDelayInNanoSec" value="0"/>
+                           <setting name="signalEventFunctionId" value="NULL"/>
+                           <setting name="enableGetFreqFnCustomName" value="false"/>
+                           <setting name="getFreqFunctionCustomID" value="LPSPI1_GetFreq"/>
+                           <setting name="enableInitPinsFnCustomName" value="false"/>
+                           <setting name="initPinFunctionCustomID" value="LPSPI1_InitPins"/>
+                           <setting name="enableDeinitPinsFnCustomName" value="false"/>
+                           <setting name="deinitPinFunctionCustomID" value="LPSPI1_DeinitPins"/>
+                        </struct>
+                     </config_set>
+                     <config_set name="fsl_spi">
+                        <struct name="channels">
+                           <struct name="receive">
+                              <setting name="uid" value="1753325606486"/>
+                              <setting name="eDMAn" value="6"/>
+                              <setting name="eDMA_source" value="kDmaRequestMuxLPSPI1Rx"/>
+                           </struct>
+                           <struct name="transmit">
+                              <setting name="uid" value="1753325606487"/>
+                              <setting name="eDMAn" value="7"/>
+                              <setting name="eDMA_source" value="kDmaRequestMuxLPSPI1Tx"/>
                            </struct>
                         </struct>
                      </config_set>

@@ -19,7 +19,7 @@ pin_labels:
 - {pin_num: '66', pin_signal: GPIO_SD_09, label: FlexSPI_D0_A, identifier: FlexSPI_D0_A}
 - {pin_num: '68', pin_signal: GPIO_SD_07, label: FlexSPI_D1_A, identifier: FlexSPI_D1_A}
 - {pin_num: '67', pin_signal: GPIO_SD_08, label: FlexSPI_D2_A, identifier: FlexSPI_D2_A}
-- {pin_num: '64', pin_signal: GPIO_SD_11, label: FlexSPI_D3_A, identifier: FlexSPI_D3_A}
+- {pin_num: '64', pin_signal: GPIO_SD_11, label: SD_CD, identifier: FlexSPI_D3_A;SD_CD}
 - {pin_num: '69', pin_signal: GPIO_SD_06, label: FlexSPI_SS0, identifier: FlexSPI_SS0}
 - {pin_num: '10', pin_signal: GPIO_03, label: LED_D13, identifier: SAI1_RXD0}
 - {pin_num: '75', pin_signal: GPIO_SD_01, label: PWM0B, identifier: PWM1;PWM1B;PWM0B}
@@ -30,6 +30,10 @@ pin_labels:
 - {pin_num: '4', pin_signal: GPIO_08, label: PWM3A, identifier: PWM3A}
 - {pin_num: '80', pin_signal: GPIO_12, label: UART3_TXD, identifier: UART3_TXD}
 - {pin_num: '1', pin_signal: GPIO_11, label: UART3_RXD, identifier: UART3_RXD}
+- {pin_num: '57', pin_signal: GPIO_AD_03, label: SD_MISO, identifier: SD_MISO}
+- {pin_num: '52', pin_signal: GPIO_AD_06, label: SD_CLK, identifier: SD_CLK}
+- {pin_num: '56', pin_signal: GPIO_AD_04, label: SD_MOSI, identifier: SD_MOSI}
+- {pin_num: '43', pin_signal: GPIO_AD_14, label: SD_CS, identifier: SD_CS}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -72,6 +76,10 @@ BOARD_InitPins:
   - {pin_num: '2', peripheral: LPUART1, signal: TXD, pin_signal: GPIO_10, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '80', peripheral: LPUART3, signal: TXD, pin_signal: GPIO_12, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '1', peripheral: LPUART3, signal: RXD, pin_signal: GPIO_11, slew_rate: Fast, software_input_on: Enable}
+  - {pin_num: '64', peripheral: GPIO2, signal: 'gpio_io, 11', pin_signal: GPIO_SD_11, identifier: SD_CD, direction: INPUT}
+  - {pin_num: '57', peripheral: LPSPI1, signal: SDI, pin_signal: GPIO_AD_03}
+  - {pin_num: '52', peripheral: LPSPI1, signal: SCK, pin_signal: GPIO_AD_06}
+  - {pin_num: '56', peripheral: LPSPI1, signal: SDO, pin_signal: GPIO_AD_04}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -94,6 +102,15 @@ void BOARD_InitPins(void) {
   /* Initialize GPIO functionality on GPIO_03 (pin 10) */
   GPIO_PinInit(GPIO1, 3U, &SAI1_RXD0_config);
 
+  /* GPIO configuration of SD_CD on GPIO_SD_11 (pin 64) */
+  gpio_pin_config_t SD_CD_config = {
+      .direction = kGPIO_DigitalInput,
+      .outputLogic = 0U,
+      .interruptMode = kGPIO_NoIntmode
+  };
+  /* Initialize GPIO functionality on GPIO_SD_11 (pin 64) */
+  GPIO_PinInit(GPIO2, 11U, &SD_CD_config);
+
   IOMUXC_SetPinMux(IOMUXC_GPIO_01_LPI2C1_SDA, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_02_LPI2C1_SCL, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_03_GPIOMUX_IO03, 0U); 
@@ -105,9 +122,13 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinMux(IOMUXC_GPIO_10_LPUART1_TXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_11_LPUART3_RXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_12_LPUART3_TXD, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_AD_03_LPSPI1_SDI, 0U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_AD_04_LPSPI1_SDO, 0U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_AD_06_LPSPI1_SCK, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_AD_09_ARM_TRACE_SWO, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_02_FLEXPWM1_PWM0_A, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_SD_11_GPIO2_IO11, 0U); 
   IOMUXC_GPR->GPR26 = ((IOMUXC_GPR->GPR26 &
     (~(BOARD_INITPINS_IOMUXC_GPR_GPR26_GPIO_SEL_MASK))) 
       | IOMUXC_GPR_GPR26_GPIO_SEL(0x00U)      

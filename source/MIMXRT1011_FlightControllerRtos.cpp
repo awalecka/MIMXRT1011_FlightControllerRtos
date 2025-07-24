@@ -1,10 +1,3 @@
-/*
- * Copyright 2016-2025 NXP
- * All rights reserved.
- *
- * SPDX-License-Identifier: BSD-3-Clause
- */
-
 /**
  * @file    MIMXRT1011_FlightControllerRtos.cpp
  * @brief   Application entry point.

@@ -37,7 +37,7 @@ extern "C" {
  */
 void BOARD_InitBootPins(void);
 
-#define BOARD_INITPINS_IOMUXC_GPR_GPR26_GPIO_SEL_MASK 0x08U /*!< Select GPIO1 or GPIO2: affected bits mask */
+#define BOARD_INITPINS_IOMUXC_GPR_GPR26_GPIO_SEL_MASK 0x0808U /*!< Select GPIO1 or GPIO2: affected bits mask */
 
 /* GPIO_03 (number 10), LED_D13 */
 /* Routed pin properties */
@@ -108,6 +108,35 @@ void BOARD_InitBootPins(void);
 /* Routed pin properties */
 #define BOARD_INITPINS_UART3_RXD_PERIPHERAL                              LPUART3   /*!< Peripheral name */
 #define BOARD_INITPINS_UART3_RXD_SIGNAL                                      RXD   /*!< Signal name */
+
+/* GPIO_SD_11 (number 64), SD_CD */
+/* Routed pin properties */
+#define BOARD_INITPINS_SD_CD_PERIPHERAL                                    GPIO2   /*!< Peripheral name */
+#define BOARD_INITPINS_SD_CD_SIGNAL                                      gpio_io   /*!< Signal name */
+#define BOARD_INITPINS_SD_CD_CHANNEL                                         11U   /*!< Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_INITPINS_SD_CD_GPIO                                          GPIO2   /*!< GPIO peripheral base pointer */
+#define BOARD_INITPINS_SD_CD_GPIO_PIN                                        11U   /*!< GPIO pin number */
+#define BOARD_INITPINS_SD_CD_GPIO_PIN_MASK                           (1U << 11U)   /*!< GPIO pin mask */
+#define BOARD_INITPINS_SD_CD_PORT                                          GPIO2   /*!< PORT peripheral base pointer */
+#define BOARD_INITPINS_SD_CD_PIN                                             11U   /*!< PORT pin number */
+#define BOARD_INITPINS_SD_CD_PIN_MASK                                (1U << 11U)   /*!< PORT pin mask */
+
+/* GPIO_AD_03 (number 57), SD_MISO */
+/* Routed pin properties */
+#define BOARD_INITPINS_SD_MISO_PERIPHERAL                                 LPSPI1   /*!< Peripheral name */
+#define BOARD_INITPINS_SD_MISO_SIGNAL                                        SDI   /*!< Signal name */
+
+/* GPIO_AD_06 (number 52), SD_CLK */
+/* Routed pin properties */
+#define BOARD_INITPINS_SD_CLK_PERIPHERAL                                  LPSPI1   /*!< Peripheral name */
+#define BOARD_INITPINS_SD_CLK_SIGNAL                                         SCK   /*!< Signal name */
+
+/* GPIO_AD_04 (number 56), SD_MOSI */
+/* Routed pin properties */
+#define BOARD_INITPINS_SD_MOSI_PERIPHERAL                                 LPSPI1   /*!< Peripheral name */
+#define BOARD_INITPINS_SD_MOSI_SIGNAL                                        SDO   /*!< Signal name */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
