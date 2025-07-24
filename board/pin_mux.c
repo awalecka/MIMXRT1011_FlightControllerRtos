@@ -22,8 +22,8 @@ pin_labels:
 - {pin_num: '64', pin_signal: GPIO_SD_11, label: FlexSPI_D3_A, identifier: FlexSPI_D3_A}
 - {pin_num: '69', pin_signal: GPIO_SD_06, label: FlexSPI_SS0, identifier: FlexSPI_SS0}
 - {pin_num: '10', pin_signal: GPIO_03, label: LED_D13, identifier: SAI1_RXD0}
-- {pin_num: '75', pin_signal: GPIO_SD_01, label: PWM1, identifier: PWM1;PWM1B;PWM0B}
-- {pin_num: '74', pin_signal: GPIO_SD_02, label: PWM1, identifier: PWM1;PWM1A;PWM0A}
+- {pin_num: '75', pin_signal: GPIO_SD_01, label: PWM0B, identifier: PWM1;PWM1B;PWM0B}
+- {pin_num: '74', pin_signal: GPIO_SD_02, label: PWM0A, identifier: PWM1;PWM1A;PWM0A}
 - {pin_num: '8', pin_signal: GPIO_05, label: PWM2B, identifier: PWM2B}
 - {pin_num: '6', pin_signal: GPIO_06, label: PWM2A, identifier: PWM2A}
 - {pin_num: '5', pin_signal: GPIO_07, label: PWM3B, identifier: PWM3B}
@@ -58,8 +58,8 @@ BOARD_InitPins:
   - {pin_num: '12', peripheral: LPI2C1, signal: SDA, pin_signal: GPIO_01, slew_rate: Fast, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
   - {pin_num: '11', peripheral: LPI2C1, signal: SCL, pin_signal: GPIO_02, slew_rate: Fast, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
   - {pin_num: '10', peripheral: GPIO1, signal: 'gpiomux_io, 03', pin_signal: GPIO_03, direction: OUTPUT}
-  - {pin_num: '75', peripheral: PWM1, signal: 'B, 0', pin_signal: GPIO_SD_01, identifier: PWM0B, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
-  - {pin_num: '74', peripheral: PWM1, signal: 'A, 0', pin_signal: GPIO_SD_02, identifier: PWM0A, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
+  - {pin_num: '75', peripheral: PWM1, signal: 'B, 0', pin_signal: GPIO_SD_01, identifier: PWM0B, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable, pull_keeper_enable: Enable}
+  - {pin_num: '74', peripheral: PWM1, signal: 'A, 0', pin_signal: GPIO_SD_02, identifier: PWM0A, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable, pull_keeper_enable: Enable}
   - {pin_num: '8', peripheral: PWM1, signal: 'B, 2', pin_signal: GPIO_05, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '6', peripheral: PWM1, signal: 'A, 2', pin_signal: GPIO_06, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '5', peripheral: PWM1, signal: 'B, 3', pin_signal: GPIO_07, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}

@@ -34,8 +34,8 @@
                <pin_label pin_num="64" pin_signal="GPIO_SD_11" label="FlexSPI_D3_A" identifier="FlexSPI_D3_A"/>
                <pin_label pin_num="69" pin_signal="GPIO_SD_06" label="FlexSPI_SS0" identifier="FlexSPI_SS0"/>
                <pin_label pin_num="10" pin_signal="GPIO_03" label="LED_D13" identifier="SAI1_RXD0"/>
-               <pin_label pin_num="75" pin_signal="GPIO_SD_01" label="PWM1" identifier="PWM1;PWM1B;PWM0B"/>
-               <pin_label pin_num="74" pin_signal="GPIO_SD_02" label="PWM1" identifier="PWM1;PWM1A;PWM0A"/>
+               <pin_label pin_num="75" pin_signal="GPIO_SD_01" label="PWM0B" identifier="PWM1;PWM1B;PWM0B"/>
+               <pin_label pin_num="74" pin_signal="GPIO_SD_02" label="PWM0A" identifier="PWM1;PWM1A;PWM0A"/>
                <pin_label pin_num="8" pin_signal="GPIO_05" label="PWM2B" identifier="PWM2B"/>
                <pin_label pin_num="6" pin_signal="GPIO_06" label="PWM2A" identifier="PWM2A"/>
                <pin_label pin_num="5" pin_signal="GPIO_07" label="PWM3B" identifier="PWM3B"/>
@@ -132,6 +132,7 @@
                         <pin_feature name="direction" value="OUTPUT"/>
                         <pin_feature name="slew_rate" value="Fast"/>
                         <pin_feature name="software_input_on" value="Enable"/>
+                        <pin_feature name="pull_keeper_enable" value="Enable"/>
                      </pin_features>
                   </pin>
                   <pin peripheral="PWM1" signal="A, 0" pin_num="74" pin_signal="GPIO_SD_02">
@@ -140,6 +141,7 @@
                         <pin_feature name="direction" value="OUTPUT"/>
                         <pin_feature name="slew_rate" value="Fast"/>
                         <pin_feature name="software_input_on" value="Enable"/>
+                        <pin_feature name="pull_keeper_enable" value="Enable"/>
                      </pin_features>
                   </pin>
                   <pin peripheral="PWM1" signal="B, 2" pin_num="8" pin_signal="GPIO_05">
@@ -788,16 +790,16 @@
                                  <setting name="pairOperation" value="kPWM_Independent"/>
                                  <setting name="operationMode" value="kPWM_EdgeAligned"/>
                                  <setting name="initializationControl" value="kPWM_Initialize_LocalSync"/>
-                                 <setting name="reloadLogic" value="kPWM_ReloadImmediate"/>
+                                 <setting name="reloadLogic" value="kPWM_ReloadPwmFullCycle"/>
                                  <setting name="reloadSelect" value="kPWM_LocalReload"/>
                                  <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
                                  <setting name="forceTrigger" value="kPWM_Force_Local"/>
-                                 <setting name="enableDebugMode" value="false"/>
+                                 <setting name="enableDebugMode" value="true"/>
                                  <set name="outputTrigger_sel">
                                     <selected/>
                                  </set>
-                                 <setting name="loadOK" value="false"/>
-                                 <setting name="startCounter" value="false"/>
+                                 <setting name="loadOK" value="true"/>
+                                 <setting name="startCounter" value="true"/>
                                  <set name="interrupt_sel">
                                     <selected/>
                                  </set>
@@ -816,7 +818,7 @@
                                     <setting name="channel_id" value="A"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="dutyCyclePercent" value="75"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -837,7 +839,7 @@
                                     <setting name="channel_id" value="B"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="dutyCyclePercent" value="75"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -878,16 +880,16 @@
                                  <setting name="pairOperation" value="kPWM_Independent"/>
                                  <setting name="operationMode" value="kPWM_EdgeAligned"/>
                                  <setting name="initializationControl" value="kPWM_Initialize_LocalSync"/>
-                                 <setting name="reloadLogic" value="kPWM_ReloadImmediate"/>
+                                 <setting name="reloadLogic" value="kPWM_ReloadPwmFullCycle"/>
                                  <setting name="reloadSelect" value="kPWM_LocalReload"/>
                                  <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
                                  <setting name="forceTrigger" value="kPWM_Force_Local"/>
-                                 <setting name="enableDebugMode" value="false"/>
+                                 <setting name="enableDebugMode" value="true"/>
                                  <set name="outputTrigger_sel">
                                     <selected/>
                                  </set>
-                                 <setting name="loadOK" value="false"/>
-                                 <setting name="startCounter" value="false"/>
+                                 <setting name="loadOK" value="true"/>
+                                 <setting name="startCounter" value="true"/>
                                  <set name="interrupt_sel">
                                     <selected/>
                                  </set>
@@ -906,7 +908,7 @@
                                     <setting name="channel_id" value="A"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="dutyCyclePercent" value="75"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -927,7 +929,7 @@
                                     <setting name="channel_id" value="B"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="dutyCyclePercent" value="75"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -968,16 +970,16 @@
                                  <setting name="pairOperation" value="kPWM_Independent"/>
                                  <setting name="operationMode" value="kPWM_EdgeAligned"/>
                                  <setting name="initializationControl" value="kPWM_Initialize_LocalSync"/>
-                                 <setting name="reloadLogic" value="kPWM_ReloadImmediate"/>
+                                 <setting name="reloadLogic" value="kPWM_ReloadPwmFullCycle"/>
                                  <setting name="reloadSelect" value="kPWM_LocalReload"/>
                                  <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
                                  <setting name="forceTrigger" value="kPWM_Force_Local"/>
-                                 <setting name="enableDebugMode" value="false"/>
+                                 <setting name="enableDebugMode" value="true"/>
                                  <set name="outputTrigger_sel">
                                     <selected/>
                                  </set>
-                                 <setting name="loadOK" value="false"/>
-                                 <setting name="startCounter" value="false"/>
+                                 <setting name="loadOK" value="true"/>
+                                 <setting name="startCounter" value="true"/>
                                  <set name="interrupt_sel">
                                     <selected/>
                                  </set>
@@ -996,7 +998,7 @@
                                     <setting name="channel_id" value="A"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="dutyCyclePercent" value="75"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -1017,7 +1019,7 @@
                                     <setting name="channel_id" value="B"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="dutyCyclePercent" value="75"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">

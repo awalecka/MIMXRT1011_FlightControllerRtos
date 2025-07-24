@@ -3,6 +3,7 @@
     <stringAttribute key="InstructionTraceInfo" value="eJzFVE1P4zAQvSPxHyzf2TSUTYtEFpUUpJUaVLWhHFduOg0BJ87aEz7+PXbsBCpS1MNKm5Nn5s3LzPN4Li5fC06eQapclCH1fwwogTIVm7zMQnqX3JyM6eWv46MLwAJwPQVkOVfGkTCZAd4Aw1qCIjF7FHLV8miWOC93HCbnOomvmAIy2Wx0jgrpyc9hEAzOgtEpJXPtghJDirIG6hn89D75ih8HwdgPevG/+/jHo8G5389/nVw1+C60ZVy5WPxdTCvxgnvDOjaRxWoUCQnLPHvASBSVKDWMRGom0qeQ3tac2zMlGr6AbIkarYX6bx91im/bKzX97UjuAKnuhkmm61Xkti7WIEN6Zjtf1lUlJMKGREUVM0wfnNwkeks5RKIu0cCtby7FtnE5h2EwUrkpI1OGzNituGSWl09+Z8XsNWZKizn0aVfIwBbST2N/61is0Uvif0dyeC2n/4ZmaGm8Tlw3Y0a+nOuH6mRV7n7+RMliRlaM19Dp4e3De59uvAXuGd7mxWBx6FTDus4W8LfrTacukUnUg141G0JbnHfhxprBM/AmmOQFKGSflEokS2HykeEWSruBnNS6M3v0ektttsShPVie3UXXuHaX4TtgbqFcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="/>
     <stringAttribute key="com.crt.ctrlcenter.OFSemuDetails" value="JLink261000603"/>
     <booleanAttribute key="com.crt.ctrlcenter.mainBreakIsHardware" value="true"/>
+    <booleanAttribute key="com.crt.ctrlcenter.saveState" value="true"/>
     <stringAttribute key="com.crt.ctrlcenter.serialNumber" value="USB 261000603"/>
     <listAttribute key="com.crt.ctrlcenter.symbolsAndImagesGroupSettings"/>
     <intAttribute key="com.nxp.mcuxpresso.core.debug.support.segger.launches.JLinkLaunchConfigHandler.version" value="2"/>

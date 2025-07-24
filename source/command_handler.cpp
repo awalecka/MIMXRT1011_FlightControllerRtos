@@ -128,6 +128,7 @@ void command_handler_task(void *pvParameters) {
                 PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_2, kPWM_PwmB, kPWM_EdgeAligned, map_ushort(channels[3], 1000, 2000, 50, 100));
                 PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_3, kPWM_PwmA, kPWM_EdgeAligned, map_ushort(channels[4], 1000, 2000, 50, 100));
                 PWM_UpdatePwmDutycycle(PWM1_PERIPHERAL, kPWM_Module_3, kPWM_PwmB, kPWM_EdgeAligned, map_ushort(channels[5], 1000, 2000, 50, 100));
+                PWM_SetPwmLdok(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3), true);
             }
 
             // 10. Re-trigger the asynchronous reception for the next message.

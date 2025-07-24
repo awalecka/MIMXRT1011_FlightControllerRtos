@@ -280,14 +280,14 @@ instance:
           - pairOperation: 'kPWM_Independent'
           - operationMode: 'kPWM_EdgeAligned'
           - initializationControl: 'kPWM_Initialize_LocalSync'
-          - reloadLogic: 'kPWM_ReloadImmediate'
+          - reloadLogic: 'kPWM_ReloadPwmFullCycle'
           - reloadSelect: 'kPWM_LocalReload'
           - reloadFrequency: 'kPWM_LoadEveryOportunity'
           - forceTrigger: 'kPWM_Force_Local'
-          - enableDebugMode: 'false'
+          - enableDebugMode: 'true'
           - outputTrigger_sel: ''
-          - loadOK: 'false'
-          - startCounter: 'false'
+          - loadOK: 'true'
+          - startCounter: 'true'
           - interrupt_sel: ''
           - dma_used: 'false'
           - dma:
@@ -300,7 +300,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '0'
+              - dutyCyclePercent: '75'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -314,7 +314,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '0'
+              - dutyCyclePercent: '75'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -344,14 +344,14 @@ instance:
           - pairOperation: 'kPWM_Independent'
           - operationMode: 'kPWM_EdgeAligned'
           - initializationControl: 'kPWM_Initialize_LocalSync'
-          - reloadLogic: 'kPWM_ReloadImmediate'
+          - reloadLogic: 'kPWM_ReloadPwmFullCycle'
           - reloadSelect: 'kPWM_LocalReload'
           - reloadFrequency: 'kPWM_LoadEveryOportunity'
           - forceTrigger: 'kPWM_Force_Local'
-          - enableDebugMode: 'false'
+          - enableDebugMode: 'true'
           - outputTrigger_sel: ''
-          - loadOK: 'false'
-          - startCounter: 'false'
+          - loadOK: 'true'
+          - startCounter: 'true'
           - interrupt_sel: ''
           - dma_used: 'false'
           - dma:
@@ -364,7 +364,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '0'
+              - dutyCyclePercent: '75'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -378,7 +378,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '0'
+              - dutyCyclePercent: '75'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -408,14 +408,14 @@ instance:
           - pairOperation: 'kPWM_Independent'
           - operationMode: 'kPWM_EdgeAligned'
           - initializationControl: 'kPWM_Initialize_LocalSync'
-          - reloadLogic: 'kPWM_ReloadImmediate'
+          - reloadLogic: 'kPWM_ReloadPwmFullCycle'
           - reloadSelect: 'kPWM_LocalReload'
           - reloadFrequency: 'kPWM_LoadEveryOportunity'
           - forceTrigger: 'kPWM_Force_Local'
-          - enableDebugMode: 'false'
+          - enableDebugMode: 'true'
           - outputTrigger_sel: ''
-          - loadOK: 'false'
-          - startCounter: 'false'
+          - loadOK: 'true'
+          - startCounter: 'true'
           - interrupt_sel: ''
           - dma_used: 'false'
           - dma:
@@ -428,7 +428,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '0'
+              - dutyCyclePercent: '75'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -442,7 +442,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '0'
+              - dutyCyclePercent: '75'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -513,17 +513,17 @@ pwm_config_t PWM1_SM0_config = {
   .prescale = kPWM_Prescale_Divide_64,
   .pairOperation = kPWM_Independent,
   .initializationControl = kPWM_Initialize_LocalSync,
-  .reloadLogic = kPWM_ReloadImmediate,
+  .reloadLogic = kPWM_ReloadPwmFullCycle,
   .reloadSelect = kPWM_LocalReload,
   .reloadFrequency = kPWM_LoadEveryOportunity,
   .forceTrigger = kPWM_Force_Local,
-  .enableDebugMode = false,
+  .enableDebugMode = true,
 };
 
 pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 0U,
+    .dutyCyclePercent = 75U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -531,7 +531,7 @@ pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 0U,
+    .dutyCyclePercent = 75U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -544,17 +544,17 @@ pwm_config_t PWM1_SM2_config = {
   .prescale = kPWM_Prescale_Divide_64,
   .pairOperation = kPWM_Independent,
   .initializationControl = kPWM_Initialize_LocalSync,
-  .reloadLogic = kPWM_ReloadImmediate,
+  .reloadLogic = kPWM_ReloadPwmFullCycle,
   .reloadSelect = kPWM_LocalReload,
   .reloadFrequency = kPWM_LoadEveryOportunity,
   .forceTrigger = kPWM_Force_Local,
-  .enableDebugMode = false,
+  .enableDebugMode = true,
 };
 
 pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 0U,
+    .dutyCyclePercent = 75U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -562,7 +562,7 @@ pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 0U,
+    .dutyCyclePercent = 75U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -575,17 +575,17 @@ pwm_config_t PWM1_SM3_config = {
   .prescale = kPWM_Prescale_Divide_64,
   .pairOperation = kPWM_Independent,
   .initializationControl = kPWM_Initialize_LocalSync,
-  .reloadLogic = kPWM_ReloadImmediate,
+  .reloadLogic = kPWM_ReloadPwmFullCycle,
   .reloadSelect = kPWM_LocalReload,
   .reloadFrequency = kPWM_LoadEveryOportunity,
   .forceTrigger = kPWM_Force_Local,
-  .enableDebugMode = false,
+  .enableDebugMode = true,
 };
 
 pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 0U,
+    .dutyCyclePercent = 75U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -593,7 +593,7 @@ pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 0U,
+    .dutyCyclePercent = 75U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -666,6 +666,10 @@ static void PWM1_init(void) {
   PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM2, PWM1_SM2_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM2_COUNTER_FREQ_HZ, PWM1_SM2_SM_CLK_SOURCE_FREQ_HZ);
   /* Setup PWM output setting for submodule SM3 */
   PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM3_COUNTER_FREQ_HZ, PWM1_SM3_SM_CLK_SOURCE_FREQ_HZ);
+  /* Initialize LDOK for update of the working registers */
+  PWM_SetPwmLdok(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3), true);
+  /* Start selected counters */
+  PWM_StartTimer(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3));
 }
 
 /***********************************************************************************************************************
