@@ -1,1 +1,2 @@
-../source/heartbeat_task.cpp:12:6:void heartbeat_task(void*)	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_gpio.h:176:24:uint32_t GPIO_PinRead(GPIO_Type*, uint32_t)	16	static
+../source/heartbeat_task.cpp:11:6:void heartbeat_task(void*)	24	static

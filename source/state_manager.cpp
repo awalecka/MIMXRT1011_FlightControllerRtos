@@ -56,11 +56,21 @@ void state_manager_task(void *pvParameters) {
 
             // Resume the task of the new state
             switch (g_flight_state) {
-                case STATE_IDLE:      vTaskResume(g_idle_task_handle); break;
-                case STATE_FLIGHT:    vTaskResume(g_flight_task_handle); break;
-                case STATE_CALIBRATE: vTaskResume(g_calibrate_task_handle); break;
+                case STATE_IDLE:
+                	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
+                	vTaskResume(g_idle_task_handle);
+                	break;
+                case STATE_FLIGHT:
+                	g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
+                	vTaskResume(g_flight_task_handle);
+                	break;
+                case STATE_CALIBRATE:
+                	g_heartbeat_frequency = pdMS_TO_TICKS(1000); // 0.5Hz
+                	vTaskResume(g_calibrate_task_handle);
+                	break;
                 case STATE_FAILSAFE:
                     PRINTF("State: FAILSAFE - System halted. Please reset.\r\n");
+                	g_heartbeat_frequency = pdMS_TO_TICKS(125); // 4Hz
                     vTaskSuspend(g_command_handler_task_handle);
                     vTaskSuspend(g_logging_task_handle);
                     vTaskSuspend(NULL); // Suspend self

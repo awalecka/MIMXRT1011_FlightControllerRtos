@@ -12,6 +12,7 @@
 #include "flight_controller.h"
 #include "fsl_debug_console.h"
 #include "peripherals.h"
+#include <vector>
 
 // Include the user-provided C driver header
 extern "C" {
@@ -34,6 +35,10 @@ TaskHandle_t g_flight_task_handle = NULL;
 TaskHandle_t g_calibrate_task_handle = NULL;
 TaskHandle_t g_logging_task_handle = NULL;
 QueueHandle_t g_sensor_data_queue = NULL;
+QueueHandle_t g_controls_data_queue = NULL;
+QueueHandle_t g_command_data_queue = NULL;
+
+volatile TickType_t g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
 
 // Task priorities
 #define STATE_MANAGER_TASK_PRIORITY     (tskIDLE_PRIORITY + 4)
@@ -50,6 +55,18 @@ QueueHandle_t g_sensor_data_queue = NULL;
 #define SENSOR_QUEUE_ITEM_SIZE sizeof(sensor_log_data_vehicle_t)
 static StaticQueue_t xSensorQueueControlBlock;
 static uint8_t ucSensorQueueStorageArea[SENSOR_QUEUE_LENGTH * SENSOR_QUEUE_ITEM_SIZE];
+
+// Controls Data Queue
+#define CONTROLS_QUEUE_LENGTH 50
+#define CONTROLS_QUEUE_ITEM_SIZE sizeof(ActuatorOutput)
+static StaticQueue_t xControlsQueueControlBlock;
+static uint8_t ucControlsQueueStorageArea[CONTROLS_QUEUE_LENGTH * CONTROLS_QUEUE_ITEM_SIZE];
+
+// Controls Data Queue
+#define COMMAND_QUEUE_LENGTH 1
+#define COMMAND_QUEUE_ITEM_SIZE sizeof(std::vector<unsigned short>*)
+static StaticQueue_t xCommandQueueControlBlock;
+static uint8_t ucCommandQueueStorageArea[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_ITEM_SIZE];
 
 // State Manager Task
 #define STATE_MGR_STACK_SIZE (configMINIMAL_STACK_SIZE + 512)
@@ -96,17 +113,29 @@ int main(void) {
 
     PRINTF("Flight Controller Initializing...\r\n");
 
-    // Create the heartbeat task using static allocation
-    g_heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, "HeartbeatTask", HEARTBEAT_STACK_SIZE, NULL, HEARTBEAT_TASK_PRIORITY, xHeartbeatStack, &xHeartbeatTaskControlBlock);
-    if (g_heartbeat_task_handle == NULL) {
-        PRINTF("Failed to create heartbeat task.\r\n");
-        return -1;
-    }
-
     // Create the queue for logging sensor data using static allocation.
     g_sensor_data_queue = xQueueCreateStatic(SENSOR_QUEUE_LENGTH, SENSOR_QUEUE_ITEM_SIZE, ucSensorQueueStorageArea, &xSensorQueueControlBlock);
     if (g_sensor_data_queue == NULL) {
         PRINTF("Failed to create sensor data queue.\r\n");
+        return -1;
+    }
+
+    g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
+    if (g_controls_data_queue == NULL) {
+        PRINTF("Failed to create controls data queue.\r\n");
+        return -1;
+    }
+
+    g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
+    if (g_command_data_queue == NULL) {
+        PRINTF("Failed to create controls data queue.\r\n");
+        return -1;
+    }
+
+    // Create the heartbeat task using static allocation
+    g_heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, "HeartbeatTask", HEARTBEAT_STACK_SIZE, NULL, HEARTBEAT_TASK_PRIORITY, xHeartbeatStack, &xHeartbeatTaskControlBlock);
+    if (g_heartbeat_task_handle == NULL) {
+        PRINTF("Failed to create heartbeat task.\r\n");
         return -1;
     }
 
@@ -138,13 +167,13 @@ int main(void) {
         PRINTF("Failed to create idle task.\r\n");
         return -1;
     }
+    vTaskSuspend(g_idle_task_handle);
 
     g_flight_task_handle = xTaskCreateStatic(flight_task, "FlightTask", FLIGHT_TASK_STACK_SIZE, NULL, FLIGHT_TASK_PRIORITY, xFlightStack, &xFlightTaskTCB);
     if (g_flight_task_handle == NULL) {
         PRINTF("Failed to create flight task.\r\n");
         return -1;
     }
-    vTaskSuspend(g_idle_task_handle);
     vTaskSuspend(g_flight_task_handle);
 
     vTaskStartScheduler();

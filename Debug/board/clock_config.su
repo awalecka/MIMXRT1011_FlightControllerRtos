@@ -1,3 +1,13 @@
-../board/clock_config.c:137:6:BOARD_BootClockRUN	16	static
-../board/clock_config.c:39:6:BOARD_InitBootClocks	0	static
-../board/clock_config.c:431:6:BOARD_BootClockRUN_400M	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_common_arm.h:225:20:_SDK_AtomicLocalClearAndSet4Byte	48	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:991:20:CLOCK_SetMux	24	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1043:20:CLOCK_SetDiv	24	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1079:20:CLOCK_ControlGate	32	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1106:20:CLOCK_DisableClock	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1239:20:CLOCK_SetXtalFreq	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1249:20:CLOCK_SetRtcXtalFreq	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1293:20:CLOCK_SetPllBypass	24	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_iomuxc.h:517:20:IOMUXC_SetSaiMClkClockSource	24	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_iomuxc.h:577:20:IOMUXC_MQSConfig	24	static
+../board/clock_config.c:39:6:BOARD_InitBootClocks	8	static
+../board/clock_config.c:137:6:BOARD_BootClockRUN	8	static
+../board/clock_config.c:431:6:BOARD_BootClockRUN_400M	8	static

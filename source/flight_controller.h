@@ -13,6 +13,7 @@
 #include "task.h"
 #include "queue.h"
 #include "semphr.h"
+#include "attitudeController.h"
 
 // Include the sensor driver header
 extern "C" {
@@ -64,6 +65,10 @@ extern TaskHandle_t g_logging_task_handle;
 
 // Queue handle for logging sensor data
 extern QueueHandle_t g_sensor_data_queue;
+extern QueueHandle_t g_controls_data_queue;
+extern QueueHandle_t g_command_data_queue;
+
+extern volatile TickType_t g_heartbeat_frequency;
 
 // --- Task Function Prototypes ---
 void state_manager_task(void *pvParameters);

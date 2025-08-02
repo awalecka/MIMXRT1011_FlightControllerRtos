@@ -16,7 +16,7 @@
  * Definitions
  ******************************************************************************/
 /*! @brief The board name */
-#define BOARD_NAME "MIMXRT1010-EVK"
+#define BOARD_NAME "METRO-M7"
 
 /* The UART to use for debug messages. */
 #define BOARD_DEBUG_UART_TYPE     kSerialPort_Uart
@@ -32,18 +32,6 @@
 #define BOARD_DEBUG_UART_BAUDRATE (115200U)
 #endif /* BOARD_DEBUG_UART_BAUDRATE */
 
-/* @Brief Board accelerator sensor configuration */
-#define BOARD_ACCEL_I2C_BASEADDR             LPI2C1
-#define BOARD_ACCEL_I2C_CLOCK_SOURCE_SELECT  (0U)
-#define BOARD_ACCEL_I2C_CLOCK_SOURCE_DIVIDER (5U)
-#define BOARD_ACCEL_I2C_CLOCK_FREQ           (CLOCK_GetFreq(kCLOCK_Usb1PllClk) / 8 / (BOARD_ACCEL_I2C_CLOCK_SOURCE_DIVIDER + 1U))
-
-#define BOARD_CODEC_I2C_BASEADDR             LPI2C1
-#define BOARD_CODEC_I2C_INSTANCE             1U
-#define BOARD_CODEC_I2C_CLOCK_SOURCE_SELECT  (0U)
-#define BOARD_CODEC_I2C_CLOCK_SOURCE_DIVIDER (5U)
-#define BOARD_CODEC_I2C_CLOCK_FREQ           (10000000U)
-
 /*! @brief The USER_LED used for board */
 #define LOGIC_LED_ON  (0U)
 #define LOGIC_LED_OFF (1U)
@@ -54,9 +42,6 @@
 #define BOARD_USER_LED_GPIO_PIN (3U)
 #endif
 
-#define USER_LED_INIT(output)                                            \
-    GPIO_PinWrite(BOARD_USER_LED_GPIO, BOARD_USER_LED_GPIO_PIN, output); \
-    BOARD_USER_LED_GPIO->GDIR |= (1U << BOARD_USER_LED_GPIO_PIN) /*!< Enable target USER_LED */
 #define USER_LED_OFF() \
     GPIO_PortClear(BOARD_USER_LED_GPIO, 1U << BOARD_USER_LED_GPIO_PIN)                 /*!< Turn off target USER_LED */
 #define USER_LED_ON() GPIO_PortSet(BOARD_USER_LED_GPIO, 1U << BOARD_USER_LED_GPIO_PIN) /*!<Turn on target USER_LED*/
@@ -64,53 +49,25 @@
     GPIO_PinWrite(BOARD_USER_LED_GPIO, BOARD_USER_LED_GPIO_PIN, \
                   0x1 ^ GPIO_PinRead(BOARD_USER_LED_GPIO, BOARD_USER_LED_GPIO_PIN)) /*!< Toggle target USER_LED */
 
-/*! @brief Define the port interrupt number for the board switches */
-#ifndef BOARD_USER_BUTTON_GPIO
-#define BOARD_USER_BUTTON_GPIO GPIO2
+/*! @brief The USER_LED used for board */
+#define TIMING_GPIO_ON  (0U)
+#define TIMING_GPIO_OFF (1U)
+#ifndef BOARD_USER_TIMING_GPIO
+#define BOARD_USER_TIMING_GPIO GPIO1
 #endif
-#ifndef BOARD_USER_BUTTON_GPIO_PIN
-#define BOARD_USER_BUTTON_GPIO_PIN (5U)
+#ifndef BOARD_USER_TIMING_GPIO_PIN
+#define BOARD_USER_TIMING_GPIO_PIN (4U)
 #endif
-#define BOARD_USER_BUTTON_IRQ         GPIO2_Combined_0_15_IRQn
-#define BOARD_USER_BUTTON_IRQ_HANDLER GPIO2_Combined_0_15_IRQHandler
-#define BOARD_USER_BUTTON_NAME        "SW4"
+
+#define USER_TIMING_OFF() \
+    GPIO_PortClear(BOARD_USER_TIMING_GPIO, 1U << BOARD_USER_TIMING_GPIO_PIN)                 /*!< Turn off target USER_LED */
+#define USER_TIMING_ON() GPIO_PortSet(BOARD_USER_TIMING_GPIO, 1U << BOARD_USER_TIMING_GPIO_PIN) /*!<Turn on target USER_LED*/
+#define USER_TIMING_TOGGLE()                                       \
+    GPIO_PinWrite(BOARD_USER_TIMING_GPIO, BOARD_USER_TIMING_GPIO_PIN, \
+                  0x1 ^ GPIO_PinRead(BOARD_USER_TIMING_GPIO, BOARD_USER_TIMING_GPIO_PIN)) /*!< Toggle target USER_LED */
 
 /*! @brief The flash size */
 #define BOARD_FLASH_SIZE (0x1000000U)
-
-/* USB PHY condfiguration */
-#define BOARD_USB_PHY_D_CAL     (0x0CU)
-#define BOARD_USB_PHY_TXCAL45DP (0x06U)
-#define BOARD_USB_PHY_TXCAL45DM (0x06U)
-
-#define BOARD_ARDUINO_INT_IRQ   (GPIO1_Combined_16_31_IRQn)
-#define BOARD_ARDUINO_I2C_IRQ   (LPI2C1_IRQn)
-#define BOARD_ARDUINO_I2C_INDEX (1)
-
-/*! @brief The WIFI-QCA shield pin. */
-#define BOARD_INITSILEX2401SHIELD_PWRON_GPIO      GPIO1               /*!< GPIO device name: GPIO */
-#define BOARD_INITSILEX2401SHIELD_PWRON_PORT      1U                  /*!< PORT device index: 1 */
-#define BOARD_INITSILEX2401SHIELD_PWRON_PIN       8U                  /*!< PIO1 pin index: 8 */
-#define BOARD_INITSILEX2401SHIELD_PWRON_PIN_NAME  GPIO1_08            /*!< Pin name */
-#define BOARD_INITSILEX2401SHIELD_PWRON_LABEL     "PWRON"             /*!< Label */
-#define BOARD_INITSILEX2401SHIELD_PWRON_NAME      "PWRON"             /*!< Identifier name */
-#define BOARD_INITSILEX2401SHIELD_PWRON_DIRECTION kGPIO_DigitalOutput /*!< Direction */
-
-#define BOARD_INITSILEX2401SHIELD_IRQ_GPIO      GPIO1              /*!< GPIO device name: GPIO */
-#define BOARD_INITSILEX2401SHIELD_IRQ_PORT      1U                 /*!< PORT device index: 1 */
-#define BOARD_INITSILEX2401SHIELD_IRQ_PIN       4U                 /*!< PIO1 pin index: 4 */
-#define BOARD_INITSILEX2401SHIELD_IRQ_PIN_NAME  GPIO1_04           /*!< Pin name */
-#define BOARD_INITSILEX2401SHIELD_IRQ_LABEL     "IRQ"              /*!< Label */
-#define BOARD_INITSILEX2401SHIELD_IRQ_NAME      "IRQ"              /*!< Identifier name */
-#define BOARD_INITSILEX2401SHIELD_IRQ_DIRECTION kGPIO_DigitalInput /*!< Direction */
-
-/* Serial MWM WIFI */
-#define BOARD_SERIAL_MWM_PORT_CLK_FREQ     BOARD_DebugConsoleSrcFreq()
-#define BOARD_SERIAL_MWM_PORT              LPUART1
-#define BOARD_SERIAL_MWM_PORT_IRQn         LPUART1_IRQn
-#define BOARD_SERIAL_MWM_RST_GPIO          GPIO1
-#define BOARD_SERIAL_MWM_RST_PIN           24
-#define BOARD_SERIAL_MWM_RST_WRITE(output) GPIO_PinWrite(BOARD_SERIAL_MWM_RST_GPIO, BOARD_SERIAL_MWM_RST_PIN, output)
 
 #if defined(__cplusplus)
 extern "C" {

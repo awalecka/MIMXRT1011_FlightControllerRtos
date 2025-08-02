@@ -46,6 +46,7 @@
                <pin_label pin_num="52" pin_signal="GPIO_AD_06" label="SD_CLK" identifier="SD_CLK"/>
                <pin_label pin_num="56" pin_signal="GPIO_AD_04" label="SD_MOSI" identifier="SD_MOSI"/>
                <pin_label pin_num="43" pin_signal="GPIO_AD_14" label="SD_CS" identifier="SD_CS"/>
+               <pin_label pin_num="9" pin_signal="GPIO_04" label="MEAS_TIME" identifier="MEAS_TIME"/>
             </pin_labels>
             <external_user_signals>
                <properties/>
@@ -82,16 +83,6 @@
                      </feature>
                   </dependency>
                   <dependency resourceType="Peripheral" resourceId="LPUART3" description="Peripheral LPUART3 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
-                     <feature name="initialized" evaluation="equal">
-                        <data>true</data>
-                     </feature>
-                  </dependency>
-                  <dependency resourceType="Peripheral" resourceId="GPIO2" description="Peripheral GPIO2 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
-                     <feature name="initialized" evaluation="equal">
-                        <data>true</data>
-                     </feature>
-                  </dependency>
-                  <dependency resourceType="Peripheral" resourceId="LPSPI1" description="Peripheral LPSPI1 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
                      <feature name="initialized" evaluation="equal">
                         <data>true</data>
                      </feature>
@@ -214,15 +205,13 @@
                         <pin_feature name="software_input_on" value="Enable"/>
                      </pin_features>
                   </pin>
-                  <pin peripheral="GPIO2" signal="gpio_io, 11" pin_num="64" pin_signal="GPIO_SD_11">
+                  <pin peripheral="GPIO1" signal="gpiomux_io, 04" pin_num="9" pin_signal="GPIO_04">
                      <pin_features>
-                        <pin_feature name="identifier" value="SD_CD"/>
-                        <pin_feature name="direction" value="INPUT"/>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                        <pin_feature name="slew_rate" value="Fast"/>
+                        <pin_feature name="software_input_on" value="Enable"/>
                      </pin_features>
                   </pin>
-                  <pin peripheral="LPSPI1" signal="SDI" pin_num="57" pin_signal="GPIO_AD_03"/>
-                  <pin peripheral="LPSPI1" signal="SCK" pin_num="52" pin_signal="GPIO_AD_06"/>
-                  <pin peripheral="LPSPI1" signal="SDO" pin_num="56" pin_signal="GPIO_AD_04"/>
                </pins>
             </function>
          </functions_list>

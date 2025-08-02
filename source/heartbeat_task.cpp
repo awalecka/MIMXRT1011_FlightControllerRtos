@@ -5,16 +5,14 @@
 #include "flight_controller.h"
 #include "fsl_debug_console.h"
 #include "board.h"
-
 /**
  * @brief Task that generates a heartbeat.
  */
 void heartbeat_task(void *pvParameters) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
-    const TickType_t xHeartbeatFrequency = pdMS_TO_TICKS(500); // 1Hz
 
     while (1) {
-        vTaskDelayUntil(&xLastWakeTime, xHeartbeatFrequency);
+        vTaskDelayUntil(&xLastWakeTime, g_heartbeat_frequency);
         USER_LED_TOGGLE();
     }
 }

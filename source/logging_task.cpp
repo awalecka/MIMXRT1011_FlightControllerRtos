@@ -34,29 +34,11 @@ static bool init_sd_card_and_logfile() {
 }
 
 /**
- * @brief Writes a line of data to the log file.
- * @param data The sensor data to write.
- */
-static void write_log_data(const sensor_log_data_vehicle_t* data) {
-    // In a real implementation, you would format and write the data
-    // f_printf(&g_log_file, "%u,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n",
-    //          data->timestamp,
-    //          data->acc_data.x, data->acc_data.y, data->acc_data.z,
-    //          data->gyro_data.x, data->gyro_data.y, data->gyro_data.z);
-
-    // For now, we just print to the console to show it's working
-    PRINTF("[Logger] T:%u, AX:%.2f, AY:%.2f, AZ:%.2f, GX:%.2f, GY:%.2f, GZ:%.2f\r\n",
-             data->timestamp,
-             data->acc_data.x, data->acc_data.y, data->acc_data.z,
-             data->gyro_data.x, data->gyro_data.y, data->gyro_data.z);
-}
-
-
-/**
  * @brief Task that waits for sensor data and writes it to a log file.
  */
 void logging_task(void *pvParameters) {
-	sensor_log_data_vehicle_t received_data;
+	sensor_log_data_vehicle_t received_sensor_data;
+	ActuatorOutput received_controls_data;
 
     // Initialize the SD card. If it fails, suspend the task.
     if (!init_sd_card_and_logfile()) {
@@ -66,8 +48,23 @@ void logging_task(void *pvParameters) {
 
     while (1) {
         // Wait indefinitely for an item to appear in the queue.
-        if (xQueueReceive(g_sensor_data_queue, &received_data, portMAX_DELAY) == pdPASS) {
-            write_log_data(&received_data);
+
+    	if (xQueueReceive(g_sensor_data_queue, &received_sensor_data, portMAX_DELAY) == pdPASS) {
+    	    PRINTF("[Sensors] T:%lu, AX:%.2f, AY:%.2f, AZ:%.2f, GX:%.2f, GY:%.2f, GZ:%.2f\r\n",
+    	    		received_sensor_data.timestamp,
+					received_sensor_data.acc_data.x, received_sensor_data.acc_data.y, received_sensor_data.acc_data.z,
+					received_sensor_data.gyro_data.x, received_sensor_data.gyro_data.y, received_sensor_data.gyro_data.z);
+        }
+
+        if (xQueueReceive(g_controls_data_queue, &received_controls_data, portMAX_DELAY) == pdPASS) {
+            PRINTF("[Controls] T:%lu, A:%.2f, E:%.2f, R:%.2f \r\n",
+            		received_controls_data.timestamp, received_controls_data.aileron,
+					received_controls_data.elevator, received_controls_data.rudder);
         }
     }
 }
+
+
+
+
+
