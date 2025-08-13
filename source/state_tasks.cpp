@@ -29,6 +29,8 @@ void flight_task(void *pvParameters) {
 
     PRINTF("Flight State \r\n");
 
+	g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
+
 	// Define the axis mapping based on your hardware setup
 	lsm6dsox_axis_mapping_t vehicle_mapping = {
 	    .map_x = LSM6DSOX_AXIS_X_POSITIVE,
@@ -56,8 +58,7 @@ void flight_task(void *pvParameters) {
         LSM6DSOX_RemapData(&current_sensor_data_raw.acc_data, &vehicle_mapping, &current_sensor_data_vehicle.acc_data);
         LSM6DSOX_RemapData(&current_sensor_data_raw.gyro_data, &vehicle_mapping, &current_sensor_data_vehicle.gyro_data);
 
-        // Run Flight Control Algorithms
-    	//gyroscope data in degrees/s, accelerometer data in g
+        // Run Flight Control Algorithms, gyroscope data in degrees/s, accelerometer data in g
         const FusionVector gyroscope     = {current_sensor_data_vehicle.gyro_data.x, current_sensor_data_vehicle.gyro_data.y, current_sensor_data_vehicle.gyro_data.z};
         const FusionVector accelerometer = {current_sensor_data_vehicle.acc_data.x, current_sensor_data_vehicle.acc_data.y, current_sensor_data_vehicle.acc_data.z};
         const FusionVector magnetometer  = {current_sensor_data_vehicle.mag_data.x, current_sensor_data_vehicle.mag_data.y, current_sensor_data_vehicle.mag_data.z};
@@ -117,10 +118,36 @@ void flight_task(void *pvParameters) {
  * @brief Task for the IDLE state.State transition: 0 -> 1
  */
 void idle_task(void *pvParameters) {
-    while (1) {
+
+	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
+
+	while (1) {
         PRINTF("State: IDLE - System ready. Waiting for command...\r\n");
         vTaskDelay(pdMS_TO_TICKS(1000));
+
+        // Transition to flight
         g_flight_state = STATE_FLIGHT;
 
     }
 }
+
+/**
+ * @brief Task for the IDLE state.State transition: 0 -> 1
+ */
+void calibrate_task(void *pvParameters) {
+
+	g_heartbeat_frequency = pdMS_TO_TICKS(1000); // 0.5Hz
+
+	while (1) {
+        PRINTF("State: CALIBRATE - System ready. Waiting for command...\r\n");
+        vTaskDelay(pdMS_TO_TICKS(1000));
+
+
+
+        // Transition to flight
+        g_flight_state = STATE_FLIGHT;
+
+    }
+}
+
+

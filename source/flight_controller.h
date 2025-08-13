@@ -68,6 +68,7 @@ extern QueueHandle_t g_sensor_data_queue;
 extern QueueHandle_t g_controls_data_queue;
 extern QueueHandle_t g_command_data_queue;
 
+// Global heartbeat
 extern volatile TickType_t g_heartbeat_frequency;
 
 // --- Task Function Prototypes ---

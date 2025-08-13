@@ -67,7 +67,7 @@
                   0x1 ^ GPIO_PinRead(BOARD_USER_TIMING_GPIO, BOARD_USER_TIMING_GPIO_PIN)) /*!< Toggle target USER_LED */
 
 /*! @brief The flash size */
-#define BOARD_FLASH_SIZE (0x1000000U)
+#define BOARD_FLASH_SIZE (0x800000U)
 
 #if defined(__cplusplus)
 extern "C" {

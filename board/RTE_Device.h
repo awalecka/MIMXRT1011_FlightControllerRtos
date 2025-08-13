@@ -29,9 +29,9 @@
 /* Enable USART DMA */
 #define RTE_USART3_DMA_EN 1
 /* Enable peripheral */
-#define RTE_SPI1 1
-/* Enable SPI DMA */
-#define RTE_SPI1_DMA_EN 1
+#define RTE_USART4 1
+/* Enable USART DMA */
+#define RTE_USART4_DMA_EN 1
 
 /***********************************************************************************************************************
  * Driver configuration
@@ -91,30 +91,24 @@
 #define RTE_USART3_DMA_TX_DMAMUX_BASE DMAMUX
 /* Used DMA device. */
 #define RTE_USART3_DMA_TX_DMA_BASE DMA0
-/* PCS to SCK delay. */
-#define RTE_SPI1_PCS_TO_SCK_DELAY 0
-/* SCK to PCS delay. */
-#define RTE_SPI1_SCK_TO_PSC_DELAY 0
-/* Between transfer delay. */
-#define RTE_SPI1_BETWEEN_TRANSFER_DELAY 0
-/* Peripheral chip select. */
-#define RTE_SPI1_MASTER_PCS_PIN_SEL kLPSPI_MasterPcs0
+/* Enable RX buffer */
+#define USART4_RX_BUFFER_ENABLE 0
 /* Selected DMA channel number. */
-#define RTE_SPI1_DMA_RX_CH 6
-/* LPSPI1_SD DMA source request. */
-#define RTE_SPI1_DMA_RX_PERI_SEL (uint16_t) kDmaRequestMuxLPSPI1Rx
+#define RTE_USART4_DMA_RX_CH 7
+/* LPUART2_Tele DMA source request. */
+#define RTE_USART4_DMA_RX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART4Rx
 /* DMAMUX device that is used for muxing of the request. */
-#define RTE_SPI1_DMA_RX_DMAMUX_BASE DMAMUX
+#define RTE_USART4_DMA_RX_DMAMUX_BASE DMAMUX
 /* Used DMA device. */
-#define RTE_SPI1_DMA_RX_DMA_BASE DMA0
+#define RTE_USART4_DMA_RX_DMA_BASE DMA0
 /* Selected DMA channel number. */
-#define RTE_SPI1_DMA_TX_CH 7
-/* LPSPI1_SD DMA source request. */
-#define RTE_SPI1_DMA_TX_PERI_SEL (uint16_t) kDmaRequestMuxLPSPI1Tx
+#define RTE_USART4_DMA_TX_CH 8
+/* LPUART2_Tele DMA source request. */
+#define RTE_USART4_DMA_TX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART4Tx
 /* DMAMUX device that is used for muxing of the request. */
-#define RTE_SPI1_DMA_TX_DMAMUX_BASE DMAMUX
+#define RTE_USART4_DMA_TX_DMAMUX_BASE DMAMUX
 /* Used DMA device. */
-#define RTE_SPI1_DMA_TX_DMA_BASE DMA0
+#define RTE_USART4_DMA_TX_DMA_BASE DMA0
 
 
 #endif /* __RTE_DEVICE_H */

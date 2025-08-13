@@ -214,7 +214,7 @@ instance:
       - dataBits: 'ARM_USART_DATA_BITS_8'
       - parityBit: 'ARM_USART_PARITY_NONE'
       - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'false'
+      - enableRX: 'true'
       - enableRXBuffer: 'true'
       - enableTX: 'false'
       - signalEventFunctionId: 'ibus_uart_callback'
@@ -249,7 +249,7 @@ static void LPUART1_Ibus_init(void) {
   /* Control of CMSIS USART */
   LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
   /* Enable or disable receiver. */
-  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
+  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 1);
   /* Enable or disable transmitter. */
   LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 0);
 }
@@ -698,7 +698,7 @@ instance:
       - dataBits: 'ARM_USART_DATA_BITS_8'
       - parityBit: 'ARM_USART_PARITY_NONE'
       - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'false'
+      - enableRX: 'true'
       - enableRXBuffer: 'true'
       - enableTX: 'false'
       - signalEventFunctionId: 'NULL'
@@ -733,74 +733,73 @@ static void LPUART3_GPS_init(void) {
   /* Control of CMSIS USART */
   LPUART3_GPS_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
   /* Enable or disable receiver. */
-  LPUART3_GPS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
+  LPUART3_GPS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 1);
   /* Enable or disable transmitter. */
   LPUART3_GPS_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 0);
 }
 
 /***********************************************************************************************************************
- * LPSPI1_SD initialization code
+ * LPUART2_Tele initialization code
  **********************************************************************************************************************/
 /* clang-format off */
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 instance:
-- name: 'LPSPI1_SD'
-- type: 'lpspi_cmsis'
+- name: 'LPUART2_Tele'
+- type: 'lpuart_cmsis'
 - mode: 'edma'
 - custom_name_enabled: 'true'
-- type_id: 'lpspi_cmsis_2.6.0'
+- type_id: 'lpuart_cmsis_2.4.0'
 - functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'LPSPI1'
+- peripheral: 'LPUART4'
 - config_sets:
   - general:
     - main_config:
-      - spi_mode_user: 'ARM_SPI_MODE_MASTER'
-      - clockSource: 'LpspiClock'
+      - operationMode: 'ARM_USART_MODE_ASYNCHRONOUS'
+      - clockSource: 'LpuartClock'
       - clockSourceFreq: 'ClocksTool_DefaultInit'
-      - clock_polarity: 'ARM_SPI_CPOL0_CPHA0'
       - power_state: 'ARM_POWER_FULL'
-      - baudRate_Bps: '500000'
-      - data_bits: '8'
-      - bit_format: 'ARM_SPI_MSB_LSB'
-      - typeControlMaster: 'ARM_SPI_SS_MASTER_HW_OUTPUT'
-      - defaultValueInt: '0'
-      - spi_chip_select: 'PCS0'
-      - pcsToSckDelayInNanoSec: '0'
-      - lastSckToPcsDelayInNanoSec: '0'
-      - betweenTransferDelayInNanoSec: '0'
+      - baudRate_Bps: '115200'
+      - dataBits: 'ARM_USART_DATA_BITS_8'
+      - parityBit: 'ARM_USART_PARITY_NONE'
+      - stopBit: 'ARM_USART_STOP_BITS_1'
+      - enableRX: 'false'
+      - enableRXBuffer: 'false'
+      - enableTX: 'true'
       - signalEventFunctionId: 'NULL'
       - enableGetFreqFnCustomName: 'false'
-      - getFreqFunctionCustomID: 'LPSPI1_GetFreq'
+      - getFreqFunctionCustomID: 'LPUART2_GetFreq'
       - enableInitPinsFnCustomName: 'false'
-      - initPinFunctionCustomID: 'LPSPI1_InitPins'
+      - initPinFunctionCustomID: 'LPUART2_InitPins'
       - enableDeinitPinsFnCustomName: 'false'
-      - deinitPinFunctionCustomID: 'LPSPI1_DeinitPins'
-  - fsl_spi:
-    - channels:
-      - receive:
-        - uid: '1753325606486'
-        - eDMAn: '6'
-        - eDMA_source: 'kDmaRequestMuxLPSPI1Rx'
-      - transmit:
-        - uid: '1753325606487'
+      - deinitPinFunctionCustomID: 'LPUART2_DeinitPins'
+  - fsl_cmsis_uart:
+    - edma_channels:
+      - edma_rx_channel:
+        - uid: '1754537380952'
         - eDMAn: '7'
-        - eDMA_source: 'kDmaRequestMuxLPSPI1Tx'
+        - eDMA_source: 'kDmaRequestMuxLPUART4Rx'
+      - edma_tx_channel:
+        - uid: '1754537380953'
+        - eDMAn: '8'
+        - eDMA_source: 'kDmaRequestMuxLPUART4Tx'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 /* Get clock source frequency */
-uint32_t LPSPI1_GetFreq(void){
-  return LPSPI1_SD_CLOCK_SOURCE_FREQ;
+uint32_t LPUART4_GetFreq(void){
+  return LPUART2_TELE_CLOCK_SOURCE_FREQ;
 };
 
-static void LPSPI1_SD_init(void) {
-  /* Initialize CMSIS SPI */
-  LPSPI1_SD_PERIPHERAL.Initialize(NULL);
-  /* Power control of CMSIS SPI */
-  LPSPI1_SD_PERIPHERAL.PowerControl(ARM_POWER_FULL);
-  /* Control of CMSIS SPI */
-  LPSPI1_SD_PERIPHERAL.Control(ARM_SPI_MODE_MASTER | ARM_SPI_CPOL0_CPHA0 | ARM_SPI_DATA_BITS(8) | ARM_SPI_MSB_LSB | ARM_SPI_SS_MASTER_HW_OUTPUT, 500000);
-  /* Control of CMSIS SPI */
-  LPSPI1_SD_PERIPHERAL.Control(ARM_SPI_SET_DEFAULT_TX_VALUE, 0);
+static void LPUART2_Tele_init(void) {
+  /* Initialize CMSIS USART */
+  LPUART2_TELE_PERIPHERAL.Initialize(NULL);
+  /* Power control of CMSIS USART */
+  LPUART2_TELE_PERIPHERAL.PowerControl(ARM_POWER_FULL);
+  /* Control of CMSIS USART */
+  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
+  /* Enable or disable receiver. */
+  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
+  /* Enable or disable transmitter. */
+  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 1);
 }
 
 /***********************************************************************************************************************
@@ -864,7 +863,7 @@ void BOARD_InitPeripherals(void)
   LPUART1_Ibus_init();
   PWM1_init();
   LPUART3_GPS_init();
-  LPSPI1_SD_init();
+  LPUART2_Tele_init();
   /* Common post-initialization */
   BOARD_InitPeripherals_CommonPostInit();
 }

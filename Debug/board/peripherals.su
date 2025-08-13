@@ -10,8 +10,8 @@ C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_pwm.h:1058:20:PWM_S
 ../board/peripherals.c:636:13:PWM1_init	24	static
 ../board/peripherals.c:724:10:LPUART3_GetFreq	4	static
 ../board/peripherals.c:728:13:LPUART3_GPS_init	8	static
-../board/peripherals.c:791:10:LPSPI1_GetFreq	4	static
-../board/peripherals.c:795:13:LPSPI1_SD_init	8	static
-../board/peripherals.c:847:13:BOARD_InitPeripherals_CommonPostInit	8	static
-../board/peripherals.c:855:6:BOARD_InitPeripherals	8	static
-../board/peripherals.c:875:6:BOARD_InitBootPeripherals	8	static
+../board/peripherals.c:788:10:LPUART4_GetFreq	4	static
+../board/peripherals.c:792:13:LPUART2_Tele_init	8	static
+../board/peripherals.c:846:13:BOARD_InitPeripherals_CommonPostInit	8	static
+../board/peripherals.c:854:6:BOARD_InitPeripherals	8	static
+../board/peripherals.c:874:6:BOARD_InitBootPeripherals	8	static

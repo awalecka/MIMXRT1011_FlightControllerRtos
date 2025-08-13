@@ -39,3 +39,13 @@
 ../drivers/fsl_lpuart_cmsis.c:2447:17:LPUART3_EdmaGetRxCount	8	static
 ../drivers/fsl_lpuart_cmsis.c:2452:16:LPUART3_EdmaControl	16	static
 ../drivers/fsl_lpuart_cmsis.c:2457:25:LPUART3_EdmaGetStatus	8	static
+../drivers/fsl_lpuart_cmsis.c:2719:16:LPUART4_EdmaInitialize	16	static
+../drivers/fsl_lpuart_cmsis.c:2727:16:LPUART4_EdmaUninitialize	8	static
+../drivers/fsl_lpuart_cmsis.c:2735:16:LPUART4_EdmaPowerControl	16	static
+../drivers/fsl_lpuart_cmsis.c:2740:16:LPUART4_EdmaSend	16	static
+../drivers/fsl_lpuart_cmsis.c:2745:16:LPUART4_EdmaReceive	16	static
+../drivers/fsl_lpuart_cmsis.c:2750:16:LPUART4_EdmaTransfer	24	static
+../drivers/fsl_lpuart_cmsis.c:2755:17:LPUART4_EdmaGetTxCount	8	static
+../drivers/fsl_lpuart_cmsis.c:2760:17:LPUART4_EdmaGetRxCount	8	static
+../drivers/fsl_lpuart_cmsis.c:2765:16:LPUART4_EdmaControl	16	static
+../drivers/fsl_lpuart_cmsis.c:2770:25:LPUART4_EdmaGetStatus	8	static

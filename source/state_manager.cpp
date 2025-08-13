@@ -39,7 +39,6 @@ void state_manager_task(void *pvParameters) {
         g_flight_state = STATE_IDLE;
     }
 
-
     while (1) {
 
         // Check if the state has changed
@@ -57,15 +56,12 @@ void state_manager_task(void *pvParameters) {
             // Resume the task of the new state
             switch (g_flight_state) {
                 case STATE_IDLE:
-                	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
                 	vTaskResume(g_idle_task_handle);
                 	break;
                 case STATE_FLIGHT:
-                	g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
                 	vTaskResume(g_flight_task_handle);
                 	break;
                 case STATE_CALIBRATE:
-                	g_heartbeat_frequency = pdMS_TO_TICKS(1000); // 0.5Hz
                 	vTaskResume(g_calibrate_task_handle);
                 	break;
                 case STATE_FAILSAFE:

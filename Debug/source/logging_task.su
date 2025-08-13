@@ -1,2 +1,1 @@
-../source/logging_task.cpp:20:13:bool init_sd_card_and_logfile()	8	static
-../source/logging_task.cpp:39:6:void logging_task(void*)	160	static
+../source/logging_task.cpp:11:6:void logging_task(void*)	160	static

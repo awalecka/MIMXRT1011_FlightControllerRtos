@@ -78,6 +78,7 @@ BOARD_InitPins:
   - {pin_num: '80', peripheral: LPUART3, signal: TXD, pin_signal: GPIO_12, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '1', peripheral: LPUART3, signal: RXD, pin_signal: GPIO_11, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '9', peripheral: GPIO1, signal: 'gpiomux_io, 04', pin_signal: GPIO_04, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
+  - {pin_num: '58', peripheral: LPUART4, signal: TXD, pin_signal: GPIO_AD_02}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -121,6 +122,7 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinMux(IOMUXC_GPIO_10_LPUART1_TXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_11_LPUART3_RXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_12_LPUART3_TXD, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_AD_02_LPUART4_TXD, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_AD_09_ARM_TRACE_SWO, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_02_FLEXPWM1_PWM0_A, 1U); 
