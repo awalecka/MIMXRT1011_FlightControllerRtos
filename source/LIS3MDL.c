@@ -1,4 +1,4 @@
-#include "LIS3MDL.h"
+#include <lis3mdl.h>
 
 // --- Public API Functions ---
 // Statically allocated buffer for the semaphore's control block

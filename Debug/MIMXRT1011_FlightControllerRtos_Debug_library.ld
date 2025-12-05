@@ -5,7 +5,7 @@
  * Generated linker script file for MIMXRT1011xxxxx
  * Created from library.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.30
- * MCUXpresso IDE v11.10.0 [Build 3148] [2024-07-03] on Aug 12, 2025, 8:16:48 PM
+ * MCUXpresso IDE v11.10.0 [Build 3148] [2024-07-03] on Dec 4, 2025, 10:28:40 PM
  */
 
 GROUP (

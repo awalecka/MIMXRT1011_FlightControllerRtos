@@ -19,96 +19,17 @@
 /* Enable peripheral */
 #define RTE_I2C1 1
 /* Enable I2C DMA */
-#define RTE_I2C1_DMA_EN 1
+#define RTE_I2C1_DMA_EN 0
 /* Enable peripheral */
 #define RTE_USART1 1
-/* Enable USART DMA */
-#define RTE_USART1_DMA_EN 1
-/* Enable peripheral */
-#define RTE_USART3 1
-/* Enable USART DMA */
-#define RTE_USART3_DMA_EN 1
-/* Enable peripheral */
-#define RTE_USART4 1
-/* Enable USART DMA */
-#define RTE_USART4_DMA_EN 1
 
 /***********************************************************************************************************************
  * Driver configuration
  **********************************************************************************************************************/
-/* I2C1 configuration */
-/* Used DMA device */
-#define RTE_I2C1_DMA_RX_DMA_BASE DMA0
-/* Selected Rx DMA channel number */
-#define RTE_I2C1_DMA_RX_CH 0
-/* DMAMUX device that is used for muxing of the Rx request */
-#define RTE_I2C1_DMA_RX_DMAMUX_BASE DMAMUX
-/* Rx DMA source request */
-#define RTE_I2C1_DMA_RX_PERI_SEL (uint16_t) kDmaRequestMuxLPI2C1
-/* Used DMA device */
-#define RTE_I2C1_DMA_TX_DMA_BASE DMA0
-/* Selected Tx DMA channel number */
-#define RTE_I2C1_DMA_TX_CH 1
-/* DMAMUX device that is used for muxing of the Tx request */
-#define RTE_I2C1_DMA_TX_DMAMUX_BASE DMAMUX
-/* Tx DMA source request */
-#define RTE_I2C1_DMA_TX_PERI_SEL (uint16_t) kDmaRequestMuxLPI2C1
 /* All USART Rx buffers length */
 #define USART_RX_BUFFER_LEN 32
 /* Enable RX buffer */
 #define USART1_RX_BUFFER_ENABLE 1
-/* Selected DMA channel number. */
-#define RTE_USART1_DMA_RX_CH 3
-/* LPUART1_Ibus DMA source request. */
-#define RTE_USART1_DMA_RX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART1Rx
-/* DMAMUX device that is used for muxing of the request. */
-#define RTE_USART1_DMA_RX_DMAMUX_BASE DMAMUX
-/* Used DMA device. */
-#define RTE_USART1_DMA_RX_DMA_BASE DMA0
-/* Selected DMA channel number. */
-#define RTE_USART1_DMA_TX_CH 2
-/* LPUART1_Ibus DMA source request. */
-#define RTE_USART1_DMA_TX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART1Tx
-/* DMAMUX device that is used for muxing of the request. */
-#define RTE_USART1_DMA_TX_DMAMUX_BASE DMAMUX
-/* Used DMA device. */
-#define RTE_USART1_DMA_TX_DMA_BASE DMA0
-/* Enable RX buffer */
-#define USART3_RX_BUFFER_ENABLE 1
-/* Selected DMA channel number. */
-#define RTE_USART3_DMA_RX_CH 5
-/* LPUART3_GPS DMA source request. */
-#define RTE_USART3_DMA_RX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART3Rx
-/* DMAMUX device that is used for muxing of the request. */
-#define RTE_USART3_DMA_RX_DMAMUX_BASE DMAMUX
-/* Used DMA device. */
-#define RTE_USART3_DMA_RX_DMA_BASE DMA0
-/* Selected DMA channel number. */
-#define RTE_USART3_DMA_TX_CH 4
-/* LPUART3_GPS DMA source request. */
-#define RTE_USART3_DMA_TX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART3Tx
-/* DMAMUX device that is used for muxing of the request. */
-#define RTE_USART3_DMA_TX_DMAMUX_BASE DMAMUX
-/* Used DMA device. */
-#define RTE_USART3_DMA_TX_DMA_BASE DMA0
-/* Enable RX buffer */
-#define USART4_RX_BUFFER_ENABLE 0
-/* Selected DMA channel number. */
-#define RTE_USART4_DMA_RX_CH 7
-/* LPUART2_Tele DMA source request. */
-#define RTE_USART4_DMA_RX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART4Rx
-/* DMAMUX device that is used for muxing of the request. */
-#define RTE_USART4_DMA_RX_DMAMUX_BASE DMAMUX
-/* Used DMA device. */
-#define RTE_USART4_DMA_RX_DMA_BASE DMA0
-/* Selected DMA channel number. */
-#define RTE_USART4_DMA_TX_CH 8
-/* LPUART2_Tele DMA source request. */
-#define RTE_USART4_DMA_TX_PERI_SEL (uint8_t) kDmaRequestMuxLPUART4Tx
-/* DMAMUX device that is used for muxing of the request. */
-#define RTE_USART4_DMA_TX_DMAMUX_BASE DMAMUX
-/* Used DMA device. */
-#define RTE_USART4_DMA_TX_DMA_BASE DMA0
 
 
 #endif /* __RTE_DEVICE_H */

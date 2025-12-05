@@ -1,32 +1,34 @@
 /**
  * @file command_handler.h
- * @brief Header for the IBUS FreeRTOS task.
- *
- * This header file provides the function prototype for the IBUS command
- * handler task, allowing it to be created and started from other parts of
- * the application, such as the main application setup.
+ * @brief Header for the IBUS FreeRTOS task with DMA/Idle Line support.
  */
 
 #ifndef COMMAND_HANDLER_H
 #define COMMAND_HANDLER_H
 
-#include <stdint.h> // For uint32_t type
+#include <stdint.h>
+#include "FreeRTOS.h"
+#include "task.h"
+
+// --- Public Function Prototypes ---
+
+/**
+ * @brief The FreeRTOS task that handles IBUS processing.
+ * Defined with C++ linkage.
+ * @param pvParameters Task parameters (unused).
+ */
+void command_handler_task(void *pvParameters);
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// --- Public Function Prototypes ---
-
 /**
- * @brief Asynchronous UART event handler, called from an ISR.
- * @param event UART event flags from the CMSIS driver.
- *
- * This function is called by the UART driver when a DMA-powered async
- * operation completes or an error occurs.
+ * @brief LPUART1 Interrupt Service Routine.
+ * Handles the Idle Line detection to trigger processing.
+ * Must be extern "C" to link correctly with the startup vector table.
  */
-void ibus_uart_callback(uint32_t event);
-
+void LPUART1_IRQHandler(void);
 
 #ifdef __cplusplus
 }

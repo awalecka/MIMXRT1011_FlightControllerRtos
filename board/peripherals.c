@@ -70,42 +70,33 @@ instance:
 - config_sets:
   - fsl_edma:
     - common_settings:
-      - enableMinorLoopMapping: 'true'
+      - enableMinorLoopMapping: 'false'
       - enableContinuousLinkMode: 'false'
-      - enableHaltOnError: 'true'
+      - enableHaltOnError: 'false'
       - ERCA: 'fixedPriority'
       - enableDebugMode: 'false'
-    - dma_table:
-      - 0: []
-      - 1: []
-      - 2: []
-      - 3: []
-      - 4: []
-      - 5: []
-      - 6: []
-      - 7: []
+    - dma_table: []
     - edma_channels: []
     - errInterruptConfig:
       - enableErrInterrupt: 'false'
       - errorInterrupt:
         - IRQn: 'DMA_ERROR_IRQn'
-        - enable_interrrupt: 'enabled'
+        - enable_interrrupt: 'noInit'
         - enable_priority: 'false'
-        - priority: '0'
+        - priority: '15'
         - enable_custom_name: 'false'
-    - quick_selection: 'default'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 const edma_config_t DMA0_config = {
   .enableContinuousLinkMode = false,
-  .enableHaltOnError = true,
+  .enableHaltOnError = false,
   .enableRoundRobinArbitration = false,
   .enableDebugMode = false
 };
 
 static void DMA0_init(void) {
   /* DMA0 minor loop mapping */
-  EDMA_EnableMinorLoopMapping(DMA0_DMA_BASEADDR, true);
+  EDMA_EnableMinorLoopMapping(DMA0_DMA_BASEADDR, false);
 }
 
 /***********************************************************************************************************************
@@ -125,15 +116,8 @@ instance:
   - nvic:
     - interrupt_table:
       - 0: []
-    - interrupts:
-      - 0:
-        - channelId: 'int_0'
-        - interrupt_t:
-          - IRQn: 'DMA0_IRQn'
-          - enable_interrrupt: 'noInit'
-          - enable_priority: 'true'
-          - priority: '15'
-          - enable_custom_name: 'false'
+      - 1: []
+    - interrupts: []
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 
@@ -149,7 +133,7 @@ static void NVIC_init(void) {
 instance:
 - name: 'LPI2C1_Sensors'
 - type: 'lpi2c_cmsis'
-- mode: 'edma'
+- mode: 'interrupt'
 - custom_name_enabled: 'true'
 - type_id: 'lpi2c_cmsis_2.2.0'
 - functional_group: 'BOARD_InitPeripherals'
@@ -167,13 +151,10 @@ instance:
     - initPinFunctionCustomID: 'LPI2C1_InitPins'
     - enableDeinitPinsFnCustomName: 'false'
     - deinitPinFunctionCustomID: 'LPI2C1_DeinitPins'
-    - edma_channel:
-      - uid: '1752722497472'
-      - eDMAn: '0'
-      - eDMA_source: 'kDmaRequestMuxLPI2C1'
-    - edma_channel_tx:
-      - uid: '1752722497479'
-      - eDMAn: '1'
+    - interrupt:
+      - IRQn: 'LPI2C1_IRQn'
+      - enable_priority: 'true'
+      - priority: '3'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 /* Get clock source frequency */
@@ -182,6 +163,8 @@ uint32_t LPI2C1_GetFreq(void){
 };
 
 static void LPI2C1_Sensors_init(void) {
+  /* Interrupt vector LPI2C1_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(LPI2C1_SENSORS_IRQN, LPI2C1_SENSORS_IRQ_PRIORITY);
   /* Initialization function */
   LPI2C1_SENSORS_CMSIS_DRIVER.Initialize(i2c_sync_event_callback);
   /* Power control function */
@@ -198,7 +181,7 @@ static void LPI2C1_Sensors_init(void) {
 instance:
 - name: 'LPUART1_Ibus'
 - type: 'lpuart_cmsis'
-- mode: 'edma'
+- mode: 'interrupt'
 - custom_name_enabled: 'true'
 - type_id: 'lpuart_cmsis_2.4.0'
 - functional_group: 'BOARD_InitPeripherals'
@@ -214,10 +197,10 @@ instance:
       - dataBits: 'ARM_USART_DATA_BITS_8'
       - parityBit: 'ARM_USART_PARITY_NONE'
       - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'true'
+      - enableRX: 'false'
       - enableRXBuffer: 'true'
       - enableTX: 'false'
-      - signalEventFunctionId: 'ibus_uart_callback'
+      - signalEventFunctionId: 'NULL'
       - enableGetFreqFnCustomName: 'false'
       - getFreqFunctionCustomID: 'LPUART1_GetFreq'
       - enableInitPinsFnCustomName: 'false'
@@ -225,15 +208,10 @@ instance:
       - enableDeinitPinsFnCustomName: 'false'
       - deinitPinFunctionCustomID: 'LPUART1_DeinitPins'
   - fsl_cmsis_uart:
-    - edma_channels:
-      - edma_rx_channel:
-        - uid: '1752722497548'
-        - eDMAn: '3'
-        - eDMA_source: 'kDmaRequestMuxLPUART1Rx'
-      - edma_tx_channel:
-        - uid: '1752722497552'
-        - eDMAn: '2'
-        - eDMA_source: 'kDmaRequestMuxLPUART1Tx'
+    - interrupt:
+      - IRQn: 'LPUART1_IRQn'
+      - enable_priority: 'true'
+      - priority: '6'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 /* Get clock source frequency */
@@ -242,14 +220,16 @@ uint32_t LPUART1_GetFreq(void){
 };
 
 static void LPUART1_Ibus_init(void) {
+  /* Interrupt vector LPUART1_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(LPUART1_IBUS_IRQN, LPUART1_IBUS_IRQ_PRIORITY);
   /* Initialize CMSIS USART */
-  LPUART1_IBUS_PERIPHERAL.Initialize(ibus_uart_callback);
+  LPUART1_IBUS_PERIPHERAL.Initialize(NULL);
   /* Power control of CMSIS USART */
   LPUART1_IBUS_PERIPHERAL.PowerControl(ARM_POWER_FULL);
   /* Control of CMSIS USART */
   LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
   /* Enable or disable receiver. */
-  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 1);
+  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
   /* Enable or disable transmitter. */
   LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 0);
 }
@@ -675,134 +655,6 @@ static void PWM1_init(void) {
 }
 
 /***********************************************************************************************************************
- * LPUART3_GPS initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'LPUART3_GPS'
-- type: 'lpuart_cmsis'
-- mode: 'edma'
-- custom_name_enabled: 'true'
-- type_id: 'lpuart_cmsis_2.4.0'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'LPUART3'
-- config_sets:
-  - general:
-    - main_config:
-      - operationMode: 'ARM_USART_MODE_ASYNCHRONOUS'
-      - clockSource: 'LpuartClock'
-      - clockSourceFreq: 'ClocksTool_DefaultInit'
-      - power_state: 'ARM_POWER_FULL'
-      - baudRate_Bps: '115200'
-      - dataBits: 'ARM_USART_DATA_BITS_8'
-      - parityBit: 'ARM_USART_PARITY_NONE'
-      - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'true'
-      - enableRXBuffer: 'true'
-      - enableTX: 'false'
-      - signalEventFunctionId: 'NULL'
-      - enableGetFreqFnCustomName: 'false'
-      - getFreqFunctionCustomID: 'LPUART2_GetFreq'
-      - enableInitPinsFnCustomName: 'false'
-      - initPinFunctionCustomID: 'LPUART2_InitPins'
-      - enableDeinitPinsFnCustomName: 'false'
-      - deinitPinFunctionCustomID: 'LPUART2_DeinitPins'
-  - fsl_cmsis_uart:
-    - edma_channels:
-      - edma_rx_channel:
-        - uid: '1753237697539'
-        - eDMAn: '5'
-        - eDMA_source: 'kDmaRequestMuxLPUART3Rx'
-      - edma_tx_channel:
-        - uid: '1753237697540'
-        - eDMAn: '4'
-        - eDMA_source: 'kDmaRequestMuxLPUART3Tx'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-/* Get clock source frequency */
-uint32_t LPUART3_GetFreq(void){
-  return LPUART3_GPS_CLOCK_SOURCE_FREQ;
-};
-
-static void LPUART3_GPS_init(void) {
-  /* Initialize CMSIS USART */
-  LPUART3_GPS_PERIPHERAL.Initialize(NULL);
-  /* Power control of CMSIS USART */
-  LPUART3_GPS_PERIPHERAL.PowerControl(ARM_POWER_FULL);
-  /* Control of CMSIS USART */
-  LPUART3_GPS_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
-  /* Enable or disable receiver. */
-  LPUART3_GPS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 1);
-  /* Enable or disable transmitter. */
-  LPUART3_GPS_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 0);
-}
-
-/***********************************************************************************************************************
- * LPUART2_Tele initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'LPUART2_Tele'
-- type: 'lpuart_cmsis'
-- mode: 'edma'
-- custom_name_enabled: 'true'
-- type_id: 'lpuart_cmsis_2.4.0'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'LPUART4'
-- config_sets:
-  - general:
-    - main_config:
-      - operationMode: 'ARM_USART_MODE_ASYNCHRONOUS'
-      - clockSource: 'LpuartClock'
-      - clockSourceFreq: 'ClocksTool_DefaultInit'
-      - power_state: 'ARM_POWER_FULL'
-      - baudRate_Bps: '115200'
-      - dataBits: 'ARM_USART_DATA_BITS_8'
-      - parityBit: 'ARM_USART_PARITY_NONE'
-      - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'false'
-      - enableRXBuffer: 'false'
-      - enableTX: 'true'
-      - signalEventFunctionId: 'NULL'
-      - enableGetFreqFnCustomName: 'false'
-      - getFreqFunctionCustomID: 'LPUART2_GetFreq'
-      - enableInitPinsFnCustomName: 'false'
-      - initPinFunctionCustomID: 'LPUART2_InitPins'
-      - enableDeinitPinsFnCustomName: 'false'
-      - deinitPinFunctionCustomID: 'LPUART2_DeinitPins'
-  - fsl_cmsis_uart:
-    - edma_channels:
-      - edma_rx_channel:
-        - uid: '1754537380952'
-        - eDMAn: '7'
-        - eDMA_source: 'kDmaRequestMuxLPUART4Rx'
-      - edma_tx_channel:
-        - uid: '1754537380953'
-        - eDMAn: '8'
-        - eDMA_source: 'kDmaRequestMuxLPUART4Tx'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-/* Get clock source frequency */
-uint32_t LPUART4_GetFreq(void){
-  return LPUART2_TELE_CLOCK_SOURCE_FREQ;
-};
-
-static void LPUART2_Tele_init(void) {
-  /* Initialize CMSIS USART */
-  LPUART2_TELE_PERIPHERAL.Initialize(NULL);
-  /* Power control of CMSIS USART */
-  LPUART2_TELE_PERIPHERAL.PowerControl(ARM_POWER_FULL);
-  /* Control of CMSIS USART */
-  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
-  /* Enable or disable receiver. */
-  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
-  /* Enable or disable transmitter. */
-  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 1);
-}
-
-/***********************************************************************************************************************
  * DebugConsole initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -843,14 +695,6 @@ static void DebugConsole_init(void) {
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
-static void BOARD_InitPeripherals_CommonPostInit(void)
-{
-  /* Interrupt vector DMA0_IRQn priority settings in the NVIC. */
-  NVIC_SetPriority(INT_0_IRQN, INT_0_IRQ_PRIORITY);
-  /* Interrupt INT_0_IRQN request in the NVIC is not initialized (disabled by default). */
-  /* It can be enabled later by EnableIRQ(INT_0_IRQN); function call. */
-}
-
 void BOARD_InitPeripherals(void)
 {
   /* Global initialization */
@@ -862,10 +706,6 @@ void BOARD_InitPeripherals(void)
   LPI2C1_Sensors_init();
   LPUART1_Ibus_init();
   PWM1_init();
-  LPUART3_GPS_init();
-  LPUART2_Tele_init();
-  /* Common post-initialization */
-  BOARD_InitPeripherals_CommonPostInit();
 }
 
 /***********************************************************************************************************************

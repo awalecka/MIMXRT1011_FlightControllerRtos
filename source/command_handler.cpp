@@ -1,134 +1,211 @@
 /**
  * @file command_handler.cpp
- * @brief Example FreeRTOS task for receiving and parsing IBUS data using a
- * binary semaphore for synchronization.
- *
- * This file provides a complete example of a FreeRTOS task that
- * initializes a UART for asynchronous reception using eDMA. The task is
- * signaled by the UART callback via a binary semaphore when a complete
- * IBUS message is received. This version is integrated with MCUXpresso
- * Config Tools by using the LPUART1_PERIPHERAL definition.
+ * @brief Implementation of the IBUS command handler using eDMA and Idle Line Interrupts.
  */
-
 #include "command_handler.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "semphr.h"       // Required for FreeRTOS semaphores
-#include "Driver_USART.h"
-#include "IbusProtocol.h" // Assumes IbusProtocol.h is in the include path
-#include "peripherals.h"  // For LPUART1_PERIPHERAL definition
+#include "ibus_handler.hpp"
+#include "flight_controller.h"
+
+// NXP SDK Drivers
+#include "fsl_lpuart.h"
+#include "fsl_lpuart_edma.h"
+#include "fsl_edma.h"
+#include "fsl_dmamux.h"
 #include "fsl_debug_console.h"
 #include "board.h"
-#include "utils.h"
-#include <vector>
+#include "peripherals.h"
 
-// --- Global Variables ---
-extern QueueHandle_t g_command_data_queue;
+using namespace firmware::drivers;
+using namespace firmware::protocols::ibus;
 
-// Use the peripheral definition from the MCUXpresso configuration tools.
-// This ensures that we are using the correctly configured LPUART instance.
-static ARM_DRIVER_USART& ibusUart = LPUART1_IBUS_PERIPHERAL;
+// --- Configuration Constants ---
+// Increased to 128 to prevent "Full vs Empty" ambiguity (0==0)
+// if exactly 64 bytes were received.
+#define IBUS_DMA_BUFFER_SIZE    128U
+#define IBUS_LPUART_INSTANCE    LPUART1
+#define IBUS_LPUART_IRQn        LPUART1_IRQn
+#define IBUS_DMA_BASE           DMA0
+#define IBUS_DMAMUX_BASE        DMAMUX
+#define IBUS_DMA_CHANNEL        0U
+#define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART1Rx
 
-// IBUS protocol parser instance
-static IbusProtocol ibusParser;
+// --- Static Data ---
+static IbusHandler s_ibusHandler;
+// Buffer must be aligned for DMA access
+static uint8_t s_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE] __attribute__((aligned(4)));
+static size_t s_readIndex = 0;
 
-// Statically allocated buffer for the semaphore's control block
-static StaticSemaphore_t xIbusSemaphoreBuffer;
+// EDMA Handle
+static edma_handle_t s_edmaHandle;
 
-// Binary semaphore to signal task from the ISR
-static SemaphoreHandle_t ibus_rx_semaphore = NULL;
+// --- Private Function Prototypes ---
+static void processReceivedData(void);
 
-// Receive buffer for DMA
-static uint8_t ibus_rx_buffer[IbusProtocol::MESSAGE_LENGTH];
+// --- Interrupt Service Routine (extern "C") ---
 
-// --- UART Callback Handler ---
+extern "C" void LPUART1_IRQHandler(void) {
+    uint32_t statusFlags = LPUART_GetStatusFlags(IBUS_LPUART_INSTANCE);
 
-/**
- * @brief Asynchronous UART event handler, called from an ISR.
- * @param event UART event flags from the CMSIS driver.
- */
-void ibus_uart_callback(uint32_t event) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    // Check for Idle Line Flag (Line high for >1 character time)
+    if ((statusFlags & kLPUART_IdleLineFlag) != 0U) {
+        LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_IdleLineFlag);
 
-    if (event & ARM_USART_EVENT_RECEIVE_COMPLETE) {
-        // A full buffer has been received. Give the semaphore to unblock the task.
-        xSemaphoreGiveFromISR(ibus_rx_semaphore, &xHigherPriorityTaskWoken);
+        // Notify task
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        if (g_command_handler_task_handle != NULL) {
+            vTaskNotifyGiveFromISR(g_command_handler_task_handle, &xHigherPriorityTaskWoken);
+        }
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 
-    // Handle receive errors by aborting and restarting the reception
-    if (event & ARM_USART_EVENT_RX_OVERFLOW ||
-        event & ARM_USART_EVENT_RX_BREAK ||
-        event & ARM_USART_EVENT_RX_PARITY_ERROR ||
-        event & ARM_USART_EVENT_RX_FRAMING_ERROR) {
-        ibusUart.Control(ARM_USART_ABORT_RECEIVE, 0);
-        ibusUart.Receive(ibus_rx_buffer, IbusProtocol::MESSAGE_LENGTH);
+    // Check for Overrun (Buffer full in hardware FIFO)
+    if ((statusFlags & kLPUART_RxOverrunFlag) != 0U) {
+        LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_RxOverrunFlag);
+        // Optional: Add error logging here
     }
 
-    // If xSemaphoreGiveFromISR unblocked a task, and that task has a higher
-    // priority than the currently running task, yield the processor.
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    // Check if DMA Major Loop finished (Circular wrap-around event)
+    // In some configs, we might want to manually re-trigger here if not using Scatter-Gather
+    // But we are relying on DLAST_SGA wrapping.
+
+    __DSB();
 }
 
-// --- RTOS Task ---
+// --- Main Task (C++ Linkage) ---
 
-/**
- * @brief The main function for the IBUS processing task.
- * @param pvParameters Task argument (not used in this example).
- */
-void command_handler_task(void *pvParameters) {
+void command_handler_task(void* pvParameters) {
+    (void)pvParameters;
 
-    // Create the binary semaphore before it's used.
-    ibus_rx_semaphore = xSemaphoreCreateBinaryStatic(&xIbusSemaphoreBuffer);
-    if (ibus_rx_semaphore == NULL) {
-        // Semaphore creation failed. This is a critical error.
-        // Halt execution or handle the error appropriately.
-        for(;;);
-    }
+    // 1. Initialize DMAMUX
+    DMAMUX_Init(IBUS_DMAMUX_BASE);
+    DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
+    DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
 
-    // Initialize the UART driver with our asynchronous callback
-    // Note: The peripheral itself is initialized in BOARD_InitPeripherals().
-    // This call just registers the callback.
-    ibusUart.Initialize(ibus_uart_callback);
+    // 2. Initialize EDMA
+    edma_config_t edmaConfig;
+    EDMA_GetDefaultConfig(&edmaConfig);
+    EDMA_Init(IBUS_DMA_BASE, &edmaConfig);
+    EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
 
-    // Power on the UART peripheral
-    ibusUart.PowerControl(ARM_POWER_FULL);
+    // 3. Configure EDMA TCD for Circular Buffer
+    edma_transfer_config_t transferConfig;
+    EDMA_PrepareTransfer(&transferConfig,
+                         (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE), // Source: UART Data Reg
+                         1,                                                                     // Source Width: 1 byte
+                         s_dmaRxBuffer,                                                         // Dest: RAM Buffer
+                         1,                                                                     // Dest Width: 1 byte
+                         1,                                                                     // Bytes per request (UART RX)
+                         IBUS_DMA_BUFFER_SIZE,                                                  // Total bytes in Major Loop
+                         kEDMA_PeripheralToMemory);
 
-    // Configure the UART for 115200 baud, 8-N-1
-    ibusUart.Control(ARM_USART_MODE_ASYNCHRONOUS |
-                     ARM_USART_DATA_BITS_8   |
-                     ARM_USART_PARITY_NONE   |
-                     ARM_USART_STOP_BITS_1   |
-                     ARM_USART_FLOW_CONTROL_NONE, 115200);
+    EDMA_SubmitTransfer(&s_edmaHandle, &transferConfig);
 
-    // Enable the UART receiver
-    ibusUart.Control(ARM_USART_CONTROL_RX, 1);
+    // Configure "Hardware Loop": When the buffer fills, subtract BufferSize from the address
+    // to wrap back to the start.
+    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DLAST_SGA = -((int32_t)IBUS_DMA_BUFFER_SIZE);
 
-    // Start the first asynchronous reception.
-    ibusUart.Receive(ibus_rx_buffer, IbusProtocol::MESSAGE_LENGTH);
+    // IMPORTANT: Prevent DMA from disabling itself after the major loop completes
+    // This effectively keeps the ring buffer running forever.
+    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].CSR &= ~(DMA_CSR_DREQ_MASK);
 
-    PRINTF("Command handler configuration complete.\r\n");
+    EDMA_StartTransfer(&s_edmaHandle);
 
-    // --- Main Task Loop ---
+    // 4. Initialize LPUART
+    lpuart_config_t lpuartConfig;
+    LPUART_GetDefaultConfig(&lpuartConfig);
+    lpuartConfig.baudRate_Bps = BAUD_RATE;
+    lpuartConfig.enableTx = false;
+    lpuartConfig.enableRx = true;
+    lpuartConfig.rxFifoWatermark = 0; // DMA request on every byte
+
+    LPUART_Init(IBUS_LPUART_INSTANCE, &lpuartConfig, BOARD_BOOTCLOCKRUN_UART_CLK_ROOT);
+
+    // 5. Enable Interrupts
+    LPUART_EnableInterrupts(IBUS_LPUART_INSTANCE, kLPUART_IdleLineInterruptEnable);
+    NVIC_SetPriority(IBUS_LPUART_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
+    NVIC_EnableIRQ(IBUS_LPUART_IRQn);
+
+    // 6. Enable Rx DMA
+    LPUART_EnableRxDMA(IBUS_LPUART_INSTANCE, true);
+
+    PRINTF("[IBUS] DMA Circular Buffer Task Started.\r\n");
+
     for (;;) {
-        // Wait indefinitely to take the semaphore. The task will block here
-        // with no CPU usage until the semaphore is given by the ISR.
-        PRINTF("Command handler waiting for message.\r\n");
+        // Wait for Idle Line (End of Packet)
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        processReceivedData();
+    }
+}
 
-        if (xSemaphoreTake(ibus_rx_semaphore, portMAX_DELAY) == pdPASS) {
-            // Semaphore received. Process the data in the buffer.
-            for (uint32_t i = 0; i < IbusProtocol::MESSAGE_LENGTH; i++) {
-                ibusParser.processByte(ibus_rx_buffer[i]);
+static void processReceivedData(void) {
+    // Robust Index Calculation:
+    // Read the current Destination Address directly from hardware TCD.
+    uint32_t dmaAddr = (uint32_t)IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR;
+    uint32_t baseAddr = (uint32_t)s_dmaRxBuffer;
+
+    // Calculate index based on pointer offset
+    size_t writeIndex = (dmaAddr - baseAddr) % IBUS_DMA_BUFFER_SIZE;
+
+    // If s_readIndex == writeIndex, the buffer is EMPTY (or we processed everything).
+    // Because we increased buffer size to 128, the "Full Wrap" collision is highly unlikely.
+
+    while (s_readIndex != writeIndex) {
+
+        uint8_t byte = s_dmaRxBuffer[s_readIndex];
+
+        // --- Protocol State Machine ---
+        static uint8_t s_assemblyBuffer[PACKET_LENGTH];
+        static size_t s_assemblyIndex = 0;
+        static bool s_synced = false;
+
+        // Sync Logic: Find [0x20, 0x40]
+        if (!s_synced) {
+            if (s_assemblyIndex == 0) {
+                if (byte == PACKET_LENGTH) { // 0x20
+                    s_assemblyBuffer[s_assemblyIndex++] = byte;
+                }
+            } else if (s_assemblyIndex == 1) {
+                if (byte == COMMAND_SERVO) { // 0x40
+                    s_assemblyBuffer[s_assemblyIndex++] = byte;
+                    s_synced = true;
+                } else {
+                     // Sync failed. Was this byte 0x20?
+                     if (byte == PACKET_LENGTH) {
+                         s_assemblyBuffer[0] = byte;
+                         s_assemblyIndex = 1;
+                     } else {
+                         s_assemblyIndex = 0;
+                     }
+                }
             }
+        } else {
+            // Payload Collection
+            s_assemblyBuffer[s_assemblyIndex++] = byte;
 
-            // Check if a complete and valid message has been parsed.
-            if (ibusParser.isLastMessageValid()) {
+            if (s_assemblyIndex == PACKET_LENGTH) {
+                // Parse Packet
+                std::span<const uint8_t> packetSpan(s_assemblyBuffer, PACKET_LENGTH);
 
-				const std::vector<unsigned short>& channels = ibusParser.getChannels();
-				xQueueSend(g_command_data_queue, &channels, portMAX_DELAY);
+                if (s_ibusHandler.processBuffer(packetSpan)) {
+                    RC_Channels_t rcData;
+                    const auto& channels = s_ibusHandler.getAllChannels();
 
-				// Re-trigger the asynchronous reception for the next message.
-				ibusUart.Receive(ibus_rx_buffer, IbusProtocol::MESSAGE_LENGTH);
-			}
-		}
-	}
+                    // Safe Copy
+                    for(size_t i = 0; i < std::min((size_t)IBUS_MAX_CHANNELS, channels.size()); i++) {
+                        rcData.channels[i] = channels[i];
+                    }
+                    xQueueOverwrite(g_command_data_queue, &rcData);
+                }
+
+                s_synced = false;
+                s_assemblyIndex = 0;
+            }
+        }
+
+        // Advance and Wrap Read Index
+        s_readIndex++;
+        if (s_readIndex >= IBUS_DMA_BUFFER_SIZE) {
+            s_readIndex = 0;
+        }
+    }
 }

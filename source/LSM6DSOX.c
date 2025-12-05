@@ -1,4 +1,4 @@
-#include "lsm6dsox.h"
+#include <lsm6dsox.h>
 #include "i2c_sync.h" // Include common I2C synchronization functions
 
 // Global pointer to the handle. This is kept for consistency with the original structure,

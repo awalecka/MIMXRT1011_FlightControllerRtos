@@ -73,7 +73,7 @@ int32_t i2c_sync_write_byte(i2c_sync_handle_t *handle, uint8_t reg_addr, uint8_t
     }
 
     // Acquire the mutex to ensure exclusive access to the I2C bus
-    if (xSemaphoreTake(i2c_bus_mutex, I2C_TIMEOUT_TICKS) == pdFALSE) { // Use a timeout for mutex acquisition
+    if (xSemaphoreTake(i2c_bus_mutex, portMAX_DELAY) == pdFALSE) { // Use a timeout for mutex acquisition
         return -1; // Failed to acquire mutex
     }
 

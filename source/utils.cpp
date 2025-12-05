@@ -1,25 +1,26 @@
+/**
+ * @file utils.cpp
+ * @brief Utility functions for range mapping.
+ */
 #include "utils.h"
 
-float map_float(float value, float in_min, float in_max, float out_min, float out_max)
-{
-    if (in_max == in_min) {
+float mapFloat(float value, float inMin, float inMax, float outMin, float outMax) {
+    if (inMax == inMin) {
         // Handle division by zero by returning the minimum of the output range.
-        return out_min;
+        return outMin;
     }
-
-    return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+    return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
-unsigned short map_ushort(unsigned short value, unsigned short in_min, unsigned short in_max, unsigned short out_min, unsigned short out_max)
-{
+unsigned short mapUshort(unsigned short value, unsigned short inMin, unsigned short inMax, unsigned short outMin, unsigned short outMax) {
     // Handle the edge case where the input range is zero to avoid division by zero.
-    if (in_min == in_max) {
+    if (inMin == inMax) {
         // As a sensible default, return the minimum of the output range.
-        return out_min;
+        return outMin;
     }
 
     // Perform linear interpolation using 'long' for intermediate calculations
     // to prevent overflow and handle negative results from range reversal.
-    long result = ((long)value - in_min) * ((long)out_max - out_min) / ((long)in_max - in_min) + out_min;
+    long result = ((long)value - inMin) * ((long)outMax - outMin) / ((long)inMax - inMin) + outMin;
     return (unsigned short)result;
 }
