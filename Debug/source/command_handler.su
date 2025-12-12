@@ -1,13 +1,3 @@
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\CMSIS/core_cm7.h:1911:22:void __NVIC_EnableIRQ(IRQn_Type)	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\CMSIS/core_cm7.h:2041:22:void __NVIC_SetPriority(IRQn_Type, uint32_t)	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_dmamux.h:75:20:void DMAMUX_EnableChannel(DMAMUX_Type*, uint32_t)	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_dmamux.h:110:20:void DMAMUX_SetSource(DMAMUX_Type*, uint32_t, int32_t)	24	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_lpuart.h:681:25:uintptr_t LPUART_GetDataRegisterAddress(LPUART_Type*)	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_lpuart.h:714:20:void LPUART_EnableRxDMA(LPUART_Type*, bool)	16	static
 ../source/command_handler.cpp:46:17:void LPUART1_IRQHandler()	16	static
-../source/command_handler.cpp:76:6:void command_handler_task(void*)	80	static
-../source/command_handler.cpp:140:13:void processReceivedData()	80	static
-C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/bits/stl_algobase.h:233:5:constexpr const _Tp& std::min(const _Tp&, const _Tp&) [with _Tp = unsigned int]	16	static
-C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/array:208:7:constexpr const std::array<_Tp, _Nm>::value_type& std::array<_Tp, _Nm>::operator[](size_type) const [with _Tp = short unsigned int; unsigned int _Nm = 14]	16	static
-../source/command_handler.cpp:211:1:void __static_initialization_and_destruction_0()	8	static
-../source/command_handler.cpp:211:1:cpp)	8	static
+../source/command_handler.cpp:76:6:void commandHandlerTask(void*)	120	static
+../source/command_handler.cpp:209:1:cpp)	0	static

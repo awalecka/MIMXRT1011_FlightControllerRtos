@@ -2,14 +2,23 @@
 
 // --- PIDController Implementation ---
 
-PIDController::PIDController(float p, float i, float d) : kp(p), ki(i), kd(d), integral(0.0f), prevError(0.0f) {}
+PIDController::PIDController(float p, float i, float d, float limit)
+    : kp(p), ki(i), kd(d), integral(0.0f), prevError(0.0f), integralLimit(std::abs(limit)) {}
 
 float PIDController::calculate(float setpoint, float currentValue, float dt) {
     if (dt <= 0) return 0.0f;
     float error = setpoint - currentValue;
+
     integral += error * dt;
+
+    // Anti-windup
+    if (integralLimit > 0.0f) {
+        integral = std::clamp(integral, -integralLimit, integralLimit);
+    }
+
     float derivative = (dt > 1e-6) ? (error - prevError) / dt : 0.0f;
     prevError = error;
+
     return (kp * error) + (ki * integral) + (kd * derivative);
 }
 
@@ -22,9 +31,9 @@ void PIDController::reset() {
 
 AttitudeController::AttitudeController()
     : kpRollAngle(6.0f), kpPitchAngle(6.0f),
-      rollRateController(0.1f, 0.05f, 0.0f),
-      pitchRateController(0.1f, 0.05f, 0.0f),
-      yawRateController(0.15f, 0.08f, 0.0f),
+      rollRateController(0.1f, 0.05f, 0.0f, 1.0f),
+      pitchRateController(0.1f, 0.05f, 0.0f, 1.0f),
+      yawRateController(0.15f, 0.08f, 0.0f, 1.0f),
       kFfRoll(0.1f), kFfPitch(0.1f), kFfYaw(0.1f),
       targetRollDeg(0.0f), targetPitchDeg(0.0f) {}
 
@@ -123,16 +132,10 @@ void Receiver::init() { PRINTF("Receiver Initialized. \r\n"); }
 
 void Receiver::getSetpoint(Receiver::Setpoint& setpoint) {
     RC_Channels_t receivedChannels;
-    //if (xQueueReceive(g_command_data_queue, &receivedChannels, 0) == pdPASS) {
-        // Example usage of mapFloat
-        // setpoint.rollDeg = mapFloat(static_cast<float>(receivedChannels.channels[0]), 1000.0f, 2000.0f, -30.0f, 30.0f);
-
-    //    PRINTF("Channel %i \r\n", receivedChannels.channels[1]);
-
-    	setpoint.rollDeg = 0.0f;
-        setpoint.pitchDeg = 0.0f;
-        setpoint.throttle = 0.0f;
-    //}
+    // Implementation placeholder for queue receive logic
+    setpoint.rollDeg = 0.0f;
+    setpoint.pitchDeg = 0.0f;
+    setpoint.throttle = 0.0f;
 }
 
 void Actuators::init() { PRINTF("Actuators Initialized. \r\n"); }
@@ -197,5 +200,5 @@ void FlightController::estimateAttitude(const IMU::RawData& rawData) {
 
     currentRollDeg = euler.angle.roll;
     currentPitchDeg = euler.angle.pitch;
-    currentYawDeg = 0.0f;
+    currentYawDeg = 0.0f; // Placeholder until magnetometer integration
 }

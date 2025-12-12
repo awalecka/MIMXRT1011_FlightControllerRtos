@@ -70,9 +70,9 @@ instance:
 - config_sets:
   - fsl_edma:
     - common_settings:
-      - enableMinorLoopMapping: 'false'
+      - enableMinorLoopMapping: 'true'
       - enableContinuousLinkMode: 'false'
-      - enableHaltOnError: 'false'
+      - enableHaltOnError: 'true'
       - ERCA: 'fixedPriority'
       - enableDebugMode: 'false'
     - dma_table: []
@@ -81,22 +81,23 @@ instance:
       - enableErrInterrupt: 'false'
       - errorInterrupt:
         - IRQn: 'DMA_ERROR_IRQn'
-        - enable_interrrupt: 'noInit'
+        - enable_interrrupt: 'enabled'
         - enable_priority: 'false'
-        - priority: '15'
+        - priority: '0'
         - enable_custom_name: 'false'
+    - quick_selection: 'default'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 const edma_config_t DMA0_config = {
   .enableContinuousLinkMode = false,
-  .enableHaltOnError = false,
+  .enableHaltOnError = true,
   .enableRoundRobinArbitration = false,
   .enableDebugMode = false
 };
 
 static void DMA0_init(void) {
   /* DMA0 minor loop mapping */
-  EDMA_EnableMinorLoopMapping(DMA0_DMA_BASEADDR, false);
+  EDMA_EnableMinorLoopMapping(DMA0_DMA_BASEADDR, true);
 }
 
 /***********************************************************************************************************************
@@ -117,6 +118,7 @@ instance:
     - interrupt_table:
       - 0: []
       - 1: []
+      - 2: []
     - interrupts: []
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -655,6 +657,67 @@ static void PWM1_init(void) {
 }
 
 /***********************************************************************************************************************
+ * LPUART2_Tele initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'LPUART2_Tele'
+- type: 'lpuart_cmsis'
+- mode: 'interrupt'
+- custom_name_enabled: 'true'
+- type_id: 'lpuart_cmsis_2.4.0'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'LPUART4'
+- config_sets:
+  - general:
+    - main_config:
+      - operationMode: 'ARM_USART_MODE_ASYNCHRONOUS'
+      - clockSource: 'LpuartClock'
+      - clockSourceFreq: 'ClocksTool_DefaultInit'
+      - power_state: 'ARM_POWER_FULL'
+      - baudRate_Bps: '115200'
+      - dataBits: 'ARM_USART_DATA_BITS_8'
+      - parityBit: 'ARM_USART_PARITY_NONE'
+      - stopBit: 'ARM_USART_STOP_BITS_1'
+      - enableRX: 'false'
+      - enableRXBuffer: 'false'
+      - enableTX: 'true'
+      - signalEventFunctionId: 'NULL'
+      - enableGetFreqFnCustomName: 'false'
+      - getFreqFunctionCustomID: 'LPUART2_GetFreq'
+      - enableInitPinsFnCustomName: 'false'
+      - initPinFunctionCustomID: 'LPUART2_InitPins'
+      - enableDeinitPinsFnCustomName: 'false'
+      - deinitPinFunctionCustomID: 'LPUART2_DeinitPins'
+  - fsl_cmsis_uart:
+    - interrupt:
+      - IRQn: 'LPUART4_IRQn'
+      - enable_priority: 'true'
+      - priority: '7'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+/* Get clock source frequency */
+uint32_t LPUART4_GetFreq(void){
+  return LPUART2_TELE_CLOCK_SOURCE_FREQ;
+};
+
+static void LPUART2_Tele_init(void) {
+  /* Interrupt vector LPUART4_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(LPUART2_TELE_IRQN, LPUART2_TELE_IRQ_PRIORITY);
+  /* Initialize CMSIS USART */
+  LPUART2_TELE_PERIPHERAL.Initialize(NULL);
+  /* Power control of CMSIS USART */
+  LPUART2_TELE_PERIPHERAL.PowerControl(ARM_POWER_FULL);
+  /* Control of CMSIS USART */
+  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
+  /* Enable or disable receiver. */
+  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
+  /* Enable or disable transmitter. */
+  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 1);
+}
+
+/***********************************************************************************************************************
  * DebugConsole initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -706,6 +769,7 @@ void BOARD_InitPeripherals(void)
   LPI2C1_Sensors_init();
   LPUART1_Ibus_init();
   PWM1_init();
+  LPUART2_Tele_init();
 }
 
 /***********************************************************************************************************************

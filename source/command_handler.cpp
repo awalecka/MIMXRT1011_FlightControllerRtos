@@ -73,21 +73,21 @@ extern "C" void LPUART1_IRQHandler(void) {
 
 // --- Main Task (C++ Linkage) ---
 
-void command_handler_task(void* pvParameters) {
+void commandHandlerTask(void* pvParameters) {
     (void)pvParameters;
 
-    // 1. Initialize DMAMUX
+    // Initialize DMAMUX
     DMAMUX_Init(IBUS_DMAMUX_BASE);
     DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
     DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
 
-    // 2. Initialize EDMA
+    // Initialize EDMA
     edma_config_t edmaConfig;
     EDMA_GetDefaultConfig(&edmaConfig);
     EDMA_Init(IBUS_DMA_BASE, &edmaConfig);
     EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
 
-    // 3. Configure EDMA TCD for Circular Buffer
+    // Configure EDMA TCD for Circular Buffer
     edma_transfer_config_t transferConfig;
     EDMA_PrepareTransfer(&transferConfig,
                          (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE), // Source: UART Data Reg
@@ -110,7 +110,7 @@ void command_handler_task(void* pvParameters) {
 
     EDMA_StartTransfer(&s_edmaHandle);
 
-    // 4. Initialize LPUART
+    // Initialize LPUART
     lpuart_config_t lpuartConfig;
     LPUART_GetDefaultConfig(&lpuartConfig);
     lpuartConfig.baudRate_Bps = BAUD_RATE;
@@ -120,12 +120,12 @@ void command_handler_task(void* pvParameters) {
 
     LPUART_Init(IBUS_LPUART_INSTANCE, &lpuartConfig, BOARD_BOOTCLOCKRUN_UART_CLK_ROOT);
 
-    // 5. Enable Interrupts
+    // Enable Interrupts
     LPUART_EnableInterrupts(IBUS_LPUART_INSTANCE, kLPUART_IdleLineInterruptEnable);
     NVIC_SetPriority(IBUS_LPUART_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(IBUS_LPUART_IRQn);
 
-    // 6. Enable Rx DMA
+    // Enable Rx DMA
     LPUART_EnableRxDMA(IBUS_LPUART_INSTANCE, true);
 
     PRINTF("[IBUS] DMA Circular Buffer Task Started.\r\n");
@@ -187,10 +187,8 @@ static void processReceivedData(void) {
                 std::span<const uint8_t> packetSpan(s_assemblyBuffer, PACKET_LENGTH);
 
                 if (s_ibusHandler.processBuffer(packetSpan)) {
-                    RC_Channels_t rcData;
                     const auto& channels = s_ibusHandler.getAllChannels();
-
-                    // Safe Copy
+                    RC_Channels_t rcData;
                     for(size_t i = 0; i < std::min((size_t)IBUS_MAX_CHANNELS, channels.size()); i++) {
                         rcData.channels[i] = channels[i];
                     }

@@ -1,12 +1,5 @@
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\CMSIS/core_cm7.h:2041:22:__NVIC_SetPriority	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_edma.h:348:20:EDMA_EnableMinorLoopMapping	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_pwm.h:857:20:PWM_StartTimer	16	static
-C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_pwm.h:1058:20:PWM_SetPwmLdok	16	static
-../board/peripherals.c:97:13:DMA0_init	8	static
-../board/peripherals.c:161:10:LPI2C1_GetFreq	4	static
-../board/peripherals.c:165:13:LPI2C1_Sensors_init	8	static
-../board/peripherals.c:218:10:LPUART1_GetFreq	4	static
-../board/peripherals.c:222:13:LPUART1_Ibus_init	8	static
-../board/peripherals.c:616:13:PWM1_init	24	static
-../board/peripherals.c:698:6:BOARD_InitPeripherals	8	static
-../board/peripherals.c:714:6:BOARD_InitBootPeripherals	8	static
+../board/peripherals.c:163:10:LPI2C1_GetFreq	0	static
+../board/peripherals.c:220:10:LPUART1_GetFreq	0	static
+../board/peripherals.c:701:10:LPUART4_GetFreq	0	static
+../board/peripherals.c:761:6:BOARD_InitPeripherals	40	static
+../board/peripherals.c:778:6:BOARD_InitBootPeripherals	0	static

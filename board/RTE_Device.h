@@ -22,6 +22,8 @@
 #define RTE_I2C1_DMA_EN 0
 /* Enable peripheral */
 #define RTE_USART1 1
+/* Enable peripheral */
+#define RTE_USART4 1
 
 /***********************************************************************************************************************
  * Driver configuration
@@ -30,6 +32,8 @@
 #define USART_RX_BUFFER_LEN 32
 /* Enable RX buffer */
 #define USART1_RX_BUFFER_ENABLE 1
+/* Enable RX buffer */
+#define USART4_RX_BUFFER_ENABLE 0
 
 
 #endif /* __RTE_DEVICE_H */

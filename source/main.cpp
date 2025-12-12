@@ -82,7 +82,7 @@ int main(void) {
 
     PRINTF("Flight Controller Initializing...\r\n");
 
-    // --- 1. Create Queues ---
+    // Create Queues
     g_sensor_data_queue = xQueueCreateStatic(SENSOR_QUEUE_LENGTH, SENSOR_QUEUE_ITEM_SIZE, ucSensorQueueStorageArea, &xSensorQueueControlBlock);
     g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
     g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
@@ -93,14 +93,14 @@ int main(void) {
         while(1);
     }
 
-    // --- 2. Create the State Manager Task ---
-    g_state_manager_task_handle = xTaskCreateStatic(state_manager_task, "StateMgrTask", STATE_MGR_STACK_SIZE, NULL, STATE_MANAGER_TASK_PRIORITY, xStateMgrStack, &xStateMgrTaskControlBlock);
+    // Create the State Manager Task
+    g_state_manager_task_handle = xTaskCreateStatic(stateManagerTask, "StateMgrTask", STATE_MGR_STACK_SIZE, NULL, STATE_MANAGER_TASK_PRIORITY, xStateMgrStack, &xStateMgrTaskControlBlock);
     if (g_state_manager_task_handle == NULL) {
         PRINTF("FATAL: Failed to create state manager task.\r\n");
         while(1);
     }
 
-    // --- 3. Start Scheduler ---
+    // Start Scheduler
     vTaskStartScheduler();
 
     // Should not reach here

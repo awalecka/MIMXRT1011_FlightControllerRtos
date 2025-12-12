@@ -653,6 +653,16 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="UART_CLK_ROOT" description="UART_CLK_ROOT is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LPUART4.uart_tx" description="Signal TX is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="NVIC" uuid="151b12a1-0054-4ebe-8847-b2f9af0b9797" type="nvic" type_id="nvic" mode="general" peripheral="NVIC" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
@@ -660,6 +670,7 @@
                         <array name="interrupt_table">
                            <struct name="0"/>
                            <struct name="1"/>
+                           <struct name="2"/>
                         </array>
                         <array name="interrupts"/>
                      </config_set>
@@ -738,11 +749,11 @@
                      </config_set>
                   </instance>
                   <instance name="DMA0" uuid="9400d6a0-ffb2-4201-b510-5e5db13ed2ac" type="edma" type_id="edma_2.4.0" mode="basic" peripheral="DMA0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_edma">
+                     <config_set name="fsl_edma" quick_selection="default">
                         <struct name="common_settings">
-                           <setting name="enableMinorLoopMapping" value="false"/>
+                           <setting name="enableMinorLoopMapping" value="true"/>
                            <setting name="enableContinuousLinkMode" value="false"/>
-                           <setting name="enableHaltOnError" value="false"/>
+                           <setting name="enableHaltOnError" value="true"/>
                            <setting name="ERCA" value="fixedPriority"/>
                            <setting name="enableDebugMode" value="false"/>
                         </struct>
@@ -752,9 +763,9 @@
                            <setting name="enableErrInterrupt" value="false"/>
                            <struct name="errorInterrupt">
                               <setting name="IRQn" value="DMA_ERROR_IRQn"/>
-                              <setting name="enable_interrrupt" value="noInit"/>
+                              <setting name="enable_interrrupt" value="enabled"/>
                               <setting name="enable_priority" value="false"/>
-                              <setting name="priority" value="15"/>
+                              <setting name="priority" value="0"/>
                               <setting name="enable_custom_name" value="false"/>
                            </struct>
                         </struct>
@@ -1116,19 +1127,19 @@
                      <config_set name="fsl_cmsis_uart">
                         <struct name="edma_channels">
                            <struct name="edma_rx_channel">
-                              <setting name="uid" value="1764906000539"/>
+                              <setting name="uid" value="1765488860095"/>
                               <setting name="eDMAn" value="5"/>
                               <setting name="eDMA_source" value="kDmaRequestMuxLPUART3Rx"/>
                            </struct>
                            <struct name="edma_tx_channel">
-                              <setting name="uid" value="1764906000540"/>
+                              <setting name="uid" value="1765488860096"/>
                               <setting name="eDMAn" value="4"/>
                               <setting name="eDMA_source" value="kDmaRequestMuxLPUART3Tx"/>
                            </struct>
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="LPUART2_Tele" uuid="f07b255f-3596-400b-b8eb-d65d3fe4c663" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="edma" peripheral="LPUART4" enabled="false" comment="" custom_name_enabled="true" editing_lock="false">
+                  <instance name="LPUART2_Tele" uuid="f07b255f-3596-400b-b8eb-d65d3fe4c663" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="interrupt" peripheral="LPUART4" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
                      <config_set name="general">
                         <struct name="main_config">
                            <setting name="operationMode" value="ARM_USART_MODE_ASYNCHRONOUS"/>
@@ -1152,17 +1163,10 @@
                         </struct>
                      </config_set>
                      <config_set name="fsl_cmsis_uart">
-                        <struct name="edma_channels">
-                           <struct name="edma_rx_channel">
-                              <setting name="uid" value="1764906000541"/>
-                              <setting name="eDMAn" value="7"/>
-                              <setting name="eDMA_source" value="kDmaRequestMuxLPUART4Rx"/>
-                           </struct>
-                           <struct name="edma_tx_channel">
-                              <setting name="uid" value="1764906000542"/>
-                              <setting name="eDMAn" value="8"/>
-                              <setting name="eDMA_source" value="kDmaRequestMuxLPUART4Tx"/>
-                           </struct>
+                        <struct name="interrupt">
+                           <setting name="IRQn" value="LPUART4_IRQn"/>
+                           <setting name="enable_priority" value="true"/>
+                           <setting name="priority" value="7"/>
                         </struct>
                      </config_set>
                   </instance>

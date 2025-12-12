@@ -8,7 +8,7 @@
 /**
  * @brief Task that waits for sensor data and writes it to a log file.
  */
-void logging_task(void *pvParameters) {
+void loggingTask(void *pvParameters) {
 	sensor_data_vehicle_t received_sensor_data;
 	ActuatorOutput surface_commands;
 

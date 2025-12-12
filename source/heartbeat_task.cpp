@@ -8,7 +8,7 @@
 /**
  * @brief Task that generates a heartbeat.
  */
-void heartbeat_task(void *pvParameters) {
+void heartbeatTask(void *pvParameters) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
     while (1) {

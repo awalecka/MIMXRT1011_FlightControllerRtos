@@ -1,4 +1,4 @@
-../component/serial_manager/fsl_component_serial_port_swo.c:51:25:Serial_SwoInit	32	static
-../component/serial_manager/fsl_component_serial_port_swo.c:108:25:Serial_SwoDeinit	24	static
-../component/serial_manager/fsl_component_serial_port_swo.c:121:25:Serial_SwoWrite	32	static
-../component/serial_manager/fsl_component_serial_port_swo.c:166:25:Serial_SwoRead	24	static
+../component/serial_manager/fsl_component_serial_port_swo.c:51:25:Serial_SwoInit	12	static
+../component/serial_manager/fsl_component_serial_port_swo.c:108:25:Serial_SwoDeinit	4	static
+../component/serial_manager/fsl_component_serial_port_swo.c:121:25:Serial_SwoWrite	4	static
+../component/serial_manager/fsl_component_serial_port_swo.c:166:25:Serial_SwoRead	0	static

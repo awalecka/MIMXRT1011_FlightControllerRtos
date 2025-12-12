@@ -13,25 +13,25 @@ IbusHandler::IbusHandler() noexcept : m_errorCount(0) {
 }
 
 bool IbusHandler::processBuffer(std::span<const uint8_t> buffer) noexcept {
-    // 1. Basic Size Validation
+    // Basic Size Validation
     if (buffer.size() < PACKET_LENGTH) {
         m_errorCount++;
         return false;
     }
 
-    // 2. Cast to raw struct pointer for easy field access.
+    // Cast to raw struct pointer for easy field access.
     // In C++23/embedded, we must ensure alignment.
     // The Cortex-M7 (RT1011) handles unaligned access, but reinterpret_cast
     // on a byte buffer to a packed struct is the standard embedded pattern here.
     const auto* packet = reinterpret_cast<const IbusPacketRaw*>(buffer.data());
 
-    // 3. Header Validation
+    // Header Validation
     if (packet->length != PACKET_LENGTH || packet->command != COMMAND_SERVO) {
         m_errorCount++;
         return false;
     }
 
-    // 4. Checksum Validation
+    // Checksum Validation
     // The checksum is over the first 30 bytes (Length + Command + 14 channels)
     // The last 2 bytes are the checksum itself.
     uint16_t calculatedSum = calculateChecksum(buffer.first(PACKET_LENGTH - 2));
@@ -41,7 +41,7 @@ bool IbusHandler::processBuffer(std::span<const uint8_t> buffer) noexcept {
         return false;
     }
 
-    // 5. Update Channel Data
+    // Update Channel Data
     // We iterate manually or use std::copy. Since the packed struct is Little Endian
     // and the RT1011 is Little Endian, we can copy directly.
     for (size_t i = 0; i < CHANNEL_COUNT; ++i) {

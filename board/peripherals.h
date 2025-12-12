@@ -97,6 +97,14 @@ extern "C" {
 #define PWM1_F0_FAULT2 kPWM_Fault_2
 /* Definition of fault Fault3 ID */
 #define PWM1_F0_FAULT3 kPWM_Fault_3
+/* Definition of peripheral ID */
+#define LPUART2_TELE_PERIPHERAL Driver_USART4
+/* Definition of the clock source frequency */
+#define LPUART2_TELE_CLOCK_SOURCE_FREQ 80000000UL
+/* LPUART2_Tele interrupt vector ID (number). */
+#define LPUART2_TELE_IRQN LPUART4_IRQn
+/* LPUART2_Tele interrupt vector priority. */
+#define LPUART2_TELE_IRQ_PRIORITY 7
 /* Debug console is initialized in the peripheral tool */
 #define BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL 
 
@@ -128,6 +136,8 @@ extern void i2c_sync_event_callback(uint32_t event);
 uint32_t LPI2C1_GetFreq(void);
 /* Get clock source frequency function for component LPUART1_Ibus */
 uint32_t LPUART1_GetFreq(void);
+/* Get clock source frequency function for component LPUART2_Tele */
+uint32_t LPUART4_GetFreq(void);
 
 /***********************************************************************************************************************
  * Initialization functions

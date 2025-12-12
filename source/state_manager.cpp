@@ -65,7 +65,7 @@ static StaticTask_t xCalibrateTaskTCB;
  * @brief Main state machine controller task.
  * Manages the lifecycle of state-specific tasks.
  */
-void state_manager_task(void *pvParameters) {
+void stateManagerTask(void *pvParameters) {
 
     // --- BOOT SEQUENCE ---
     PRINTF("State: BOOT\r\n");
@@ -92,26 +92,26 @@ void state_manager_task(void *pvParameters) {
 
     // --- TASK CREATION ---
 
-    // 1. Create the persistent system tasks
-    g_heartbeat_task_handle = xTaskCreateStatic(heartbeat_task, "HeartbeatTask", HEARTBEAT_STACK_SIZE, NULL, HEARTBEAT_TASK_PRIORITY, xHeartbeatStack, &xHeartbeatTaskControlBlock);
+    // Create the persistent system tasks
+    g_heartbeat_task_handle = xTaskCreateStatic(heartbeatTask, "HeartbeatTask", HEARTBEAT_STACK_SIZE, NULL, HEARTBEAT_TASK_PRIORITY, xHeartbeatStack, &xHeartbeatTaskControlBlock);
     if (g_heartbeat_task_handle == NULL) { PRINTF("FATAL: Failed to create heartbeat task.\r\n"); }
 
-    g_command_handler_task_handle = xTaskCreateStatic(command_handler_task, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, xCmdHandlerStack, &xCmdHandlerTaskControlBlock);
+    g_command_handler_task_handle = xTaskCreateStatic(commandHandlerTask, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, xCmdHandlerStack, &xCmdHandlerTaskControlBlock);
     if (g_command_handler_task_handle == NULL) { PRINTF("FATAL: Failed to create command handler task.\r\n"); }
 
-    g_logging_task_handle = xTaskCreateStatic(logging_task, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, xLoggingStack, &xLoggingTaskControlBlock);
+    g_logging_task_handle = xTaskCreateStatic(loggingTask, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, xLoggingStack, &xLoggingTaskControlBlock);
     if (g_logging_task_handle == NULL) { PRINTF("FATAL: Failed to create logging task.\r\n"); }
 
     // 2. Create and suspend the state-specific tasks
-    g_idle_task_handle = xTaskCreateStatic(idle_task, "IdleTask", IDLE_TASK_STACK_SIZE, NULL, IDLE_TASK_PRIORITY, xIdleStack, &xIdleTaskTCB);
+    g_idle_task_handle = xTaskCreateStatic(idleTask, "IdleTask", IDLE_TASK_STACK_SIZE, NULL, IDLE_TASK_PRIORITY, xIdleStack, &xIdleTaskTCB);
     if (g_idle_task_handle == NULL) { PRINTF("FATAL: Failed to create idle task.\r\n"); }
     vTaskSuspend(g_idle_task_handle);
 
-    g_flight_task_handle = xTaskCreateStatic(flight_task, "FlightTask", FLIGHT_TASK_STACK_SIZE, NULL, FLIGHT_TASK_PRIORITY, xFlightStack, &xFlightTaskTCB);
+    g_flight_task_handle = xTaskCreateStatic(flightTask, "FlightTask", FLIGHT_TASK_STACK_SIZE, NULL, FLIGHT_TASK_PRIORITY, xFlightStack, &xFlightTaskTCB);
     if (g_flight_task_handle == NULL) { PRINTF("FATAL: Failed to create flight task.\r\n"); }
     vTaskSuspend(g_flight_task_handle);
 
-    g_calibrate_task_handle = xTaskCreateStatic(calibrate_task, "CalibrateTask", CALIBRATE_TASK_STACK_SIZE, NULL, FLIGHT_TASK_PRIORITY, xCalibrateStack, &xCalibrateTaskTCB);
+    g_calibrate_task_handle = xTaskCreateStatic(calibrateTask, "CalibrateTask", CALIBRATE_TASK_STACK_SIZE, NULL, FLIGHT_TASK_PRIORITY, xCalibrateStack, &xCalibrateTaskTCB);
     if (g_calibrate_task_handle == NULL) { PRINTF("FATAL: Failed to create calibrate task.\r\n"); }
     vTaskSuspend(g_calibrate_task_handle);
 

@@ -13,7 +13,7 @@
 /**
  * @brief Task for the FLIGHT state.
  */
-void flight_task(void *pvParameters) {
+void flightTask(void *pvParameters) {
     // ... (function unchanged) ...
     const TickType_t xFlightLoopFrequency = pdMS_TO_TICKS(10); // 100Hz
 	TickType_t xLastWakeTime = xTaskGetTickCount();
@@ -33,7 +33,7 @@ void flight_task(void *pvParameters) {
 /**
  * @brief Task for the IDLE state.
  */
-void idle_task(void *pvParameters) {
+void idleTask(void *pvParameters) {
 
 	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
 
@@ -55,7 +55,7 @@ void idle_task(void *pvParameters) {
 /**
  * @brief Task for the CALIBRATE state.
  */
-void calibrate_task(void *pvParameters) {
+void calibrateTask(void *pvParameters) {
 
 	g_heartbeat_frequency = pdMS_TO_TICKS(1000); // 0.5Hz
 

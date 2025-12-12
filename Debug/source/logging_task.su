@@ -1,1 +1,1 @@
-../source/logging_task.cpp:11:6:void logging_task(void*)	128	static
+../source/logging_task.cpp:11:6:void loggingTask(void*)	72	static
