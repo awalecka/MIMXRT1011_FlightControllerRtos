@@ -22,6 +22,22 @@ RM := rm -rf
 -include component/serial_manager/subdir.mk
 -include component/lists/subdir.mk
 -include board/subdir.mk
+-include CMSIS/DSP/Source/WindowFunctions/subdir.mk
+-include CMSIS/DSP/Source/TransformFunctions/subdir.mk
+-include CMSIS/DSP/Source/SupportFunctions/subdir.mk
+-include CMSIS/DSP/Source/StatisticsFunctions/subdir.mk
+-include CMSIS/DSP/Source/SVMFunctions/subdir.mk
+-include CMSIS/DSP/Source/QuaternionMathFunctions/subdir.mk
+-include CMSIS/DSP/Source/MatrixFunctions/subdir.mk
+-include CMSIS/DSP/Source/InterpolationFunctions/subdir.mk
+-include CMSIS/DSP/Source/FilteringFunctions/subdir.mk
+-include CMSIS/DSP/Source/FastMathFunctions/subdir.mk
+-include CMSIS/DSP/Source/DistanceFunctions/subdir.mk
+-include CMSIS/DSP/Source/ControllerFunctions/subdir.mk
+-include CMSIS/DSP/Source/ComplexMathFunctions/subdir.mk
+-include CMSIS/DSP/Source/CommonTables/subdir.mk
+-include CMSIS/DSP/Source/BayesFunctions/subdir.mk
+-include CMSIS/DSP/Source/BasicMathFunctions/subdir.mk
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(strip $(C++M_DEPS)),)
 -include $(C++M_DEPS)

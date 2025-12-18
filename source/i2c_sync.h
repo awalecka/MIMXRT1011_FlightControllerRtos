@@ -2,9 +2,9 @@
 #define I2C_SYNC_H
 
 #include <stdint.h>
-#include "Driver_I2C.h" // CMSIS I2C Driver API
+#include "Driver_I2C.h"
 #include "FreeRTOS.h"
-#include "semphr.h" // For SemaphoreHandle_t
+#include "semphr.h"
 
 // Define a maximum timeout for I2C operations in FreeRTOS ticks
 #define I2C_TIMEOUT_TICKS pdMS_TO_TICKS(100) // 100ms timeout

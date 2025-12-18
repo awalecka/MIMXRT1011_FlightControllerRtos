@@ -5,7 +5,7 @@
  * Generated linker script file for MIMXRT1011xxxxx
  * Created from linkscript.ldt by FMCreateLinkLibraries
  * Using Freemarker v2.3.30
- * MCUXpresso IDE v11.10.0 [Build 3148] [2024-07-03] on Dec 11, 2025, 7:41:45 PM
+ * MCUXpresso IDE v11.10.0 [Build 3148] [2024-07-03] on Dec 17, 2025, 9:39:32 PM
  */
 
 INCLUDE "MIMXRT1011_FlightControllerRtos_Debug_library.ld"
