@@ -21,6 +21,7 @@
 #include "peripherals.h"
 #include "fsl_debug_console.h"
 #include "rls_mag_calibration.h"
+#include "servo_driver.h" //
 
 extern "C" {
 #include <lis3mdl.h>
@@ -126,40 +127,16 @@ void heartbeatTask(void *pvParameters);
  */
 class PIDController {
 public:
-    /**
-     * @brief Construct a new PIDController object.
-     * @param p Proportional gain.
-     * @param i Integral gain.
-     * @param d Derivative gain.
-     * @param alpha Derivative Low Pass Filter coefficient (precomputed).
-     * alpha = dt / (tau + dt), where tau = 1 / (2*pi*cutoff).
-     */
     PIDController(float p, float i, float d, float alpha);
-
-    /**
-     * @brief Calculates PID output with Conditional Integration and Derivative Filtering.
-     * @param setpoint Desired value.
-     * @param currentValue Measured value.
-     * @param dt Delta time in seconds (still needed for I and raw D term).
-     * @param minLimit Lower saturation limit of the actuator.
-     * @param maxLimit Upper saturation limit of the actuator.
-     * @return float Clamped control output.
-     */
     float calculate(float setpoint, float currentValue, float dt, float minLimit, float maxLimit);
-
-    /**
-     * @brief Resets the internal state (integral and previous error).
-     */
     void reset();
 
 private:
     float kp, ki, kd;
     float integral;
     float prevError;
-
-    // Derivative Filter State
-    float alpha;         ///< Precomputed filter coefficient
-    float dTermFiltered; ///< Previous filtered derivative value
+    float alpha;
+    float dTermFiltered;
 };
 
 class AttitudeController {
@@ -181,10 +158,6 @@ private:
     const float NOMINAL_AIRSPEED_FOR_TUNING = 20.0f;
 };
 
-/**
- * @brief Interface for Inertial Measurement Unit operations.
- * Handles driver initialization, remapping, and calibration (bias/iron).
- */
 class IMU {
 public:
     struct RawData {
@@ -201,24 +174,8 @@ public:
     };
 
     IMU();
-
-    /**
-     * @brief Initializes the IMU hardware drivers.
-     * @return 0 on success, non-zero on failure.
-     */
     int init();
-
-    /**
-     * @brief Reads sensor data, applies bias corrections and runs Mag calibration.
-     * @param rawData Output structure.
-     * @return 0 on success, non-zero on error.
-     */
     int readData(RawData& rawData);
-
-    /**
-     * @brief Blocking routine to calculate gyro bias.
-     * Assumes vehicle is stationary.
-     */
     void calibrateGyro();
 
 private:
@@ -235,43 +192,17 @@ public:
     };
 
     struct StickInput {
-        float roll;     // Normalized -1.0 to 1.0
-        float pitch;    // Normalized -1.0 to 1.0
-        float yaw;      // Normalized -1.0 to 1.0
-        float throttle; // Normalized 0.0 to 100.0 (or 0.0 to 1.0)
+        float roll;
+        float pitch;
+        float yaw;
+        float throttle;
     };
 
     void init();
-
-    /**
-     * @brief Reads the latest data from the queue and updates the internal cache.
-     * This should be called once per flight loop iteration.
-     */
     void update();
-
-    /**
-     * @brief Gets the setpoint for stabilized modes (Angles).
-     * @param setpoint Output structure.
-     */
     void getSetpoint(Setpoint& setpoint);
-
-    /**
-     * @brief Gets normalized stick inputs for pass-through modes.
-     * @param input Output structure with normalized values.
-     */
     void getStickInput(StickInput& input);
-
-    /**
-     * @brief Returns the raw value of a specific channel from the cache.
-     * @param channel Index of the channel.
-     * @return Channel value in microseconds (typically 1000-2000).
-     */
     uint16_t getChannel(uint8_t channel) const;
-
-    /**
-     * @brief Returns the entire cached RC data frame.
-     * @return Const reference to the internal cache.
-     */
     const RC_Channels_t& getCachedData() const;
 
 private:
@@ -281,7 +212,27 @@ private:
 class Actuators {
 public:
     void init();
+
+    /**
+     * @brief Sets the normalized output for control surfaces and throttle.
+     * @param aileron -1.0 to 1.0
+     * @param elevator -1.0 to 1.0
+     * @param rudder -1.0 to 1.0
+     * @param throttle 0.0 to 100.0
+     */
     void setOutputs(float aileron, float elevator, float rudder, float throttle);
+
+    /**
+     * @brief Sets the raw output in microseconds (Direct Pass-Through).
+     * @param aileronUs Pulse width in microseconds
+     * @param elevatorUs Pulse width in microseconds
+     * @param rudderUs Pulse width in microseconds
+     * @param throttleUs Pulse width in microseconds
+     */
+    void setRawOutputs(uint16_t aileronUs, uint16_t elevatorUs, uint16_t rudderUs, uint16_t throttleUs);
+
+private:
+    firmware::drivers::ServoDriver m_servoDriver;
 };
 
 class FlightController {
@@ -292,21 +243,10 @@ public:
     };
 
     FlightController(float loopTime);
-
-    /**
-     * @brief Performs full system initialization (sensors, drivers, AHRS).
-     * @return 0 on success, non-zero on failure.
-     */
     int init();
-
     void update();
     void calibrateSensors();
     void setControlMode(ControlMode mode);
-
-    /**
-     * @brief Retrieves the latest RC channel data.
-     * @return A copy of the current RC channel data.
-     */
     RC_Channels_t getRcData() const;
 
 private:
@@ -324,7 +264,6 @@ private:
     ControlMode currentControlMode;
 };
 
-// Global instance exposed for tasks (e.g., calibrateTask)
 extern FlightController g_flightController;
 
 #endif // FLIGHT_CONTROLLER_H
