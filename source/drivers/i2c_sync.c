@@ -6,7 +6,7 @@ static StaticSemaphore_t xI2cMutexBuffer;
 // Define a mutex for protecting I2C bus access
 static SemaphoreHandle_t i2c_bus_mutex = NULL;
 
-// New: A global variable to store the handle for the *currently active* transaction.
+// Global variable to store the handle for the *currently active* transaction.
 // This is still global but will be protected by the mutex.
 // This is a common pattern when the underlying driver callback doesn't support user_data.
 static i2c_sync_handle_t *g_active_i2c_sync_handle = NULL;
@@ -139,7 +139,7 @@ int32_t i2c_sync_read_bytes(i2c_sync_handle_t *handle, uint8_t reg_addr, uint8_t
     // Clear any pending semaphore tokens
     xSemaphoreTake(handle->i2c_semaphore, 0);
 
-    // 1. Send register address (Master Transmit with restart)
+    // Send register address (Master Transmit with restart)
     int32_t status = handle->i2c_driver->MasterTransmit(handle->i2c_addr, &reg_addr, 1, true); // True for restart
     if (status != ARM_DRIVER_OK) {
         goto exit_error;
@@ -155,7 +155,7 @@ int32_t i2c_sync_read_bytes(i2c_sync_handle_t *handle, uint8_t reg_addr, uint8_t
     // Clear any pending semaphore tokens again for the next transaction
     xSemaphoreTake(handle->i2c_semaphore, 0);
 
-    // 2. Read data (Master Receive)
+    // Read data (Master Receive)
     // Set the global active handle *after* acquiring the mutex and *before* starting the transfer
     g_active_i2c_sync_handle = handle; // Set the global active handle
 

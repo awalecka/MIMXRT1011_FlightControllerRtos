@@ -57,16 +57,16 @@ void ServoDriver::disableServo(size_t servoIndex) {
 }
 
 void ServoDriver::writeHardwareRegister(const ServoChannelConfig& config, uint16_t pulseWidthUs) {
-    // 1. Get the current Period (Modulo) in ticks from the hardware.
+    // Get the current Period (Modulo) in ticks from the hardware.
     // VAL1 register holds the maximum count value (Period) for the submodule.
     uint16_t periodTicks = config.base->SM[config.subModule].VAL1;
 
-    // 2. Calculate the target tick count for the desired pulse width.
+    // Calculate the target tick count for the desired pulse width.
     // Logic: (TargetUS / TotalPeriodUS) * TotalPeriodTicks
     // We use uint32_t for the intermediate calculation to prevent overflow.
     uint32_t targetTicks = (static_cast<uint32_t>(pulseWidthUs) * periodTicks) / PERIOD_US;
 
-    // 3. Write to the Value Register.
+    // Write to the Value Register.
     // For Edge-Aligned PWM (standard for Servos):
     // - PWM A uses VAL3 as the turn-off point.
     // - PWM B uses VAL5 as the turn-off point.
@@ -77,7 +77,7 @@ void ServoDriver::writeHardwareRegister(const ServoChannelConfig& config, uint16
         config.base->SM[config.subModule].VAL5 = static_cast<uint16_t>(targetTicks);
     }
 
-    // 4. Set the Load OK bit to latch the new values into the active registers
+    // Set the Load OK bit to latch the new values into the active registers
     // at the next PWM reload opportunity.
     PWM_SetPwmLdok(config.base, (1U << config.subModule), true);
 }

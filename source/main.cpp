@@ -13,6 +13,7 @@
 #include "fsl_debug_console.h"
 #include "peripherals.h"
 #include "command_handler.h"
+#include "fsl_lpuart.h"
 
 extern "C" {
 #include "i2c_sync.h"
@@ -112,41 +113,11 @@ int main(void) {
 
 static void initCustomConfig()
 {
-    // Initialize DMAMUX
-    DMAMUX_Init(IBUS_DMAMUX_BASE);
-    DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
-    DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
+    // 1. GLOBAL INIT REMOVED:
+    //    DMAMUX_Init, EDMA_Init, and EDMA_CreateHandle are removed.
+    //    The Controller is already initialized by BOARD_InitBootPeripherals (via MEX).
 
-    // Initialize EDMA
-    edma_config_t edmaConfig;
-    EDMA_GetDefaultConfig(&edmaConfig);
-    EDMA_Init(IBUS_DMA_BASE, &edmaConfig);
-    EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
-
-    // Configure EDMA TCD for Circular Buffer
-    edma_transfer_config_t transferConfig;
-    EDMA_PrepareTransfer(&transferConfig,
-                         (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE), // Source: UART Data Reg
-                         1,                                                                     // Source Width: 1 byte
-						 g_dmaRxBuffer,                                                         // Dest: RAM Buffer
-                         1,                                                                     // Dest Width: 1 byte
-                         1,                                                                     // Bytes per request (UART RX)
-                         IBUS_DMA_BUFFER_SIZE,                                                  // Total bytes in Major Loop
-                         kEDMA_PeripheralToMemory);
-
-    EDMA_SubmitTransfer(&s_edmaHandle, &transferConfig);
-
-    // Configure "Hardware Loop": When the buffer fills, subtract BufferSize from the address
-    // to wrap back to the start.
-    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DLAST_SGA = -((int32_t)IBUS_DMA_BUFFER_SIZE);
-
-    // IMPORTANT: Prevent DMA from disabling itself after the major loop completes
-    // This effectively keeps the ring buffer running forever.
-    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].CSR &= ~(DMA_CSR_DREQ_MASK);
-
-    EDMA_StartTransfer(&s_edmaHandle);
-
-    // Initialize LPUART
+    // 2. LPUART Initialization (Kept because we disabled it in MEX):
     lpuart_config_t lpuartConfig;
     LPUART_GetDefaultConfig(&lpuartConfig);
     lpuartConfig.baudRate_Bps = 115200;
@@ -154,14 +125,42 @@ static void initCustomConfig()
     lpuartConfig.enableRx = true;
     lpuartConfig.rxFifoWatermark = 0; // DMA request on every byte
 
+    // We must manually init the clock if we disabled the component in MEX,
+    // or ensure BOARD_BootClockRUN configures it.
+    // (The MEX Clocks tool [cite: 164] shows UART_CLK_ROOT is active at 80MHz, so this is safe).
     LPUART_Init(IBUS_LPUART_INSTANCE, &lpuartConfig, BOARD_BOOTCLOCKRUN_UART_CLK_ROOT);
 
-    // Enable Interrupts
+    // 3. Re-create the EDMA Handle for the IBUS Channel (0)
+    //    We need s_edmaHandle valid for our local usage, even if EDMA is globally init.
+    EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
+
+    // 4. Configure DMAMUX for Channel 0 (IBUS)
+    //    (DMAMUX global init is done by BOARD_Init, but we must set the source for Ch0)
+    DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
+    DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
+
+    // 5. Configure TCD for Circular Buffer (Existing Logic)
+    edma_transfer_config_t transferConfig;
+    EDMA_PrepareTransfer(&transferConfig,
+                         (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE),
+                         1,
+                         g_dmaRxBuffer,
+                         1,
+                         1,
+                         IBUS_DMA_BUFFER_SIZE,
+                         kEDMA_PeripheralToMemory);
+
+    EDMA_SubmitTransfer(&s_edmaHandle, &transferConfig);
+
+    // Hardware Loop / Ring Buffer Logic
+    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DLAST_SGA = -((int32_t)IBUS_DMA_BUFFER_SIZE);
+    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].CSR &= ~(DMA_CSR_DREQ_MASK);
+
+    EDMA_StartTransfer(&s_edmaHandle);
+
+    // 6. Enable LPUART specific features
     LPUART_EnableInterrupts(IBUS_LPUART_INSTANCE, kLPUART_IdleLineInterruptEnable);
     NVIC_SetPriority(IBUS_LPUART_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(IBUS_LPUART_IRQn);
-
-    // Enable Rx DMA
     LPUART_EnableRxDMA(IBUS_LPUART_INSTANCE, true);
-
 }

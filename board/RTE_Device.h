@@ -19,21 +19,28 @@
 /* Enable peripheral */
 #define RTE_I2C1 1
 /* Enable I2C DMA */
-#define RTE_I2C1_DMA_EN 0
-/* Enable peripheral */
-#define RTE_USART1 1
-/* Enable peripheral */
-#define RTE_USART4 1
+#define RTE_I2C1_DMA_EN 1
 
 /***********************************************************************************************************************
  * Driver configuration
  **********************************************************************************************************************/
-/* All USART Rx buffers length */
-#define USART_RX_BUFFER_LEN 32
-/* Enable RX buffer */
-#define USART1_RX_BUFFER_ENABLE 1
-/* Enable RX buffer */
-#define USART4_RX_BUFFER_ENABLE 0
+/* I2C1 configuration */
+/* Used DMA device */
+#define RTE_I2C1_DMA_RX_DMA_BASE DMA0
+/* Selected Rx DMA channel number */
+#define RTE_I2C1_DMA_RX_CH 4
+/* DMAMUX device that is used for muxing of the Rx request */
+#define RTE_I2C1_DMA_RX_DMAMUX_BASE DMAMUX
+/* Rx DMA source request */
+#define RTE_I2C1_DMA_RX_PERI_SEL (uint16_t) kDmaRequestMuxLPI2C1
+/* Used DMA device */
+#define RTE_I2C1_DMA_TX_DMA_BASE DMA0
+/* Selected Tx DMA channel number */
+#define RTE_I2C1_DMA_TX_CH 5
+/* DMAMUX device that is used for muxing of the Tx request */
+#define RTE_I2C1_DMA_TX_DMAMUX_BASE DMAMUX
+/* Tx DMA source request */
+#define RTE_I2C1_DMA_TX_PERI_SEL (uint16_t) kDmaRequestMuxLPI2C1
 
 
 #endif /* __RTE_DEVICE_H */

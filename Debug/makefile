@@ -11,6 +11,10 @@ RM := rm -rf
 -include xip/subdir.mk
 -include utilities/subdir.mk
 -include startup/subdir.mk
+-include source/utils/subdir.mk
+-include source/system/subdir.mk
+-include source/radio/subdir.mk
+-include source/drivers/subdir.mk
 -include source/subdir.mk
 -include fusion/subdir.mk
 -include freertos/freertos-kernel/portable/MemMang/subdir.mk

@@ -1,1 +1,2 @@
-../source/logging_task.cpp:11:6:void loggingTask(void*)	72	static
+C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/arm-none-eabi/thumb/v7e-m+fp/hard/bits/gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
+../source/logging_task.cpp:11:6:void loggingTask(void*)	88	static

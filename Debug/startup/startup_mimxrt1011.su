@@ -1,3 +1,6 @@
+../startup/startup_mimxrt1011.cpp:384:6:void data_init(unsigned int, unsigned int, unsigned int)	4	static
+../startup/startup_mimxrt1011.cpp:393:6:void bss_init(unsigned int, unsigned int)	0	static
+../startup/startup_mimxrt1011.cpp:418:6:void ResetISR()	0	static
 ../startup/startup_mimxrt1011.cpp:509:14:void NMI_Handler()	0	static
 ../startup/startup_mimxrt1011.cpp:513:14:void HardFault_Handler()	0	static
 ../startup/startup_mimxrt1011.cpp:517:14:void MemManage_Handler()	0	static
@@ -7,9 +10,6 @@
 ../startup/startup_mimxrt1011.cpp:533:14:void DebugMon_Handler()	0	static
 ../startup/startup_mimxrt1011.cpp:537:14:void PendSV_Handler()	0	static
 ../startup/startup_mimxrt1011.cpp:541:14:void SysTick_Handler()	0	static
-../startup/startup_mimxrt1011.cpp:384:6:void data_init(unsigned int, unsigned int, unsigned int)	4	static
-../startup/startup_mimxrt1011.cpp:393:6:void bss_init(unsigned int, unsigned int)	0	static
-../startup/startup_mimxrt1011.cpp:418:6:void ResetISR()	0	static
 ../startup/startup_mimxrt1011.cpp:549:14:void IntDefaultHandler()	0	static
 ../startup/startup_mimxrt1011.cpp:559:11:void DMA0_IRQHandler()	8	static
 ../startup/startup_mimxrt1011.cpp:563:11:void DMA1_IRQHandler()	8	static

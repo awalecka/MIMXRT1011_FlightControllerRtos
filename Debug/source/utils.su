@@ -1,2 +1,2 @@
-../source/utils.cpp:7:7:float mapFloat(float, float, float, float, float)	0	static
-../source/utils.cpp:15:16:short unsigned int mapUshort(short unsigned int, short unsigned int, short unsigned int, short unsigned int, short unsigned int)	0	static
+../source/utils.cpp:7:7:float mapFloat(float, float, float, float, float)	32	static
+../source/utils.cpp:15:16:short unsigned int mapUshort(short unsigned int, short unsigned int, short unsigned int, short unsigned int, short unsigned int)	24	static

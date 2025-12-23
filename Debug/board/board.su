@@ -1,4 +1,10 @@
-../board/board.c:22:10:BOARD_DebugConsoleSrcFreq	8	static
-../board/board.c:41:6:BOARD_InitDebugConsole	8	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\CMSIS/mpu_armv7.h:191:22:ARM_MPU_Enable	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\CMSIS/mpu_armv7.h:204:22:ARM_MPU_Disable	4	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1017:24:CLOCK_GetMux	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1068:24:CLOCK_GetDiv	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_clock.h:1129:24:CLOCK_GetOscFreq	4	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\utilities/fsl_debug_console.h:154:24:DbgConsole_Init	24	static
+../board/board.c:22:10:BOARD_DebugConsoleSrcFreq	24	static
+../board/board.c:41:6:BOARD_InitDebugConsole	16	static
 ../board/board.c:49:6:BOARD_ConfigMPU	32	static
-../board/board.c:160:6:SystemInitHook	0	static
+../board/board.c:160:6:SystemInitHook	4	static

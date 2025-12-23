@@ -32,9 +32,7 @@ component:
 component:
 - type: 'uart_cmsis_common'
 - type_id: 'uart_cmsis_common'
-- global_USART_CMSIS_common:
-  - commonSetting:
-    - USART_RX_BUFFER_LEN: '32'
+- global_USART_CMSIS_common: []
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 
 /* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
@@ -75,7 +73,9 @@ instance:
       - enableHaltOnError: 'true'
       - ERCA: 'fixedPriority'
       - enableDebugMode: 'false'
-    - dma_table: []
+    - dma_table:
+      - 0: []
+      - 1: []
     - edma_channels: []
     - errInterruptConfig:
       - enableErrInterrupt: 'false'
@@ -118,8 +118,23 @@ instance:
     - interrupt_table:
       - 0: []
       - 1: []
-      - 2: []
-    - interrupts: []
+    - interrupts:
+      - 0:
+        - channelId: 'int_0'
+        - interrupt_t:
+          - IRQn: 'DMA4_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'true'
+          - priority: '4'
+          - enable_custom_name: 'false'
+      - 1:
+        - channelId: 'int_1'
+        - interrupt_t:
+          - IRQn: 'DMA5_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'true'
+          - priority: '5'
+          - enable_custom_name: 'false'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 
@@ -135,7 +150,7 @@ static void NVIC_init(void) {
 instance:
 - name: 'LPI2C1_Sensors'
 - type: 'lpi2c_cmsis'
-- mode: 'interrupt'
+- mode: 'edma'
 - custom_name_enabled: 'true'
 - type_id: 'lpi2c_cmsis_2.2.0'
 - functional_group: 'BOARD_InitPeripherals'
@@ -153,10 +168,13 @@ instance:
     - initPinFunctionCustomID: 'LPI2C1_InitPins'
     - enableDeinitPinsFnCustomName: 'false'
     - deinitPinFunctionCustomID: 'LPI2C1_DeinitPins'
-    - interrupt:
-      - IRQn: 'LPI2C1_IRQn'
-      - enable_priority: 'true'
-      - priority: '3'
+    - edma_channel:
+      - uid: '1766284915321'
+      - eDMAn: '4'
+      - eDMA_source: 'kDmaRequestMuxLPI2C1'
+    - edma_channel_tx:
+      - uid: '1766284915324'
+      - eDMAn: '5'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 /* Get clock source frequency */
@@ -165,75 +183,12 @@ uint32_t LPI2C1_GetFreq(void){
 };
 
 static void LPI2C1_Sensors_init(void) {
-  /* Interrupt vector LPI2C1_IRQn priority settings in the NVIC. */
-  NVIC_SetPriority(LPI2C1_SENSORS_IRQN, LPI2C1_SENSORS_IRQ_PRIORITY);
   /* Initialization function */
   LPI2C1_SENSORS_CMSIS_DRIVER.Initialize(i2c_sync_event_callback);
   /* Power control function */
   LPI2C1_SENSORS_CMSIS_DRIVER.PowerControl(ARM_POWER_FULL);
   /* Configuration of the I2C communication speed */
   LPI2C1_SENSORS_CMSIS_DRIVER.Control(ARM_I2C_BUS_SPEED, ARM_I2C_BUS_SPEED_FAST);
-}
-
-/***********************************************************************************************************************
- * LPUART1_Ibus initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'LPUART1_Ibus'
-- type: 'lpuart_cmsis'
-- mode: 'interrupt'
-- custom_name_enabled: 'true'
-- type_id: 'lpuart_cmsis_2.4.0'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'LPUART1'
-- config_sets:
-  - general:
-    - main_config:
-      - operationMode: 'ARM_USART_MODE_ASYNCHRONOUS'
-      - clockSource: 'LpuartClock'
-      - clockSourceFreq: 'ClocksTool_DefaultInit'
-      - power_state: 'ARM_POWER_FULL'
-      - baudRate_Bps: '115200'
-      - dataBits: 'ARM_USART_DATA_BITS_8'
-      - parityBit: 'ARM_USART_PARITY_NONE'
-      - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'false'
-      - enableRXBuffer: 'true'
-      - enableTX: 'false'
-      - signalEventFunctionId: 'NULL'
-      - enableGetFreqFnCustomName: 'false'
-      - getFreqFunctionCustomID: 'LPUART1_GetFreq'
-      - enableInitPinsFnCustomName: 'false'
-      - initPinFunctionCustomID: 'LPUART1_InitPins'
-      - enableDeinitPinsFnCustomName: 'false'
-      - deinitPinFunctionCustomID: 'LPUART1_DeinitPins'
-  - fsl_cmsis_uart:
-    - interrupt:
-      - IRQn: 'LPUART1_IRQn'
-      - enable_priority: 'true'
-      - priority: '6'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-/* Get clock source frequency */
-uint32_t LPUART1_GetFreq(void){
-  return LPUART1_IBUS_CLOCK_SOURCE_FREQ;
-};
-
-static void LPUART1_Ibus_init(void) {
-  /* Interrupt vector LPUART1_IRQn priority settings in the NVIC. */
-  NVIC_SetPriority(LPUART1_IBUS_IRQN, LPUART1_IBUS_IRQ_PRIORITY);
-  /* Initialize CMSIS USART */
-  LPUART1_IBUS_PERIPHERAL.Initialize(NULL);
-  /* Power control of CMSIS USART */
-  LPUART1_IBUS_PERIPHERAL.PowerControl(ARM_POWER_FULL);
-  /* Control of CMSIS USART */
-  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
-  /* Enable or disable receiver. */
-  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
-  /* Enable or disable transmitter. */
-  LPUART1_IBUS_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 0);
 }
 
 /***********************************************************************************************************************
@@ -284,7 +239,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '75'
+              - dutyCyclePercent: '7'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -298,7 +253,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '75'
+              - dutyCyclePercent: '7'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -348,7 +303,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '75'
+              - dutyCyclePercent: '7'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -362,7 +317,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '75'
+              - dutyCyclePercent: '7'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -412,7 +367,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '75'
+              - dutyCyclePercent: '7'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -426,7 +381,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '75'
+              - dutyCyclePercent: '7'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -507,7 +462,7 @@ pwm_config_t PWM1_SM0_config = {
 pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 75U,
+    .dutyCyclePercent = 7U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -515,7 +470,7 @@ pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 75U,
+    .dutyCyclePercent = 7U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -538,7 +493,7 @@ pwm_config_t PWM1_SM2_config = {
 pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 75U,
+    .dutyCyclePercent = 7U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -546,7 +501,7 @@ pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 75U,
+    .dutyCyclePercent = 7U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -569,7 +524,7 @@ pwm_config_t PWM1_SM3_config = {
 pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 75U,
+    .dutyCyclePercent = 7U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -577,7 +532,7 @@ pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 75U,
+    .dutyCyclePercent = 7U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -657,67 +612,6 @@ static void PWM1_init(void) {
 }
 
 /***********************************************************************************************************************
- * LPUART2_Tele initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'LPUART2_Tele'
-- type: 'lpuart_cmsis'
-- mode: 'interrupt'
-- custom_name_enabled: 'true'
-- type_id: 'lpuart_cmsis_2.4.0'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'LPUART4'
-- config_sets:
-  - general:
-    - main_config:
-      - operationMode: 'ARM_USART_MODE_ASYNCHRONOUS'
-      - clockSource: 'LpuartClock'
-      - clockSourceFreq: 'ClocksTool_DefaultInit'
-      - power_state: 'ARM_POWER_FULL'
-      - baudRate_Bps: '115200'
-      - dataBits: 'ARM_USART_DATA_BITS_8'
-      - parityBit: 'ARM_USART_PARITY_NONE'
-      - stopBit: 'ARM_USART_STOP_BITS_1'
-      - enableRX: 'false'
-      - enableRXBuffer: 'false'
-      - enableTX: 'true'
-      - signalEventFunctionId: 'NULL'
-      - enableGetFreqFnCustomName: 'false'
-      - getFreqFunctionCustomID: 'LPUART2_GetFreq'
-      - enableInitPinsFnCustomName: 'false'
-      - initPinFunctionCustomID: 'LPUART2_InitPins'
-      - enableDeinitPinsFnCustomName: 'false'
-      - deinitPinFunctionCustomID: 'LPUART2_DeinitPins'
-  - fsl_cmsis_uart:
-    - interrupt:
-      - IRQn: 'LPUART4_IRQn'
-      - enable_priority: 'true'
-      - priority: '7'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-/* Get clock source frequency */
-uint32_t LPUART4_GetFreq(void){
-  return LPUART2_TELE_CLOCK_SOURCE_FREQ;
-};
-
-static void LPUART2_Tele_init(void) {
-  /* Interrupt vector LPUART4_IRQn priority settings in the NVIC. */
-  NVIC_SetPriority(LPUART2_TELE_IRQN, LPUART2_TELE_IRQ_PRIORITY);
-  /* Initialize CMSIS USART */
-  LPUART2_TELE_PERIPHERAL.Initialize(NULL);
-  /* Power control of CMSIS USART */
-  LPUART2_TELE_PERIPHERAL.PowerControl(ARM_POWER_FULL);
-  /* Control of CMSIS USART */
-  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_MODE_ASYNCHRONOUS | ARM_USART_DATA_BITS_8 | ARM_USART_PARITY_NONE | ARM_USART_STOP_BITS_1, 115200);
-  /* Enable or disable receiver. */
-  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_RX , 0);
-  /* Enable or disable transmitter. */
-  LPUART2_TELE_PERIPHERAL.Control(ARM_USART_CONTROL_TX , 1);
-}
-
-/***********************************************************************************************************************
  * DebugConsole initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -758,6 +652,18 @@ static void DebugConsole_init(void) {
 /***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
+static void BOARD_InitPeripherals_CommonPostInit(void)
+{
+  /* Interrupt vector DMA4_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(INT_0_IRQN, INT_0_IRQ_PRIORITY);
+  /* Interrupt vector DMA5_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(INT_1_IRQN, INT_1_IRQ_PRIORITY);
+  /* Enable interrupt INT_0_IRQN request in the NVIC */
+  EnableIRQ(INT_0_IRQN);
+  /* Enable interrupt INT_1_IRQN request in the NVIC */
+  EnableIRQ(INT_1_IRQN);
+}
+
 void BOARD_InitPeripherals(void)
 {
   /* Global initialization */
@@ -767,9 +673,9 @@ void BOARD_InitPeripherals(void)
   /* Initialize components */
   DMA0_init();
   LPI2C1_Sensors_init();
-  LPUART1_Ibus_init();
   PWM1_init();
-  LPUART2_Tele_init();
+  /* Common post-initialization */
+  BOARD_InitPeripherals_CommonPostInit();
 }
 
 /***********************************************************************************************************************

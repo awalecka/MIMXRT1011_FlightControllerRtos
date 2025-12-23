@@ -1,3 +1,6 @@
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_gpio.h:112:20:void GPIO_PortSet(GPIO_Type*, uint32_t)	16	static
+C:\nxp\workspace\MIMXRT1011_FlightControllerRtos\drivers/fsl_gpio.h:136:20:void GPIO_PortClear(GPIO_Type*, uint32_t)	16	static
+C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/arm-none-eabi/thumb/v7e-m+fp/hard/bits/gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
 ../source/state_tasks.cpp:13:6:void flightTask(void*)	24	static
-../source/state_tasks.cpp:32:6:void idleTask(void*)	16	static
-../source/state_tasks.cpp:53:6:void calibrateTask(void*)	16	static
+../source/state_tasks.cpp:32:6:void idleTask(void*)	24	static
+../source/state_tasks.cpp:53:6:void calibrateTask(void*)	24	static

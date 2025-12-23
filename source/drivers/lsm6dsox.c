@@ -1,14 +1,11 @@
 #include <lsm6dsox.h>
 #include "i2c_sync.h" // Include common I2C synchronization functions
 
-// Global pointer to the handle. This is kept for consistency with the original structure,
-// but its direct use in the callback is replaced by the common global pointer managed
-// by the i2c_sync functions.
+// Global pointer to the handle
 static lsm6dsox_handle_t *g_lsm6dsox_handle = NULL;
 
 // Statically allocated buffer for the semaphore's control block
 static StaticSemaphore_t xLsm6dsoxSemaphoreBuffer;
-
 
 // --- Public API Functions ---
 
@@ -67,7 +64,6 @@ int32_t LSM6DSOX_Init(lsm6dsox_handle_t *handle, ARM_DRIVER_I2C *i2c_driver, uin
     if (i2c_sync_write_byte(&handle->i2c_sync, LSM6DSOX_REG_CTRL3_C, reg_val) != 0) return -1;
 
     // A small delay might be needed here to ensure the sensor finishes booting after soft reset.
-    // For a real-time system with FreeRTOS, use vTaskDelay.
     vTaskDelay(pdMS_TO_TICKS(200)); // Delay for 200ms for sensor boot-up after soft reset
 
     // After soft reset, re-read WHO_AM_I if necessary, or proceed with default configuration.

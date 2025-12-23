@@ -95,7 +95,7 @@ void stateManagerTask(void *pvParameters) {
     }
 
     FlightState_t requested_state;
-    while (1) {
+    while (true) {
         if (xQueueReceive(g_state_change_request_queue, &requested_state, portMAX_DELAY) == pdPASS) {
             if (requested_state == g_flight_state) continue;
 

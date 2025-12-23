@@ -1,5 +1,5 @@
-../source/lis3mdl.c:10:9:LIS3MDL_Init	32	static
-../source/lis3mdl.c:66:9:LIS3MDL_ReadID	16	static
-../source/lis3mdl.c:77:9:LIS3MDL_SetConfig	16	static
-../source/lis3mdl.c:114:9:LIS3MDL_ReadMagnetometerRaw	16	static
-../source/lis3mdl.c:133:9:LIS3MDL_ReadMagnetometer	24	static
+../source/lis3mdl.c:10:9:LIS3MDL_Init	40	static
+../source/lis3mdl.c:66:9:LIS3MDL_ReadID	24	static
+../source/lis3mdl.c:77:9:LIS3MDL_SetConfig	24	static
+../source/lis3mdl.c:114:9:LIS3MDL_ReadMagnetometerRaw	24	static
+../source/lis3mdl.c:133:9:LIS3MDL_ReadMagnetometer	32	static

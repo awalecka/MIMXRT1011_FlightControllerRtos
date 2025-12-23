@@ -1,5 +1,5 @@
 ../source/i2c_sync.c:21:6:i2c_sync_event_callback	24	static
 ../source/i2c_sync.c:50:6:i2c_sync_global_init	8	static
-../source/i2c_sync.c:65:9:i2c_sync_write_byte	32	static
+../source/i2c_sync.c:65:9:i2c_sync_write_byte	40	static
 ../source/i2c_sync.c:125:9:i2c_sync_read_bytes	40	static
-../source/i2c_sync.c:192:9:i2c_sync_read_byte	32	static
+../source/i2c_sync.c:192:9:i2c_sync_read_byte	24	static

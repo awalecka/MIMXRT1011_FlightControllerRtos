@@ -5,6 +5,7 @@
 #include "command_handler.h"
 #include "ibus_handler.hpp"
 #include "flight_controller.h"
+#include "fsl_lpuart.h"
 
 using namespace firmware::drivers;
 using namespace firmware::protocols::ibus;
@@ -38,7 +39,6 @@ extern "C" void LPUART1_IRQHandler(void) {
     // Check for Overrun (Buffer full in hardware FIFO)
     if ((statusFlags & kLPUART_RxOverrunFlag) != 0U) {
         LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_RxOverrunFlag);
-        // Optional: Add error logging here
     }
 
     // Check if DMA Major Loop finished (Circular wrap-around event)

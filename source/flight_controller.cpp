@@ -307,7 +307,7 @@ void FlightController::update() {
     IMU::RawData rawSensorData;
     int sensorStatus = imu.readData(rawSensorData);
 
-    // 3. Determine Control Mode
+    // Determine Control Mode
     uint16_t aux1Value = receiver.getChannel(RC_CH_AUX1);
     if (aux1Value > 1500) {
         currentControlMode = ControlMode::PASS_THROUGH;

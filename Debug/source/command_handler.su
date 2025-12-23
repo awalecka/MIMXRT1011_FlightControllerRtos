@@ -1,3 +1,8 @@
-../source/command_handler.cpp:23:17:void LPUART1_IRQHandler()	16	static
-../source/command_handler.cpp:53:6:void commandHandlerTask(void*)	56	static
-../source/command_handler.cpp:134:1:cpp)	0	static
+C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/arm-none-eabi/thumb/v7e-m+fp/hard/bits/gthr-default.h:229:1:int __gthread_key_delete(__gthread_key_t)	16	static
+C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/bits/stl_algobase.h:233:5:constexpr const _Tp& std::min(const _Tp&, const _Tp&) [with _Tp = unsigned int]	16	static
+../source/command_handler.cpp:24:17:void LPUART1_IRQHandler()	16	static
+../source/command_handler.cpp:53:6:void commandHandlerTask(void*)	16	static
+../source/command_handler.cpp:65:13:void processReceivedData()	80	static
+C:/nxp/MCUXpressoIDE_11.10.0_3148/ide/plugins/com.nxp.mcuxpresso.tools.win32_11.10.0.202311280810/tools/arm-none-eabi/include/c++/13.2.1/array:208:7:constexpr const std::array<_Tp, _Nm>::value_type& std::array<_Tp, _Nm>::operator[](size_type) const [with _Tp = short unsigned int; unsigned int _Nm = 14]	16	static
+../source/command_handler.cpp:134:1:void __static_initialization_and_destruction_0()	8	static
+../source/command_handler.cpp:134:1:cpp)	8	static

@@ -13,7 +13,6 @@
 #include "fsl_dmamux.h"
 #include "fsl_common.h"
 #include "fsl_lpi2c_cmsis.h"
-#include "fsl_lpuart_cmsis.h"
 #include "fsl_pwm.h"
 
 #if defined(__cplusplus)
@@ -28,23 +27,23 @@ extern "C" {
 #define DMA0_DMA_BASEADDR DMA0
 /* Associated DMAMUX device that is used for muxing of requests. */
 #define DMA0_DMAMUX_BASEADDR DMAMUX
+/* NVIC interrupt vector ID (number). */
+#define INT_0_IRQN DMA4_IRQn
+/* NVIC interrupt vector priority. */
+#define INT_0_IRQ_PRIORITY 4
+/* NVIC interrupt handler identifier. */
+#define INT_0_IRQHANDLER DMA4_IRQHandler
+/* NVIC interrupt vector ID (number). */
+#define INT_1_IRQN DMA5_IRQn
+/* NVIC interrupt vector priority. */
+#define INT_1_IRQ_PRIORITY 5
+/* NVIC interrupt handler identifier. */
+#define INT_1_IRQHANDLER DMA5_IRQHandler
 /* LPI2C1 defines */
 /* Definition of peripheral driver */
 #define LPI2C1_SENSORS_CMSIS_DRIVER Driver_I2C1
 /* Definition of the clock source frequency */
 #define LPI2C1_SENSORS_CLOCK_SOURCE_FREQ 60000000UL
-/* LPI2C1_Sensors interrupt vector ID (number). */
-#define LPI2C1_SENSORS_IRQN LPI2C1_IRQn
-/* LPI2C1_Sensors interrupt vector priority. */
-#define LPI2C1_SENSORS_IRQ_PRIORITY 3
-/* Definition of peripheral ID */
-#define LPUART1_IBUS_PERIPHERAL Driver_USART1
-/* Definition of the clock source frequency */
-#define LPUART1_IBUS_CLOCK_SOURCE_FREQ 80000000UL
-/* LPUART1_Ibus interrupt vector ID (number). */
-#define LPUART1_IBUS_IRQN LPUART1_IRQn
-/* LPUART1_Ibus interrupt vector priority. */
-#define LPUART1_IBUS_IRQ_PRIORITY 6
 /* Definition of peripheral ID */
 #define PWM1_PERIPHERAL PWM1
 /* Definition of submodule 0 ID */
@@ -97,14 +96,6 @@ extern "C" {
 #define PWM1_F0_FAULT2 kPWM_Fault_2
 /* Definition of fault Fault3 ID */
 #define PWM1_F0_FAULT3 kPWM_Fault_3
-/* Definition of peripheral ID */
-#define LPUART2_TELE_PERIPHERAL Driver_USART4
-/* Definition of the clock source frequency */
-#define LPUART2_TELE_CLOCK_SOURCE_FREQ 80000000UL
-/* LPUART2_Tele interrupt vector ID (number). */
-#define LPUART2_TELE_IRQN LPUART4_IRQn
-/* LPUART2_Tele interrupt vector priority. */
-#define LPUART2_TELE_IRQ_PRIORITY 7
 /* Debug console is initialized in the peripheral tool */
 #define BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL 
 
@@ -134,10 +125,6 @@ extern const pwm_fault_param_t PWM1_Fault3_fault_config;
 extern void i2c_sync_event_callback(uint32_t event);
 /* Get clock source frequency function for component LPI2C1_Sensors */
 uint32_t LPI2C1_GetFreq(void);
-/* Get clock source frequency function for component LPUART1_Ibus */
-uint32_t LPUART1_GetFreq(void);
-/* Get clock source frequency function for component LPUART2_Tele */
-uint32_t LPUART4_GetFreq(void);
 
 /***********************************************************************************************************************
  * Initialization functions

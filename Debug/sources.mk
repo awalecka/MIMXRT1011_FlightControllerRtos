@@ -56,7 +56,11 @@ freertos/freertos-kernel \
 freertos/freertos-kernel/portable/GCC/ARM_CM4F \
 freertos/freertos-kernel/portable/MemMang \
 fusion \
+source/drivers \
 source \
+source/radio \
+source/system \
+source/utils \
 startup \
 utilities \
 xip \
