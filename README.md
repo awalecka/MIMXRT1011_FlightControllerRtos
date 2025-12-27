@@ -84,6 +84,54 @@ stateDiagram-v2
     
     FAILSAFE --> [*]
 ```
+The controller has the following architecture:
+
+```mermaid
+graph TD
+    %% Styling
+    classDef hardware fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef software fill:#e1f5fe,stroke:#333,stroke-width:2px;
+    classDef logic fill:#fff9c4,stroke:#333,stroke-width:2px;
+
+    subgraph "External Hardware"
+        Pilot("RC Receiver<br>(FlySky/FrSky)"):::hardware
+        Sensors("Sensors<br>(LSM6DSOX / LIS3MDL)"):::hardware
+        Motors("ESCs / Servos"):::hardware
+    end
+
+    subgraph "Flight Controller Firmware"
+        direction TB
+        
+        %% Input Processing
+        RC_Driver("Receiver Class<br>(ibus_handler)"):::software
+        IMU_Driver("IMU Class<br>(readData)"):::software
+        
+        %% Logic
+        subgraph "Control Loop (100 Hz)"
+            Fusion("Fusion AHRS<br>(Attitude Est)"):::logic
+            Attitude("Attitude Controller<br>(Cascaded PIDs)"):::logic
+            Mixer("Mixer<br>(Stabilization)"):::logic
+        end
+        
+        Actuators("Actuators Class<br>(PWM Gen)"):::software
+    end
+
+    %% Connections
+    Pilot ==>|UART/IBUS| RC_Driver
+    Sensors ==>|I2C| IMU_Driver
+    
+    RC_Driver -->|Setpoint| Attitude
+    IMU_Driver -->|Raw Accel/Gyro| Fusion
+    IMU_Driver -->|Gyro Rates| Attitude
+    
+    Fusion -->|Euler Angles| Attitude
+    Attitude -->|PID Output| Mixer
+    
+    Mixer -->|Surface Cmds| Actuators
+    RC_Driver -->|Throttle| Actuators
+    
+    Actuators ==>|PWM| Motors
+```
 
 ### State Machine
 1.  **BOOT**: Hardware initialization and sensor self-checks.
