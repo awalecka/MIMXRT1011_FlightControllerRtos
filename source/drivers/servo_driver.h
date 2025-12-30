@@ -33,8 +33,8 @@ public:
      */
     static constexpr uint32_t PWM_FREQUENCY_HZ = 50U;
     static constexpr uint32_t PERIOD_US = 1000000U / PWM_FREQUENCY_HZ;
-    static constexpr uint16_t MIN_PULSE_US = 1000U;
-    static constexpr uint16_t MAX_PULSE_US = 2000U;
+    static constexpr uint16_t MIN_PULSE_US = 500;
+    static constexpr uint16_t MAX_PULSE_US = 2500;
     static constexpr uint16_t CENTER_PULSE_US = 1500U;
 
     /**

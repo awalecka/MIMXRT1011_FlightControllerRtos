@@ -4,7 +4,7 @@
  */
 
 #include "servo_driver.h"
-#include "utils.h" // For mapFloat
+#include "utils.h" // For mapFloat, mapUshort
 #include <algorithm> // For std::clamp
 
 namespace firmware::drivers {
@@ -29,11 +29,9 @@ void ServoDriver::setNormalizedOutput(size_t servoIndex, float value) {
     // Clamp input for safety
     float clampedValue = std::clamp(value, -1.0f, 1.0f);
 
-    // Map -1.0...1.0 to 1000...2000
-    // Using mapFloat from utils.h
-    float usFloat = mapFloat(clampedValue, -1.0f, 1.0f,
-                             static_cast<float>(MIN_PULSE_US),
-                             static_cast<float>(MAX_PULSE_US));
+    // Map -1.0...1.0 to standard RC range 1000...2000
+    // setPulseWidthUs will then map this to the physical range MIN_PULSE_US...MAX_PULSE_US
+    float usFloat = mapFloat(clampedValue, -1.0f, 1.0f, 1000.0f, 2000.0f);
 
     setPulseWidthUs(servoIndex, static_cast<uint16_t>(usFloat));
 }
@@ -43,8 +41,11 @@ void ServoDriver::setPulseWidthUs(size_t servoIndex, uint16_t pulseWidthUs) {
         return;
     }
 
+    // Map standard RC input (1000-2000) to the driver's configured physical range (500-2500)
+    uint16_t mappedWidth = mapUshort(pulseWidthUs, 1000, 2000, MIN_PULSE_US, MAX_PULSE_US);
+
     const auto& cfg = m_config[servoIndex];
-    writeHardwareRegister(cfg, pulseWidthUs);
+    writeHardwareRegister(cfg, mappedWidth);
 }
 
 void ServoDriver::disableServo(size_t servoIndex) {
