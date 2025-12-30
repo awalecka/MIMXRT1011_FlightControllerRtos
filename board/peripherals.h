@@ -14,6 +14,8 @@
 #include "fsl_common.h"
 #include "fsl_lpi2c_cmsis.h"
 #include "fsl_pwm.h"
+#include "fsl_lpuart.h"
+#include "fsl_clock.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -96,6 +98,10 @@ extern "C" {
 #define PWM1_F0_FAULT2 kPWM_Fault_2
 /* Definition of fault Fault3 ID */
 #define PWM1_F0_FAULT3 kPWM_Fault_3
+/* Definition of peripheral ID */
+#define LPUART3_TELE_PERIPHERAL LPUART3
+/* Definition of the clock source frequency */
+#define LPUART3_TELE_CLOCK_SOURCE 80000000UL
 /* Debug console is initialized in the peripheral tool */
 #define BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL 
 
@@ -117,6 +123,7 @@ extern const pwm_fault_param_t PWM1_Fault0_fault_config;
 extern const pwm_fault_param_t PWM1_Fault1_fault_config;
 extern const pwm_fault_param_t PWM1_Fault2_fault_config;
 extern const pwm_fault_param_t PWM1_Fault3_fault_config;
+extern const lpuart_config_t LPUART3_TELE_config;
 
 /***********************************************************************************************************************
  * Global functions

@@ -612,6 +612,67 @@ static void PWM1_init(void) {
 }
 
 /***********************************************************************************************************************
+ * LPUART3_TELE initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'LPUART3_TELE'
+- type: 'lpuart'
+- mode: 'polling'
+- custom_name_enabled: 'true'
+- type_id: 'lpuart_2.8.1'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'LPUART3'
+- config_sets:
+  - lpuartConfig_t:
+    - lpuartConfig:
+      - clockSource: 'LpuartClock'
+      - lpuartSrcClkFreq: 'ClocksTool_DefaultInit'
+      - baudRate_Bps: '57600'
+      - parityMode: 'kLPUART_ParityDisabled'
+      - dataBitsCount: 'kLPUART_EightDataBits'
+      - isMsb: 'false'
+      - stopBitCount: 'kLPUART_OneStopBit'
+      - enableMatchAddress1: 'false'
+      - matchAddress1: '0'
+      - enableMatchAddress2: 'false'
+      - matchAddress2: '0'
+      - txFifoWatermark: '0'
+      - rxFifoWatermark: '1'
+      - enableRxRTS: 'false'
+      - enableTxCTS: 'false'
+      - txCtsSource: 'kLPUART_CtsSourcePin'
+      - txCtsConfig: 'kLPUART_CtsSampleAtStart'
+      - rxIdleType: 'kLPUART_IdleTypeStartBit'
+      - rxIdleConfig: 'kLPUART_IdleCharacter1'
+      - enableTx: 'true'
+      - enableRx: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const lpuart_config_t LPUART3_TELE_config = {
+  .baudRate_Bps = 57600UL,
+  .parityMode = kLPUART_ParityDisabled,
+  .dataBitsCount = kLPUART_EightDataBits,
+  .isMsb = false,
+  .stopBitCount = kLPUART_OneStopBit,
+  .txFifoWatermark = 0U,
+  .rxFifoWatermark = 1U,
+  .enableRxRTS = false,
+  .enableTxCTS = false,
+  .txCtsSource = kLPUART_CtsSourcePin,
+  .txCtsConfig = kLPUART_CtsSampleAtStart,
+  .rxIdleType = kLPUART_IdleTypeStartBit,
+  .rxIdleConfig = kLPUART_IdleCharacter1,
+  .enableTx = true,
+  .enableRx = false
+};
+
+static void LPUART3_TELE_init(void) {
+  LPUART_Init(LPUART3_TELE_PERIPHERAL, &LPUART3_TELE_config, LPUART3_TELE_CLOCK_SOURCE);
+}
+
+/***********************************************************************************************************************
  * DebugConsole initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -674,6 +735,7 @@ void BOARD_InitPeripherals(void)
   DMA0_init();
   LPI2C1_Sensors_init();
   PWM1_init();
+  LPUART3_TELE_init();
   /* Common post-initialization */
   BOARD_InitPeripherals_CommonPostInit();
 }

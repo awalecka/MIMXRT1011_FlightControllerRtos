@@ -113,11 +113,11 @@ int main(void) {
 
 static void initCustomConfig()
 {
-    // 1. GLOBAL INIT REMOVED:
-    //    DMAMUX_Init, EDMA_Init, and EDMA_CreateHandle are removed.
-    //    The Controller is already initialized by BOARD_InitBootPeripherals (via MEX).
+    // GLOBAL INIT REMOVED:
+    // DMAMUX_Init, EDMA_Init, and EDMA_CreateHandle are removed.
+    // The Controller is already initialized by BOARD_InitBootPeripherals (via MEX).
 
-    // 2. LPUART Initialization (Kept because we disabled it in MEX):
+    // LPUART Initialization (disabled in MEX):
     lpuart_config_t lpuartConfig;
     LPUART_GetDefaultConfig(&lpuartConfig);
     lpuartConfig.baudRate_Bps = 115200;
@@ -125,21 +125,20 @@ static void initCustomConfig()
     lpuartConfig.enableRx = true;
     lpuartConfig.rxFifoWatermark = 0; // DMA request on every byte
 
-    // We must manually init the clock if we disabled the component in MEX,
+    // Manually init the clock if we disabled the component in MEX,
     // or ensure BOARD_BootClockRUN configures it.
-    // (The MEX Clocks tool [cite: 164] shows UART_CLK_ROOT is active at 80MHz, so this is safe).
     LPUART_Init(IBUS_LPUART_INSTANCE, &lpuartConfig, BOARD_BOOTCLOCKRUN_UART_CLK_ROOT);
 
-    // 3. Re-create the EDMA Handle for the IBUS Channel (0)
-    //    We need s_edmaHandle valid for our local usage, even if EDMA is globally init.
+    // Re-create the EDMA Handle for the IBUS Channel (0)
+    // Need s_edmaHandle valid for our local usage, even if EDMA is globally init.
     EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
 
-    // 4. Configure DMAMUX for Channel 0 (IBUS)
-    //    (DMAMUX global init is done by BOARD_Init, but we must set the source for Ch0)
+    // Configure DMAMUX for Channel 0 (IBUS)
+    // (DMAMUX global init is done by BOARD_Init, but we must set the source for Ch0)
     DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
     DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
 
-    // 5. Configure TCD for Circular Buffer (Existing Logic)
+    // Configure TCD for Circular Buffer
     edma_transfer_config_t transferConfig;
     EDMA_PrepareTransfer(&transferConfig,
                          (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE),
@@ -158,7 +157,7 @@ static void initCustomConfig()
 
     EDMA_StartTransfer(&s_edmaHandle);
 
-    // 6. Enable LPUART specific features
+    // Enable LPUART specific features
     LPUART_EnableInterrupts(IBUS_LPUART_INSTANCE, kLPUART_IdleLineInterruptEnable);
     NVIC_SetPriority(IBUS_LPUART_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
     NVIC_EnableIRQ(IBUS_LPUART_IRQn);

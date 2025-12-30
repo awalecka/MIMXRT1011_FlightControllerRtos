@@ -6,6 +6,7 @@
 #include "ibus_handler.hpp"
 #include "flight_controller.h"
 #include "fsl_lpuart.h"
+#include <cstdint> // Required for uintptr_t
 
 using namespace firmware::drivers;
 using namespace firmware::protocols::ibus;
@@ -42,9 +43,6 @@ extern "C" void LPUART1_IRQHandler(void) {
     }
 
     // Check if DMA Major Loop finished (Circular wrap-around event)
-    // In some configs, we might want to manually re-trigger here if not using Scatter-Gather
-    // But we are relying on DLAST_SGA wrapping.
-
     __DSB();
 }
 
@@ -63,19 +61,22 @@ void commandHandlerTask(void* pvParameters) {
 }
 
 static void processReceivedData(void) {
-    // Robust Index Calculation:
-    // Read the current Destination Address directly from hardware TCD.
-    uint32_t dmaAddr = (uint32_t)IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR;
-    uint32_t baseAddr = (uint32_t)g_dmaRxBuffer;
+    // Robust Index Calculation (AV Rule 96 Compliance):
+    // We strictly avoid pointer arithmetic (ptrA - ptrB) to calculate the index.
+    // Instead, we cast addresses to `uintptr_t` and perform integer arithmetic.
 
-    // Calculate index based on pointer offset
-    size_t writeIndex = (dmaAddr - baseAddr) % IBUS_DMA_BUFFER_SIZE;
+    // DADDR is a uint32_t register value, so we use static_cast (integer to integer)
+    uintptr_t dmaAddr = static_cast<uintptr_t>(IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR);
 
-    // If s_readIndex == writeIndex, the buffer is EMPTY (or we processed everything).
-    // Because we increased buffer size to 128, the "Full Wrap" collision is highly unlikely.
+    // g_dmaRxBuffer is a pointer, so we use reinterpret_cast (pointer to integer)
+    uintptr_t baseAddr = reinterpret_cast<uintptr_t>(g_dmaRxBuffer);
+
+    // Calculate index based on integer offset
+    size_t writeIndex = (static_cast<size_t>(dmaAddr - baseAddr)) % IBUS_DMA_BUFFER_SIZE;
 
     while (s_readIndex != writeIndex) {
 
+        // Array Access via Subscript (Compliant with AV Rule 96)
         uint8_t byte = g_dmaRxBuffer[s_readIndex];
 
         // --- Protocol State Machine ---

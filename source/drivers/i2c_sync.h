@@ -1,6 +1,10 @@
 #ifndef I2C_SYNC_H
 #define I2C_SYNC_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include "Driver_I2C.h"
 #include "FreeRTOS.h"
@@ -61,5 +65,9 @@ int32_t i2c_sync_read_bytes(i2c_sync_handle_t *handle, uint8_t reg_addr, uint8_t
  * @return 0 on success, -1 on I2C error or timeout.
  */
 int32_t i2c_sync_read_byte(i2c_sync_handle_t *handle, uint8_t reg_addr, uint8_t *data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // I2C_SYNC_H
