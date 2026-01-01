@@ -91,25 +91,6 @@ struct ActuatorOutput {
     float rudder;
 };
 
-// --- Globals ---
-extern volatile FlightState_t g_flight_state;
-extern lsm6dsox_handle_t g_sensor_handle;
-extern lis3mdl_handle_t g_mag_handle;
-
-extern TaskHandle_t g_state_manager_task_handle;
-extern TaskHandle_t g_command_handler_task_handle;
-extern TaskHandle_t g_idle_task_handle;
-extern TaskHandle_t g_flight_task_handle;
-extern TaskHandle_t g_calibrate_task_handle;
-extern TaskHandle_t g_logging_task_handle;
-extern TaskHandle_t g_heartbeat_task_handle;
-
-extern QueueHandle_t g_sensor_data_queue;
-extern QueueHandle_t g_controls_data_queue;
-extern QueueHandle_t g_command_data_queue;
-extern QueueHandle_t g_state_change_request_queue;
-
-extern volatile TickType_t g_heartbeat_frequency;
 
 // --- Task Prototypes ---
 void stateManagerTask(void *pvParameters);
@@ -264,6 +245,26 @@ private:
     ControlMode currentControlMode;
 };
 
+// --- Globals ---
+extern lsm6dsox_handle_t g_sensor_handle;
+extern lis3mdl_handle_t g_mag_handle;
+
+extern TaskHandle_t g_state_manager_task_handle;
+extern TaskHandle_t g_command_handler_task_handle;
+extern TaskHandle_t g_idle_task_handle;
+extern TaskHandle_t g_flight_task_handle;
+extern TaskHandle_t g_calibrate_task_handle;
+extern TaskHandle_t g_logging_task_handle;
+extern TaskHandle_t g_heartbeat_task_handle;
+
+extern QueueHandle_t g_sensor_data_queue;
+extern QueueHandle_t g_controls_data_queue;
+extern QueueHandle_t g_command_data_queue;
+extern QueueHandle_t g_state_change_request_queue;
+
+extern volatile TickType_t g_heartbeat_frequency;
+
+extern volatile FlightState_t g_flight_state;
 extern FlightController g_flightController;
 
 #endif // FLIGHT_CONTROLLER_H

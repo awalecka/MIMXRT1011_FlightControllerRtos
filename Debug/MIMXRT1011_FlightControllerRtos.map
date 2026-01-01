@@ -15935,51 +15935,51 @@ NonCacheable    0x20004ea8       0xa4
 OUTPUT(MIMXRT1011_FlightControllerRtos.axf elf32-littlearm)
 LOAD linker stubs
 
-.debug_info     0x00000000   0x10ea6e
+.debug_info     0x00000000   0x10ea57
  .debug_info    0x00000000      0x86a ./xip/evkmimxrt1010_flexspi_nor_config.o
  .debug_info    0x0000086a      0x4b3 ./xip/fsl_flexspi_nor_boot.o
  .debug_info    0x00000d1d      0x1ad ./utilities/fsl_assert.o
  .debug_info    0x00000eca      0xc4d ./startup/startup_mimxrt1011.o
  .debug_info    0x00001b17       0x3c ./source/utils/semihost_hardfault.o
  .debug_info    0x00001b53      0x154 ./source/utils/utils.o
- .debug_info    0x00001ca7     0x7194 ./source/system/heartbeat_task.o
- .debug_info    0x00008e3b    0x1a5c8 ./source/system/logging_task.o
- .debug_info    0x00023403    0x1b8f4 ./source/system/state_manager.o
- .debug_info    0x0003ecf7    0x1a8bd ./source/system/state_tasks.o
- .debug_info    0x000595b4    0x1aff3 ./source/radio/command_handler.o
- .debug_info    0x000745a7     0x2ec2 ./source/radio/ibus_handler.o
- .debug_info    0x00077469      0xb7e ./source/drivers/i2c_sync.o
- .debug_info    0x00077fe7      0xcfa ./source/drivers/lis3mdl.o
- .debug_info    0x00078ce1     0x11ba ./source/drivers/lsm6dsox.o
- .debug_info    0x00079e9b     0x2d4a ./source/drivers/servo_driver.o
- .debug_info    0x0007cbe5    0x319b1 ./source/flight_controller.o
- .debug_info    0x000ae596    0x1b6a3 ./source/main.o
- .debug_info    0x000c9c39     0x1d5a ./fusion/FusionAhrs.o
- .debug_info    0x000cb993      0x468 ./freertos/freertos-kernel/portable/MemMang/heap_1.o
- .debug_info    0x000cbdfb      0x6cb ./freertos/freertos-kernel/portable/GCC/ARM_CM4F/port.o
- .debug_info    0x000cc4c6      0x2e4 ./freertos/freertos-kernel/list.o
- .debug_info    0x000cc7aa     0x372e ./freertos/freertos-kernel/queue.o
- .debug_info    0x000cfed8     0x4665 ./freertos/freertos-kernel/tasks.o
- .debug_info    0x000d453d     0x21c6 ./freertos/freertos-kernel/timers.o
- .debug_info    0x000d6703     0x51da ./drivers/fsl_clock.o
- .debug_info    0x000db8dd      0xa33 ./drivers/fsl_dmamux.o
- .debug_info    0x000dc310     0x54a2 ./drivers/fsl_edma.o
- .debug_info    0x000e17b2     0x1cf9 ./drivers/fsl_flexio.o
- .debug_info    0x000e34ab     0x108a ./drivers/fsl_gpio.o
- .debug_info    0x000e4535     0x5c09 ./drivers/fsl_lpi2c.o
- .debug_info    0x000ea13e     0x238d ./drivers/fsl_lpi2c_cmsis.o
- .debug_info    0x000ec4cb     0x248a ./drivers/fsl_lpi2c_edma.o
- .debug_info    0x000ee955     0x5fa5 ./drivers/fsl_lpspi.o
- .debug_info    0x000f48fa     0x4f6d ./drivers/fsl_lpuart.o
- .debug_info    0x000f9867     0x32f7 ./drivers/fsl_pwm.o
- .debug_info    0x000fcb5e     0x1277 ./drivers/fsl_xbara.o
- .debug_info    0x000fddd5      0xc12 ./device/system_MIMXRT1011.o
- .debug_info    0x000fe9e7     0x1461 ./board/board.o
- .debug_info    0x000ffe48     0x5a05 ./board/clock_config.o
- .debug_info    0x0010584d     0x28ed ./board/peripherals.o
- .debug_info    0x0010813a     0x1f36 ./board/pin_mux.o
- .debug_info    0x0010a070     0x2c6c ./CMSIS/DSP/Source/FastMathFunctions/FastMathFunctions.o
- .debug_info    0x0010ccdc     0x1d92 ./CMSIS/DSP/Source/CommonTables/CommonTables.o
+ .debug_info    0x00001ca7     0x7195 ./source/system/heartbeat_task.o
+ .debug_info    0x00008e3c    0x1a5bd ./source/system/logging_task.o
+ .debug_info    0x000233f9    0x1b8f0 ./source/system/state_manager.o
+ .debug_info    0x0003ece9    0x1a8b3 ./source/system/state_tasks.o
+ .debug_info    0x0005959c    0x1aff4 ./source/radio/command_handler.o
+ .debug_info    0x00074590     0x2ec2 ./source/radio/ibus_handler.o
+ .debug_info    0x00077452      0xb7e ./source/drivers/i2c_sync.o
+ .debug_info    0x00077fd0      0xcfa ./source/drivers/lis3mdl.o
+ .debug_info    0x00078cca     0x11ba ./source/drivers/lsm6dsox.o
+ .debug_info    0x00079e84     0x2d4a ./source/drivers/servo_driver.o
+ .debug_info    0x0007cbce    0x319a9 ./source/flight_controller.o
+ .debug_info    0x000ae577    0x1b6ab ./source/main.o
+ .debug_info    0x000c9c22     0x1d5a ./fusion/FusionAhrs.o
+ .debug_info    0x000cb97c      0x468 ./freertos/freertos-kernel/portable/MemMang/heap_1.o
+ .debug_info    0x000cbde4      0x6cb ./freertos/freertos-kernel/portable/GCC/ARM_CM4F/port.o
+ .debug_info    0x000cc4af      0x2e4 ./freertos/freertos-kernel/list.o
+ .debug_info    0x000cc793     0x372e ./freertos/freertos-kernel/queue.o
+ .debug_info    0x000cfec1     0x4665 ./freertos/freertos-kernel/tasks.o
+ .debug_info    0x000d4526     0x21c6 ./freertos/freertos-kernel/timers.o
+ .debug_info    0x000d66ec     0x51da ./drivers/fsl_clock.o
+ .debug_info    0x000db8c6      0xa33 ./drivers/fsl_dmamux.o
+ .debug_info    0x000dc2f9     0x54a2 ./drivers/fsl_edma.o
+ .debug_info    0x000e179b     0x1cf9 ./drivers/fsl_flexio.o
+ .debug_info    0x000e3494     0x108a ./drivers/fsl_gpio.o
+ .debug_info    0x000e451e     0x5c09 ./drivers/fsl_lpi2c.o
+ .debug_info    0x000ea127     0x238d ./drivers/fsl_lpi2c_cmsis.o
+ .debug_info    0x000ec4b4     0x248a ./drivers/fsl_lpi2c_edma.o
+ .debug_info    0x000ee93e     0x5fa5 ./drivers/fsl_lpspi.o
+ .debug_info    0x000f48e3     0x4f6d ./drivers/fsl_lpuart.o
+ .debug_info    0x000f9850     0x32f7 ./drivers/fsl_pwm.o
+ .debug_info    0x000fcb47     0x1277 ./drivers/fsl_xbara.o
+ .debug_info    0x000fddbe      0xc12 ./device/system_MIMXRT1011.o
+ .debug_info    0x000fe9d0     0x1461 ./board/board.o
+ .debug_info    0x000ffe31     0x5a05 ./board/clock_config.o
+ .debug_info    0x00105836     0x28ed ./board/peripherals.o
+ .debug_info    0x00108123     0x1f36 ./board/pin_mux.o
+ .debug_info    0x0010a059     0x2c6c ./CMSIS/DSP/Source/FastMathFunctions/FastMathFunctions.o
+ .debug_info    0x0010ccc5     0x1d92 ./CMSIS/DSP/Source/CommonTables/CommonTables.o
 
 .debug_abbrev   0x00000000     0xd739
  .debug_abbrev  0x00000000      0x10a ./xip/evkmimxrt1010_flexspi_nor_config.o
@@ -15989,17 +15989,17 @@ LOAD linker stubs
  .debug_abbrev  0x00000454       0x31 ./source/utils/semihost_hardfault.o
  .debug_abbrev  0x00000485       0x95 ./source/utils/utils.o
  .debug_abbrev  0x0000051a      0x666 ./source/system/heartbeat_task.o
- .debug_abbrev  0x00000b80      0xbd2 ./source/system/logging_task.o
- .debug_abbrev  0x00001752      0xc48 ./source/system/state_manager.o
- .debug_abbrev  0x0000239a      0xc7d ./source/system/state_tasks.o
- .debug_abbrev  0x00003017      0xd8b ./source/radio/command_handler.o
- .debug_abbrev  0x00003da2      0x814 ./source/radio/ibus_handler.o
- .debug_abbrev  0x000045b6      0x2db ./source/drivers/i2c_sync.o
- .debug_abbrev  0x00004891      0x324 ./source/drivers/lis3mdl.o
- .debug_abbrev  0x00004bb5      0x383 ./source/drivers/lsm6dsox.o
- .debug_abbrev  0x00004f38      0x877 ./source/drivers/servo_driver.o
- .debug_abbrev  0x000057af     0x10f1 ./source/flight_controller.o
- .debug_abbrev  0x000068a0      0xca5 ./source/main.o
+ .debug_abbrev  0x00000b80      0xbbe ./source/system/logging_task.o
+ .debug_abbrev  0x0000173e      0xc48 ./source/system/state_manager.o
+ .debug_abbrev  0x00002386      0xc69 ./source/system/state_tasks.o
+ .debug_abbrev  0x00002fef      0xd9f ./source/radio/command_handler.o
+ .debug_abbrev  0x00003d8e      0x814 ./source/radio/ibus_handler.o
+ .debug_abbrev  0x000045a2      0x2db ./source/drivers/i2c_sync.o
+ .debug_abbrev  0x0000487d      0x324 ./source/drivers/lis3mdl.o
+ .debug_abbrev  0x00004ba1      0x383 ./source/drivers/lsm6dsox.o
+ .debug_abbrev  0x00004f24      0x877 ./source/drivers/servo_driver.o
+ .debug_abbrev  0x0000579b     0x10f1 ./source/flight_controller.o
+ .debug_abbrev  0x0000688c      0xcb9 ./source/main.o
  .debug_abbrev  0x00007545      0x405 ./fusion/FusionAhrs.o
  .debug_abbrev  0x0000794a      0x1bb ./freertos/freertos-kernel/portable/MemMang/heap_1.o
  .debug_abbrev  0x00007b05      0x29d ./freertos/freertos-kernel/portable/GCC/ARM_CM4F/port.o
@@ -16406,7 +16406,7 @@ LOAD linker stubs
  .debug_macro   0x00031e5b       0x1c ./CMSIS/DSP/Source/FastMathFunctions/FastMathFunctions.o
  .debug_macro   0x00031e77      0x21f ./CMSIS/DSP/Source/CommonTables/CommonTables.o
 
-.debug_line     0x00000000    0x4a373
+.debug_line     0x00000000    0x4a372
  .debug_line    0x00000000      0x569 ./xip/evkmimxrt1010_flexspi_nor_config.o
  .debug_line    0x00000569      0x5b3 ./xip/fsl_flexspi_nor_boot.o
  .debug_line    0x00000b1c      0x661 ./utilities/fsl_assert.o
@@ -16423,34 +16423,34 @@ LOAD linker stubs
  .debug_line    0x00011c6e      0x7e9 ./source/drivers/lis3mdl.o
  .debug_line    0x00012457      0x9f1 ./source/drivers/lsm6dsox.o
  .debug_line    0x00012e48     0x121f ./source/drivers/servo_driver.o
- .debug_line    0x00014067     0x4f0a ./source/flight_controller.o
- .debug_line    0x00018f71     0x2e74 ./source/main.o
- .debug_line    0x0001bde5     0x15b3 ./fusion/FusionAhrs.o
- .debug_line    0x0001d398      0x621 ./freertos/freertos-kernel/portable/MemMang/heap_1.o
- .debug_line    0x0001d9b9      0xae2 ./freertos/freertos-kernel/portable/GCC/ARM_CM4F/port.o
- .debug_line    0x0001e49b      0x6d6 ./freertos/freertos-kernel/list.o
- .debug_line    0x0001eb71     0x34d9 ./freertos/freertos-kernel/queue.o
- .debug_line    0x0002204a     0x4108 ./freertos/freertos-kernel/tasks.o
- .debug_line    0x00026152     0x15c1 ./freertos/freertos-kernel/timers.o
- .debug_line    0x00027713     0x3ab2 ./drivers/fsl_clock.o
- .debug_line    0x0002b1c5      0x66a ./drivers/fsl_dmamux.o
- .debug_line    0x0002b82f     0x4252 ./drivers/fsl_edma.o
- .debug_line    0x0002fa81      0xc9b ./drivers/fsl_flexio.o
- .debug_line    0x0003071c      0x958 ./drivers/fsl_gpio.o
- .debug_line    0x00031074     0x466c ./drivers/fsl_lpi2c.o
- .debug_line    0x000356e0      0xbac ./drivers/fsl_lpi2c_cmsis.o
- .debug_line    0x0003628c      0xef0 ./drivers/fsl_lpi2c_edma.o
- .debug_line    0x0003717c     0x458d ./drivers/fsl_lpspi.o
- .debug_line    0x0003b709     0x310d ./drivers/fsl_lpuart.o
- .debug_line    0x0003e816     0x2734 ./drivers/fsl_pwm.o
- .debug_line    0x00040f4a      0x7d0 ./drivers/fsl_xbara.o
- .debug_line    0x0004171a      0x651 ./device/system_MIMXRT1011.o
- .debug_line    0x00041d6b      0xc75 ./board/board.o
- .debug_line    0x000429e0     0x265e ./board/clock_config.o
- .debug_line    0x0004503e      0x87d ./board/peripherals.o
- .debug_line    0x000458bb      0xa89 ./board/pin_mux.o
- .debug_line    0x00046344     0x3a79 ./CMSIS/DSP/Source/FastMathFunctions/FastMathFunctions.o
- .debug_line    0x00049dbd      0x5b6 ./CMSIS/DSP/Source/CommonTables/CommonTables.o
+ .debug_line    0x00014067     0x4f09 ./source/flight_controller.o
+ .debug_line    0x00018f70     0x2e74 ./source/main.o
+ .debug_line    0x0001bde4     0x15b3 ./fusion/FusionAhrs.o
+ .debug_line    0x0001d397      0x621 ./freertos/freertos-kernel/portable/MemMang/heap_1.o
+ .debug_line    0x0001d9b8      0xae2 ./freertos/freertos-kernel/portable/GCC/ARM_CM4F/port.o
+ .debug_line    0x0001e49a      0x6d6 ./freertos/freertos-kernel/list.o
+ .debug_line    0x0001eb70     0x34d9 ./freertos/freertos-kernel/queue.o
+ .debug_line    0x00022049     0x4108 ./freertos/freertos-kernel/tasks.o
+ .debug_line    0x00026151     0x15c1 ./freertos/freertos-kernel/timers.o
+ .debug_line    0x00027712     0x3ab2 ./drivers/fsl_clock.o
+ .debug_line    0x0002b1c4      0x66a ./drivers/fsl_dmamux.o
+ .debug_line    0x0002b82e     0x4252 ./drivers/fsl_edma.o
+ .debug_line    0x0002fa80      0xc9b ./drivers/fsl_flexio.o
+ .debug_line    0x0003071b      0x958 ./drivers/fsl_gpio.o
+ .debug_line    0x00031073     0x466c ./drivers/fsl_lpi2c.o
+ .debug_line    0x000356df      0xbac ./drivers/fsl_lpi2c_cmsis.o
+ .debug_line    0x0003628b      0xef0 ./drivers/fsl_lpi2c_edma.o
+ .debug_line    0x0003717b     0x458d ./drivers/fsl_lpspi.o
+ .debug_line    0x0003b708     0x310d ./drivers/fsl_lpuart.o
+ .debug_line    0x0003e815     0x2734 ./drivers/fsl_pwm.o
+ .debug_line    0x00040f49      0x7d0 ./drivers/fsl_xbara.o
+ .debug_line    0x00041719      0x651 ./device/system_MIMXRT1011.o
+ .debug_line    0x00041d6a      0xc75 ./board/board.o
+ .debug_line    0x000429df     0x265e ./board/clock_config.o
+ .debug_line    0x0004503d      0x87d ./board/peripherals.o
+ .debug_line    0x000458ba      0xa89 ./board/pin_mux.o
+ .debug_line    0x00046343     0x3a79 ./CMSIS/DSP/Source/FastMathFunctions/FastMathFunctions.o
+ .debug_line    0x00049dbc      0x5b6 ./CMSIS/DSP/Source/CommonTables/CommonTables.o
 
 .debug_str      0x00000000   0x1871c2
  .debug_str     0x00000000   0x1871c2 ./xip/evkmimxrt1010_flexspi_nor_config.o
