@@ -47,6 +47,7 @@ void BOARD_InitBootPins(void);
 
 /* Symbols to be used with GPIO driver */
 #define BOARD_INITPINS_SAI1_RXD0_GPIO                                      GPIO1   /*!< GPIO peripheral base pointer */
+#define BOARD_INITPINS_SAI1_RXD0_INIT_GPIO_VALUE                              0U   /*!< GPIO output initial state */
 #define BOARD_INITPINS_SAI1_RXD0_GPIO_PIN                                     3U   /*!< GPIO pin number */
 #define BOARD_INITPINS_SAI1_RXD0_GPIO_PIN_MASK                        (1U << 3U)   /*!< GPIO pin mask */
 #define BOARD_INITPINS_SAI1_RXD0_PORT                                      GPIO1   /*!< PORT peripheral base pointer */
@@ -117,6 +118,7 @@ void BOARD_InitBootPins(void);
 
 /* Symbols to be used with GPIO driver */
 #define BOARD_INITPINS_MEAS_TIME_GPIO                                      GPIO1   /*!< GPIO peripheral base pointer */
+#define BOARD_INITPINS_MEAS_TIME_INIT_GPIO_VALUE                              0U   /*!< GPIO output initial state */
 #define BOARD_INITPINS_MEAS_TIME_GPIO_PIN                                     4U   /*!< GPIO pin number */
 #define BOARD_INITPINS_MEAS_TIME_GPIO_PIN_MASK                        (1U << 4U)   /*!< GPIO pin mask */
 #define BOARD_INITPINS_MEAS_TIME_PORT                                      GPIO1   /*!< PORT peripheral base pointer */

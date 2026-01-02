@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MIMXRT1011xxxxx" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_16 http://mcuxpresso.nxp.com/XSD/mex_configuration_16.xsd" uuid="feece118-ce67-44cf-93da-2d329c934657" version="16" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_16" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="MIMXRT1011xxxxx" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_18 http://mcuxpresso.nxp.com/XSD/mex_configuration_18.xsd" uuid="feece118-ce67-44cf-93da-2d329c934657" version="18" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MIMXRT1011xxxxx</processor>
       <package>MIMXRT1011DAE5A</package>
@@ -11,19 +11,19 @@
    </common>
    <preferences>
       <validate_boot_init_only>true</validate_boot_init_only>
-      <generate_extended_information>false</generate_extended_information>
       <generate_code_modified_registers_only>false</generate_code_modified_registers_only>
       <update_include_paths>true</update_include_paths>
+      <enable_parallel_routing>true</enable_parallel_routing>
       <generate_registers_defines>false</generate_registers_defines>
    </preferences>
    <tools>
-      <pins name="Pins" version="16.0" enabled="true" update_project_code="true">
+      <pins name="Pins" version="17.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/pin_mux.c" update_enabled="true"/>
             <file path="board/pin_mux.h" update_enabled="true"/>
          </generated_project_files>
          <pins_profile>
-            <processor_version>16.3.0</processor_version>
+            <processor_version>25.06.10</processor_version>
             <pin_labels>
                <pin_label pin_num="3" pin_signal="GPIO_09" label="UART1_RXD" identifier="UART1_RXD"/>
                <pin_label pin_num="2" pin_signal="GPIO_10" label="UART1_TXD" identifier="UART1_TXD"/>
@@ -222,13 +222,13 @@
             </function>
          </functions_list>
       </pins>
-      <clocks name="Clocks" version="14.0" enabled="true" update_project_code="true">
+      <clocks name="Clocks" version="17.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/clock_config.c" update_enabled="true"/>
             <file path="board/clock_config.h" update_enabled="true"/>
          </generated_project_files>
          <clocks_profile>
-            <processor_version>16.3.0</processor_version>
+            <processor_version>25.06.10</processor_version>
          </clocks_profile>
          <clock_configurations>
             <clock_configuration name="BOARD_BootClockRUN" id_prefix="" prefix_user_defined="false">
@@ -480,7 +480,7 @@
             </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.lpi2c_cmsis" description="An unsupported version of the LPI2C CMSIS Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="greaterOrEqual">
-                  <data type="Version" maxValue="2.5.9">2.2.0</data>
+                  <data type="Version" maxValue="2.6.9">2.2.0</data>
                </feature>
             </dependency>
             <dependency resourceType="SWComponent" resourceId="utility.debug_console" description="Utility debug_console is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
@@ -510,7 +510,7 @@
             </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.pwm" description="An unsupported version of the PWM Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="greaterOrEqual">
-                  <data type="Version" maxValue="2.8.9">2.6.0</data>
+                  <data type="Version" maxValue="2.9.9">2.6.0</data>
                </feature>
             </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.lpuart" description="LPUART Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
@@ -519,8 +519,8 @@
                </feature>
             </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.lpuart" description="An unsupported version of the LPUART Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="equivalent">
-                  <data type="Version">2.8.1</data>
+               <feature name="version" evaluation="greaterOrEqual">
+                  <data type="Version" maxValue="2.9.9">2.8.1</data>
                </feature>
             </dependency>
             <dependency resourceType="Tool" resourceId="Clocks" description="The Clocks tool is required by the Peripherals tool, but it is disabled." problem_level="2" source="Peripherals">
@@ -536,7 +536,7 @@
             <file path="utilities/fsl_debug_console_conf.h" update_enabled="true"/>
          </generated_project_files>
          <peripherals_profile>
-            <processor_version>16.3.0</processor_version>
+            <processor_version>25.06.10</processor_version>
          </peripherals_profile>
          <functional_groups>
             <functional_group name="BOARD_InitPeripherals" uuid="cb07c6c3-f678-4ac9-83df-c43998cee013" called_from_default_init="true" id_prefix="" core="core0">
@@ -765,7 +765,7 @@
                   <instance name="PWM1" uuid="5c54e236-ff01-42ac-a32d-860469bc8205" type="pwm" type_id="pwm_2.6.0" mode="general" peripheral="PWM1" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
                      <config_set name="fsl_pwm">
                         <setting name="clockSource" value="SystemClock"/>
-                        <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                        <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
                         <array name="submodules">
                            <struct name="0">
                               <setting name="sm" value="kPWM_Module_0"/>
@@ -782,6 +782,7 @@
                                  <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
                                  <setting name="forceTrigger" value="kPWM_Force_Local"/>
                                  <setting name="enableDebugMode" value="true"/>
+                                 <setting name="enableWait" value="false"/>
                                  <set name="outputTrigger_sel">
                                     <selected/>
                                  </set>
@@ -872,6 +873,7 @@
                                  <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
                                  <setting name="forceTrigger" value="kPWM_Force_Local"/>
                                  <setting name="enableDebugMode" value="true"/>
+                                 <setting name="enableWait" value="false"/>
                                  <set name="outputTrigger_sel">
                                     <selected/>
                                  </set>
@@ -962,6 +964,7 @@
                                  <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
                                  <setting name="forceTrigger" value="kPWM_Force_Local"/>
                                  <setting name="enableDebugMode" value="true"/>
+                                 <setting name="enableWait" value="false"/>
                                  <set name="outputTrigger_sel">
                                     <selected/>
                                  </set>

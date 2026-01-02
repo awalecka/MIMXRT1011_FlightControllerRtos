@@ -1,6 +1,6 @@
 ../freertos/freertos-kernel/timers.c:748:12:prvTimerTask	64	static
 ../freertos/freertos-kernel/timers.c:237:16:xTimerCreateTimerTask	56	static
-../freertos/freertos-kernel/timers.c:370:23:xTimerCreateStatic	56	static
+../freertos/freertos-kernel/timers.c:370:23:xTimerCreateStatic	48	static
 ../freertos/freertos-kernel/timers.c:448:16:xTimerGenericCommandFromTask	24	static
 ../freertos/freertos-kernel/timers.c:499:16:xTimerGenericCommandFromISR	24	static
 ../freertos/freertos-kernel/timers.c:543:18:xTimerGetTimerDaemonTaskHandle	0	static
@@ -18,3 +18,4 @@
 ../freertos/freertos-kernel/timers.c:1263:20:xTimerPendFunctionCall	32	static
 ../freertos/freertos-kernel/timers.c:1298:21:uxTimerGetTimerNumber	0	static
 ../freertos/freertos-kernel/timers.c:1312:14:vTimerSetTimerNumber	0	static
+../freertos/freertos-kernel/timers.c:1330:10:vTimerResetState	0	static

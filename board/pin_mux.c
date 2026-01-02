@@ -6,11 +6,11 @@
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
 !!GlobalInfo
-product: Pins v16.0
+product: Pins v17.0
 processor: MIMXRT1011xxxxx
 package_id: MIMXRT1011DAE5A
 mcu_data: ksdk2_0
-processor_version: 16.3.0
+processor_version: 25.06.10
 external_user_signals: {}
 pin_labels:
 - {pin_num: '3', pin_signal: GPIO_09, label: UART1_RXD, identifier: UART1_RXD}

@@ -14,6 +14,8 @@
 #include "peripherals.h"
 #include "command_handler.h"
 #include "fsl_lpuart.h"
+#include "fsl_edma.h"
+#include "fsl_dmamux.h"
 
 extern "C" {
 #include "i2c_sync.h"

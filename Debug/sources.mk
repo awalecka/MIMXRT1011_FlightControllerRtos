@@ -62,6 +62,8 @@ source/radio \
 source/system \
 source/utils \
 startup \
+utilities/debug_console \
 utilities \
+utilities/str \
 xip \
 

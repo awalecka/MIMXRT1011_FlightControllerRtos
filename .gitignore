@@ -1,0 +1,78 @@
+# ----------------------------------------------------------------------
+# Build & Output Directories
+# ----------------------------------------------------------------------
+# Standard Release and Debug build directories created by MCUXpresso
+Debug/
+Release/
+# Any other custom build directories
+build/
+bin/
+out/
+
+# ----------------------------------------------------------------------
+# MCUXpresso / Eclipse Metadata
+# ----------------------------------------------------------------------
+# Eclipse project settings folder (keep if sharing project settings, ignore if user-specific)
+.settings/
+
+# The .project and .cproject files ARE usually committed to share build settings.
+# Uncomment the lines below ONLY if you want to keep project configuration local.
+# .cproject
+# .project
+
+# User-specific configuration (always ignore)
+*.launch
+*.user
+.metadata/
+
+# MCUXpresso Config Tools (Pins, Clocks, Peripherals)
+# These generate source code, but the .mex file is the source of truth.
+# Generally, you commit the .mex file and the generated source code.
+# If you prefer not to commit generated code, uncomment the following:
+# board/
+# source/generated/
+
+# ----------------------------------------------------------------------
+# Compiled Object Files & Libraries
+# ----------------------------------------------------------------------
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.dylib
+*.hex
+*.bin
+*.s19
+*.axf
+*.elf
+*.map
+*.d
+*.mk
+
+# ----------------------------------------------------------------------
+# Debugger & Trace Files
+# ----------------------------------------------------------------------
+# J-Link / SEGGER specific
+JLinkLog.txt
+*.jlink
+.jlink-flash
+
+# P&E Micro specific
+*.pe_micro
+*.pemicro
+
+# Instruction Trace
+*.itm
+*.trace
+
+# ----------------------------------------------------------------------
+# OS Specific
+# ----------------------------------------------------------------------
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db

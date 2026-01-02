@@ -10,7 +10,7 @@ product: Peripherals v15.0
 processor: MIMXRT1011xxxxx
 package_id: MIMXRT1011DAE5A
 mcu_data: ksdk2_0
-processor_version: 16.3.0
+processor_version: 25.06.10
 functionalGroups:
 - name: BOARD_InitPeripherals
   UUID: cb07c6c3-f678-4ac9-83df-c43998cee013
@@ -207,7 +207,7 @@ instance:
 - config_sets:
   - fsl_pwm:
     - clockSource: 'SystemClock'
-    - clockSourceFreq: 'ClocksTool_DefaultInit'
+    - clockSourceFreq: 'BOARD_BootClockRUN'
     - submodules:
       - 0:
         - sm: 'kPWM_Module_0'
@@ -224,6 +224,7 @@ instance:
           - reloadFrequency: 'kPWM_LoadEveryOportunity'
           - forceTrigger: 'kPWM_Force_Local'
           - enableDebugMode: 'true'
+          - enableWait: 'false'
           - outputTrigger_sel: ''
           - loadOK: 'true'
           - startCounter: 'true'
@@ -288,6 +289,7 @@ instance:
           - reloadFrequency: 'kPWM_LoadEveryOportunity'
           - forceTrigger: 'kPWM_Force_Local'
           - enableDebugMode: 'true'
+          - enableWait: 'false'
           - outputTrigger_sel: ''
           - loadOK: 'true'
           - startCounter: 'true'
@@ -352,6 +354,7 @@ instance:
           - reloadFrequency: 'kPWM_LoadEveryOportunity'
           - forceTrigger: 'kPWM_Force_Local'
           - enableDebugMode: 'true'
+          - enableWait: 'false'
           - outputTrigger_sel: ''
           - loadOK: 'true'
           - startCounter: 'true'
@@ -457,6 +460,7 @@ pwm_config_t PWM1_SM0_config = {
   .reloadFrequency = kPWM_LoadEveryOportunity,
   .forceTrigger = kPWM_Force_Local,
   .enableDebugMode = true,
+  .enableWait = false
 };
 
 pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
@@ -488,6 +492,7 @@ pwm_config_t PWM1_SM2_config = {
   .reloadFrequency = kPWM_LoadEveryOportunity,
   .forceTrigger = kPWM_Force_Local,
   .enableDebugMode = true,
+  .enableWait = false
 };
 
 pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
@@ -519,6 +524,7 @@ pwm_config_t PWM1_SM3_config = {
   .reloadFrequency = kPWM_LoadEveryOportunity,
   .forceTrigger = kPWM_Force_Local,
   .enableDebugMode = true,
+  .enableWait = false
 };
 
 pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
@@ -665,7 +671,7 @@ const lpuart_config_t LPUART3_TELE_config = {
   .rxIdleType = kLPUART_IdleTypeStartBit,
   .rxIdleConfig = kLPUART_IdleCharacter1,
   .enableTx = true,
-  .enableRx = false
+  .enableRx = false,
 };
 
 static void LPUART3_TELE_init(void) {
