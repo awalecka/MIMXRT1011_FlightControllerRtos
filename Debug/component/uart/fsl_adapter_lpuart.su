@@ -1,6 +1,0 @@
-../component/uart/fsl_adapter_lpuart.c:699:19:HAL_UartInit	40	static
-../component/uart/fsl_adapter_lpuart.c:764:19:HAL_UartDeinit	8	static
-../component/uart/fsl_adapter_lpuart.c:785:19:HAL_UartReceiveBlocking	8	static
-../component/uart/fsl_adapter_lpuart.c:800:19:HAL_UartSendBlocking	8	static
-../component/uart/fsl_adapter_lpuart.c:815:19:HAL_UartEnterLowpower	8	static
-../component/uart/fsl_adapter_lpuart.c:822:19:HAL_UartExitLowpower	0	static
