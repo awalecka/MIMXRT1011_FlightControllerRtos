@@ -41,7 +41,6 @@
 #include <stdio.h>
 #endif
 
-#include "fsl_debug_console_conf.h"
 #include "fsl_str.h"
 
 #include "fsl_common.h"

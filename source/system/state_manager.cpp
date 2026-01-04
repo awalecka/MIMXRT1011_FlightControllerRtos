@@ -4,7 +4,6 @@
  */
 
 #include "flight_controller.h"
-#include "fsl_debug_console.h"
 #include "Driver_I2C.h"
 #include "peripherals.h"
 
@@ -52,17 +51,13 @@ static StaticTask_t xCalibrateTaskTCB;
 void stateManagerTask(void *pvParameters) {
 
     // --- BOOT SEQUENCE ---
-    PRINTF("State: BOOT\r\n");
-
     volatile FlightState_t last_known_state = STATE_BOOT;
     g_flight_state = STATE_BOOT;
 
     // Use the FlightController to initialize all hardware
     if (g_flightController.init() != 0) {
-        PRINTF("Error: System initialization failed! Entering FAILSAFE.\r\n");
         g_flight_state = STATE_FAILSAFE;
     } else {
-        PRINTF("System initialized successfully.\r\n");
         g_flight_state = STATE_IDLE;
     }
 
@@ -98,8 +93,6 @@ void stateManagerTask(void *pvParameters) {
     while (true) {
         if (xQueueReceive(g_state_change_request_queue, &requested_state, portMAX_DELAY) == pdPASS) {
             if (requested_state == g_flight_state) continue;
-
-            PRINTF("State transition requested: %d -> %d\r\n", last_known_state, requested_state);
 
             // Suspend current
             switch (last_known_state) {

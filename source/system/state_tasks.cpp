@@ -14,7 +14,6 @@ void flightTask(void *pvParameters) {
     const TickType_t xFlightLoopFrequency = pdMS_TO_TICKS(10); // 100Hz
 	TickType_t xLastWakeTime = xTaskGetTickCount();
 
-    PRINTF("Flight State \r\n");
 	g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
 
     while (true) {
@@ -33,7 +32,6 @@ void idleTask(void *pvParameters) {
 	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
 
 	while (true) {
-        PRINTF("State: IDLE - System ready. Waiting for command...\r\n");
         vTaskDelay(pdMS_TO_TICKS(1000));
 
         // --- Request transition to flight ---
@@ -54,12 +52,8 @@ void calibrateTask(void *pvParameters) {
 	g_heartbeat_frequency = pdMS_TO_TICKS(100); // Fast blink for calibration
 
 	while (true) {
-        PRINTF("State: CALIBRATE - Starting Sensor Calibration...\r\n");
-
         // Blocking call to perform calibration
         g_flightController.calibrateSensors();
-
-        PRINTF("State: CALIBRATE - Done. Returning to IDLE.\r\n");
 
         // Automatically transition back to IDLE
         FlightState_t new_state = STATE_FLIGHT;

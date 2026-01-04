@@ -19,7 +19,6 @@
 #include "arm_math.h"
 #include "board.h"
 #include "peripherals.h"
-#include "fsl_debug_console.h"
 #include "rls_mag_calibration.h"
 #include "servo_driver.h" //
 
@@ -42,12 +41,12 @@ constexpr float radToDeg(float rad) { return rad * 180.0f / PI; }
 
 // IBUS Configuration Constants
 #define IBUS_DMA_BUFFER_SIZE    128U
-#define IBUS_LPUART_INSTANCE    LPUART1
-#define IBUS_LPUART_IRQn        LPUART1_IRQn
+#define IBUS_LPUART_INSTANCE    LPUART4
+#define IBUS_LPUART_IRQn        LPUART4_IRQn
 #define IBUS_DMA_BASE           DMA0
 #define IBUS_DMAMUX_BASE        DMAMUX
 #define IBUS_DMA_CHANNEL        0U
-#define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART1Rx
+#define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART4Rx
 
 typedef struct {
     unsigned short channels[IBUS_MAX_CHANNELS];

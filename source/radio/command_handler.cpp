@@ -22,7 +22,7 @@ static size_t s_readIndex = 0;
 static void processReceivedData(void);
 
 // --- Interrupt Service Routine (extern "C") ---
-extern "C" void LPUART1_IRQHandler(void) {
+extern "C" void LPUART4_IRQHandler(void) {
     uint32_t statusFlags = LPUART_GetStatusFlags(IBUS_LPUART_INSTANCE);
 
     // Check for Idle Line Flag (Line high for >1 character time)
@@ -50,8 +50,6 @@ extern "C" void LPUART1_IRQHandler(void) {
 
 void commandHandlerTask(void* pvParameters) {
     (void)pvParameters;
-
-    PRINTF("[IBUS] DMA Circular Buffer Task Started.\r\n");
 
     for (;;) {
         // Wait for Idle Line (End of Packet)

@@ -151,8 +151,6 @@ void IMU::calibrateGyro() {
     sensor_data_raw_t raw;
     sensor_data_vehicle_t veh;
 
-    PRINTF("Starting Gyro Calibration... Keep vehicle still.\r\n");
-
     for (int i = 0; i < sampleCount; i++) {
         if (LSM6DSOX_ReadGyro(&g_sensor_handle, &raw.gyro_data) == 0) {
             LSM6DSOX_RemapData(&raw.gyro_data, &vehicleMapping, &veh.gyro_data);
@@ -166,8 +164,6 @@ void IMU::calibrateGyro() {
     gyroBiasX = sumX / (float)sampleCount;
     gyroBiasY = sumY / (float)sampleCount;
     gyroBiasZ = sumZ / (float)sampleCount;
-
-    PRINTF("Gyro Calibration Complete. New Bias: [%.3f, %.3f, %.3f]\r\n", gyroBiasX, gyroBiasY, gyroBiasZ);
 }
 
 int IMU::readData(IMU::RawData& rawData) {
@@ -199,7 +195,6 @@ int IMU::readData(IMU::RawData& rawData) {
 void Receiver::init() {
     std::fill(std::begin(m_cachedRcData.channels), std::end(m_cachedRcData.channels), 1500);
     m_cachedRcData.channels[RC_CH_THROTTLE] = 1000;
-    PRINTF("Receiver Initialized. \r\n");
 }
 
 void Receiver::update() {
@@ -251,7 +246,6 @@ static const ServoChannelConfig s_servoConfig[] = {
 void Actuators::init() {
     // Initialize the ServoDriver with the static configuration
     m_servoDriver.init(s_servoConfig);
-    PRINTF("Actuators Initialized with ServoDriver. \r\n");
 }
 
 void Actuators::setOutputs(float aileron, float elevator, float rudder, float throttle) {

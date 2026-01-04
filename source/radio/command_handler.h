@@ -24,11 +24,11 @@ extern "C" {
 #endif
 
 /**
- * @brief LPUART1 Interrupt Service Routine.
+ * @brief LPUART4 Interrupt Service Routine.
  * Handles the Idle Line detection to trigger processing.
  * Must be extern "C" to link correctly with the startup vector table.
  */
-void LPUART1_IRQHandler(void);
+void LPUART4_IRQHandler(void);
 
 #ifdef __cplusplus
 }

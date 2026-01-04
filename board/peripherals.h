@@ -102,8 +102,6 @@ extern "C" {
 #define LPUART3_TELE_PERIPHERAL LPUART3
 /* Definition of the clock source frequency */
 #define LPUART3_TELE_CLOCK_SOURCE 80000000UL
-/* Debug console is initialized in the peripheral tool */
-#define BOARD_INIT_DEBUG_CONSOLE_PERIPHERAL 
 
 /***********************************************************************************************************************
  * Global variables

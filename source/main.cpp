@@ -72,8 +72,10 @@ static StaticTask_t xStateMgrTaskControlBlock;
 // Local functions
 static void initCustomConfig();
 
-/*
- * @brief   Application entry point.
+/**
+ * @brief Main Application Entry Point.
+ * Initializes the board hardware, sets up FreeRTOS queues and tasks, and starts the scheduler.
+ * @return Does not return.
  */
 int main(void) {
 
@@ -83,9 +85,8 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
+    // Custom initialization not possible in the configuration tools
     initCustomConfig();
-
-    PRINTF("Flight Controller Initializing Complete...\r\n");
 
     // Create Queues
     g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
@@ -93,14 +94,12 @@ int main(void) {
     g_state_change_request_queue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, STATE_CHANGE_QUEUE_ITEM_SIZE, ucStateChangeQueueStorageArea, &xStateChangeQueueControlBlock);
 
     if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL) {
-        PRINTF("FATAL: Failed to create one or more queues.\r\n");
         while(1);
     }
 
     // Create the State Manager Task
     g_state_manager_task_handle = xTaskCreateStatic(stateManagerTask, "StateMgrTask", STATE_MGR_STACK_SIZE, NULL, STATE_MANAGER_TASK_PRIORITY, xStateMgrStack, &xStateMgrTaskControlBlock);
     if (g_state_manager_task_handle == NULL) {
-        PRINTF("FATAL: Failed to create state manager task.\r\n");
         while(1);
     }
 
@@ -113,6 +112,11 @@ int main(void) {
     return 0;
 }
 
+/**
+ * @brief Initializes custom peripheral configurations.
+ * Sets up the LPUART for IBUS communication using EDMA with a circular buffer.
+ * Configures interrupts for Idle Line detection.
+ */
 static void initCustomConfig()
 {
     // GLOBAL INIT REMOVED:

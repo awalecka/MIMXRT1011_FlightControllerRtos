@@ -679,44 +679,6 @@ static void LPUART3_TELE_init(void) {
 }
 
 /***********************************************************************************************************************
- * DebugConsole initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'DebugConsole'
-- type: 'debug_console'
-- mode: 'general'
-- custom_name_enabled: 'false'
-- type_id: 'debug_console_1.0.0'
-- functional_group: 'BOARD_InitPeripherals'
-- config_sets:
-  - fsl_debug_console:
-    - config:
-      - SDK_DEBUGCONSOLE: 'DEBUGCONSOLE_REDIRECT_TO_TOOLCHAIN'
-      - SDK_DEBUGCONSOLE_UART: 'semihost'
-      - DEBUG_CONSOLE_RX_ENABLE: 'false'
-      - DEBUG_CONSOLE_PRINTF_MAX_LOG_LEN: '128'
-      - DEBUG_CONSOLE_SCANF_MAX_LOG_LEN: '20'
-      - DEBUG_CONSOLE_ENABLE_ECHO: 'false'
-      - PRINTF_FLOAT_ENABLE: 'false'
-      - SCANF_FLOAT_ENABLE: 'false'
-      - PRINTF_ADVANCED_ENABLE: 'false'
-      - SCANF_ADVANCED_ENABLE: 'false'
-      - DEBUG_CONSOLE_TRANSFER_NON_BLOCKING: 'false'
-      - DEBUG_CONSOLE_TRANSMIT_BUFFER_LEN: '512'
-      - DEBUG_CONSOLE_RECEIVE_BUFFER_LEN: '1024'
-      - DEBUG_CONSOLE_TX_RELIABLE_ENABLE: 'true'
-      - DEBUG_CONSOLE_DISABLE_RTOS_SYNCHRONIZATION: 'false'
-    - debug_console_codegenerator: []
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-
-/* Empty initialization function (commented out)
-static void DebugConsole_init(void) {
-} */
-
-/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 static void BOARD_InitPeripherals_CommonPostInit(void)

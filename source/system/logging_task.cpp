@@ -15,6 +15,7 @@ void loggingTask(void *pvParameters) {
         // Wait for telemetry data (runs at a decimated rate from the flight task)
         if (xQueueReceive(g_controls_data_queue, &surface_commands, portMAX_DELAY) == pdPASS) {
 
+#if 0
             // Print Controls
             PRINTF("[Controls] A:%.2f, E:%.2f, R:%.2f ",
                     surface_commands.aileron,
@@ -29,6 +30,7 @@ void loggingTask(void *pvParameters) {
                     rcData.channels[1], // Pitch
                     rcData.channels[2], // Throttle
                     rcData.channels[3]); // Yaw
+#endif
         }
     }
 }

@@ -77,11 +77,6 @@
                         <data>true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="Peripheral" resourceId="LPUART1" description="Peripheral LPUART1 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
-                     <feature name="initialized" evaluation="equal">
-                        <data>true</data>
-                     </feature>
-                  </dependency>
                   <dependency resourceType="Peripheral" resourceId="LPUART3" description="Peripheral LPUART3 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
                      <feature name="initialized" evaluation="equal">
                         <data>true</data>
@@ -186,18 +181,6 @@
                   <pin peripheral="PWM1" signal="FAULT, 1" pin_num="" pin_signal="LOGIC_HIGH"/>
                   <pin peripheral="PWM1" signal="FAULT, 2" pin_num="" pin_signal="LOGIC_HIGH"/>
                   <pin peripheral="PWM1" signal="FAULT, 3" pin_num="" pin_signal="LOGIC_HIGH"/>
-                  <pin peripheral="LPUART1" signal="RXD" pin_num="3" pin_signal="GPIO_09">
-                     <pin_features>
-                        <pin_feature name="slew_rate" value="Fast"/>
-                        <pin_feature name="software_input_on" value="Enable"/>
-                     </pin_features>
-                  </pin>
-                  <pin peripheral="LPUART1" signal="TXD" pin_num="2" pin_signal="GPIO_10">
-                     <pin_features>
-                        <pin_feature name="slew_rate" value="Fast"/>
-                        <pin_feature name="software_input_on" value="Enable"/>
-                     </pin_features>
-                  </pin>
                   <pin peripheral="LPUART3" signal="TXD" pin_num="80" pin_signal="GPIO_12">
                      <pin_features>
                         <pin_feature name="slew_rate" value="Fast"/>
@@ -218,6 +201,7 @@
                      </pin_features>
                   </pin>
                   <pin peripheral="LPUART4" signal="TXD" pin_num="58" pin_signal="GPIO_AD_02"/>
+                  <pin peripheral="LPUART4" signal="RXD" pin_num="59" pin_signal="GPIO_AD_01"/>
                </pins>
             </function>
          </functions_list>
@@ -483,16 +467,6 @@
                   <data type="Version" maxValue="2.6.9">2.2.0</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="utility.debug_console" description="Utility debug_console is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
-               <feature name="enabled" evaluation="equal">
-                  <data type="Boolean">true</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="SWComponent" resourceId="utility.debug_console" description="An unsupported version of the Utility debug_console in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. The project might not compile correctly." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="equivalent">
-                  <data type="Version">1.0.0</data>
-               </feature>
-            </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.edma" description="EDMA Driver is not found in the toolchain/IDE project. The project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
@@ -533,7 +507,6 @@
             <file path="board/RTE_Device.h" update_enabled="true"/>
             <file path="board/peripherals.c" update_enabled="true"/>
             <file path="board/peripherals.h" update_enabled="true"/>
-            <file path="utilities/fsl_debug_console_conf.h" update_enabled="true"/>
          </generated_project_files>
          <peripherals_profile>
             <processor_version>25.06.10</processor_version>
@@ -712,28 +685,6 @@
                            <setting name="uid" value="1766284915324"/>
                            <setting name="eDMAn" value="5"/>
                         </struct>
-                     </config_set>
-                  </instance>
-                  <instance name="DebugConsole" uuid="280209e1-f603-4fab-842f-b6043909a6b1" type="debug_console" type_id="debug_console_1.0.0" mode="general" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
-                     <config_set name="fsl_debug_console">
-                        <struct name="config">
-                           <setting name="SDK_DEBUGCONSOLE" value="DEBUGCONSOLE_REDIRECT_TO_TOOLCHAIN"/>
-                           <setting name="SDK_DEBUGCONSOLE_UART" value="semihost"/>
-                           <setting name="DEBUG_CONSOLE_RX_ENABLE" value="false"/>
-                           <setting name="DEBUG_CONSOLE_PRINTF_MAX_LOG_LEN" value="128"/>
-                           <setting name="DEBUG_CONSOLE_SCANF_MAX_LOG_LEN" value="20"/>
-                           <setting name="DEBUG_CONSOLE_ENABLE_ECHO" value="false"/>
-                           <setting name="PRINTF_FLOAT_ENABLE" value="false"/>
-                           <setting name="SCANF_FLOAT_ENABLE" value="false"/>
-                           <setting name="PRINTF_ADVANCED_ENABLE" value="false"/>
-                           <setting name="SCANF_ADVANCED_ENABLE" value="false"/>
-                           <setting name="DEBUG_CONSOLE_TRANSFER_NON_BLOCKING" value="false"/>
-                           <setting name="DEBUG_CONSOLE_TRANSMIT_BUFFER_LEN" value="512"/>
-                           <setting name="DEBUG_CONSOLE_RECEIVE_BUFFER_LEN" value="1024"/>
-                           <setting name="DEBUG_CONSOLE_TX_RELIABLE_ENABLE" value="true"/>
-                           <setting name="DEBUG_CONSOLE_DISABLE_RTOS_SYNCHRONIZATION" value="false"/>
-                        </struct>
-                        <struct name="debug_console_codegenerator"/>
                      </config_set>
                   </instance>
                   <instance name="DMA0" uuid="9400d6a0-ffb2-4201-b510-5e5db13ed2ac" type="edma" type_id="edma_2.4.0" mode="basic" peripheral="DMA0" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
@@ -1095,37 +1046,6 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="LPUART1_IBUS" uuid="dc160f6a-097f-44f4-81de-dcd05699b42f" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="interrupt" peripheral="LPUART1" enabled="false" comment="" custom_name_enabled="true" editing_lock="false">
-                     <config_set name="general">
-                        <struct name="main_config">
-                           <setting name="operationMode" value="ARM_USART_MODE_ASYNCHRONOUS"/>
-                           <setting name="clockSource" value="LpuartClock"/>
-                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
-                           <setting name="power_state" value="ARM_POWER_FULL"/>
-                           <setting name="baudRate_Bps" value="115200"/>
-                           <setting name="dataBits" value="ARM_USART_DATA_BITS_8"/>
-                           <setting name="parityBit" value="ARM_USART_PARITY_NONE"/>
-                           <setting name="stopBit" value="ARM_USART_STOP_BITS_1"/>
-                           <setting name="enableRX" value="false"/>
-                           <setting name="enableRXBuffer" value="true"/>
-                           <setting name="enableTX" value="false"/>
-                           <setting name="signalEventFunctionId" value="NULL"/>
-                           <setting name="enableGetFreqFnCustomName" value="false"/>
-                           <setting name="getFreqFunctionCustomID" value="USART_GetFreq"/>
-                           <setting name="enableInitPinsFnCustomName" value="false"/>
-                           <setting name="initPinFunctionCustomID" value="USART_InitPins"/>
-                           <setting name="enableDeinitPinsFnCustomName" value="false"/>
-                           <setting name="deinitPinFunctionCustomID" value="USART_DeinitPins"/>
-                        </struct>
-                     </config_set>
-                     <config_set name="fsl_cmsis_uart" quick_selection="default_edma">
-                        <struct name="interrupt">
-                           <setting name="IRQn" value="LPUART1_IRQn"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="priority" value="0"/>
-                        </struct>
-                     </config_set>
-                  </instance>
                   <instance name="LPUART3_TELE" uuid="e56f56c8-68b9-4174-b3ed-f02b68e6afe9" type="lpuart" type_id="lpuart_2.8.1" mode="polling" peripheral="LPUART3" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
                      <config_set name="lpuartConfig_t">
                         <struct name="lpuartConfig">
@@ -1150,6 +1070,37 @@
                            <setting name="rxIdleConfig" value="kLPUART_IdleCharacter1"/>
                            <setting name="enableTx" value="true"/>
                            <setting name="enableRx" value="false"/>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="LPUART4_IBUS" uuid="4e98ba49-294f-4b22-a2f3-5bf9133da39e" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="interrupt" peripheral="LPUART4" enabled="false" comment="" custom_name_enabled="true" editing_lock="false">
+                     <config_set name="general" quick_selection="default">
+                        <struct name="main_config">
+                           <setting name="operationMode" value="ARM_USART_MODE_ASYNCHRONOUS"/>
+                           <setting name="clockSource" value="LpuartClock"/>
+                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="power_state" value="ARM_POWER_FULL"/>
+                           <setting name="baudRate_Bps" value="115200"/>
+                           <setting name="dataBits" value="ARM_USART_DATA_BITS_8"/>
+                           <setting name="parityBit" value="ARM_USART_PARITY_NONE"/>
+                           <setting name="stopBit" value="ARM_USART_STOP_BITS_1"/>
+                           <setting name="enableRX" value="false"/>
+                           <setting name="enableRXBuffer" value="true"/>
+                           <setting name="enableTX" value="false"/>
+                           <setting name="signalEventFunctionId" value="LPUART2_SignalEvent"/>
+                           <setting name="enableGetFreqFnCustomName" value="false"/>
+                           <setting name="getFreqFunctionCustomID" value="LPUART2_GetFreq"/>
+                           <setting name="enableInitPinsFnCustomName" value="false"/>
+                           <setting name="initPinFunctionCustomID" value="LPUART2_InitPins"/>
+                           <setting name="enableDeinitPinsFnCustomName" value="false"/>
+                           <setting name="deinitPinFunctionCustomID" value="LPUART2_DeinitPins"/>
+                        </struct>
+                     </config_set>
+                     <config_set name="fsl_cmsis_uart">
+                        <struct name="interrupt">
+                           <setting name="IRQn" value="LPUART4_IRQn"/>
+                           <setting name="enable_priority" value="false"/>
+                           <setting name="priority" value="0"/>
                         </struct>
                      </config_set>
                   </instance>

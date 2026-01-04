@@ -73,12 +73,11 @@ BOARD_InitPins:
   - {peripheral: PWM1, signal: 'FAULT, 1', pin_signal: LOGIC_HIGH}
   - {peripheral: PWM1, signal: 'FAULT, 2', pin_signal: LOGIC_HIGH}
   - {peripheral: PWM1, signal: 'FAULT, 3', pin_signal: LOGIC_HIGH}
-  - {pin_num: '3', peripheral: LPUART1, signal: RXD, pin_signal: GPIO_09, slew_rate: Fast, software_input_on: Enable}
-  - {pin_num: '2', peripheral: LPUART1, signal: TXD, pin_signal: GPIO_10, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '80', peripheral: LPUART3, signal: TXD, pin_signal: GPIO_12, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '1', peripheral: LPUART3, signal: RXD, pin_signal: GPIO_11, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '9', peripheral: GPIO1, signal: 'gpiomux_io, 04', pin_signal: GPIO_04, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '58', peripheral: LPUART4, signal: TXD, pin_signal: GPIO_AD_02}
+  - {pin_num: '59', peripheral: LPUART4, signal: RXD, pin_signal: GPIO_AD_01}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -118,10 +117,9 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinMux(IOMUXC_GPIO_06_FLEXPWM1_PWM2_A, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_07_FLEXPWM1_PWM3_B, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_08_FLEXPWM1_PWM3_A, 1U); 
-  IOMUXC_SetPinMux(IOMUXC_GPIO_09_LPUART1_RXD, 1U); 
-  IOMUXC_SetPinMux(IOMUXC_GPIO_10_LPUART1_TXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_11_LPUART3_RXD, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_12_LPUART3_TXD, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_AD_01_LPUART4_RXD, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_AD_02_LPUART4_TXD, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_AD_09_ARM_TRACE_SWO, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 1U); 
@@ -141,8 +139,6 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinConfig(IOMUXC_GPIO_06_FLEXPWM1_PWM2_A, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_07_FLEXPWM1_PWM3_B, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_08_FLEXPWM1_PWM3_A, 0x10A1U); 
-  IOMUXC_SetPinConfig(IOMUXC_GPIO_09_LPUART1_RXD, 0x10A1U); 
-  IOMUXC_SetPinConfig(IOMUXC_GPIO_10_LPUART1_TXD, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_11_LPUART3_RXD, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_12_LPUART3_TXD, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 0x10A1U); 
