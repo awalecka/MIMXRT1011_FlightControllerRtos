@@ -10,41 +10,6 @@
 #include "board.h"
 #include "fsl_iomuxc.h"
 
-/*******************************************************************************
- * Variables
- ******************************************************************************/
-
-/*******************************************************************************
- * Code
- ******************************************************************************/
-
-/* Get debug console frequency. */
-uint32_t BOARD_DebugConsoleSrcFreq(void)
-{
-    uint32_t freq;
-
-    /* To make it simple, we assume default PLL and divider settings, and the only variable
-       from application is use PLL3 source or OSC source */
-    if (CLOCK_GetMux(kCLOCK_UartMux) == 0) /* PLL3 div6 80M */
-    {
-        freq = (CLOCK_GetPllFreq(kCLOCK_PllUsb1) / 6U) / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
-    }
-    else
-    {
-        freq = CLOCK_GetOscFreq() / (CLOCK_GetDiv(kCLOCK_UartDiv) + 1U);
-    }
-
-    return freq;
-}
-
-/* Initialize debug console. */
-void BOARD_InitDebugConsole(void)
-{
-    uint32_t uartClkSrcFreq = BOARD_DebugConsoleSrcFreq();
-
-    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
-}
-
 /* MPU configuration. */
 void BOARD_ConfigMPU(void)
 {
@@ -163,37 +128,3 @@ void SystemInitHook(void)
     FLEXSPI->AHBCR |= FLEXSPI_AHBCR_READADDROPT_MASK;
 }
 #endif
-
-#if 0
-void Configure_DMA_Priorities(void)
-{
-    // 1. Init DMAMUX (Routes peripheral requests to DMA channels)
-    DMAMUX_Init(DMAMUX);
-
-    // Map LPUART1 RX to Channel 0
-    DMAMUX_SetSource(DMAMUX, UART_DMA_CHANNEL, kDmaRequestMuxLPUART1Rx);
-    DMAMUX_EnableChannel(DMAMUX, UART_DMA_CHANNEL);
-
-    // Map LPI2C1 to Channel 1
-    DMAMUX_SetSource(DMAMUX, I2C_DMA_CHANNEL, kDmaRequestMuxLPI2C1);
-    DMAMUX_EnableChannel(DMAMUX, I2C_DMA_CHANNEL);
-
-    // 2. Set Priorities (0 = Low, 15 = High)
-    edma_channel_Preemption_config_t uartConfig = {
-        .channelPriority = 15,       // Highest priority for UART
-        .enablePreemptAbility = true,
-        .enableChannelPreemption = false
-    };
-
-    edma_channel_Preemption_config_t i2cConfig = {
-        .channelPriority = 8,        // Medium priority for I2C
-        .enablePreemptAbility = false,
-        .enableChannelPreemption = true
-    };
-
-    // Apply settings to the generic eDMA channels
-    EDMA_SetChannelPreemptionConfig(DMA0, UART_DMA_CHANNEL, &uartConfig);
-    EDMA_SetChannelPreemptionConfig(DMA0, I2C_DMA_CHANNEL, &i2cConfig);
-}
-#endif
-

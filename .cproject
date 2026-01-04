@@ -78,7 +78,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Eigen}&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.include.files.1092362728" name="Include files (-include)" superClass="gnu.cpp.compiler.option.include.files" useByScannerDiscovery="false"/>
-								<option id="com.crt.advproject.cpp.exe.debug.option.optimization.level.1522446758" name="Optimization Level" superClass="com.crt.advproject.cpp.exe.debug.option.optimization.level" useByScannerDiscovery="true" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="com.crt.advproject.cpp.exe.debug.option.optimization.level.1522446758" name="Optimization Level" superClass="com.crt.advproject.cpp.exe.debug.option.optimization.level" useByScannerDiscovery="true" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.optimization.flags.1977536937" name="Other optimization flags" superClass="gnu.cpp.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-fno-common" valueType="string"/>
 								<option id="com.crt.advproject.cpp.exe.debug.option.debugging.level.1260416038" name="Debug Level" superClass="com.crt.advproject.cpp.exe.debug.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.cpp.exe.debug.option.debugging.other.1473010921" name="Other debugging flags" superClass="com.crt.advproject.cpp.exe.debug.option.debugging.other" useByScannerDiscovery="false"/>
@@ -123,7 +123,7 @@
 								<option id="gnu.cpp.compiler.option.other.pic.1887926815" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" useByScannerDiscovery="false"/>
 								<option id="gnu.cpp.compiler.option.misc.hardening.2143644522" name="Hardening options (-fstack-protector-all -Wformat=2 -Wformat-security -Wstrict-overflow)" superClass="gnu.cpp.compiler.option.misc.hardening" useByScannerDiscovery="false"/>
 								<option id="gnu.cpp.compiler.option.misc.randomization.828330485" name="Address randomization (-fPIE)" superClass="gnu.cpp.compiler.option.misc.randomization" useByScannerDiscovery="false"/>
-								<option id="com.crt.advproject.cpp.lto.1117686864" name="Enable Link-time optimization (-flto)" superClass="com.crt.advproject.cpp.lto" useByScannerDiscovery="false"/>
+								<option id="com.crt.advproject.cpp.lto.1117686864" name="Enable Link-time optimization (-flto)" superClass="com.crt.advproject.cpp.lto" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="com.crt.advproject.cpp.lto.fat.311280153" name="Fat lto objects (-ffat-lto-objects)" superClass="com.crt.advproject.cpp.lto.fat" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.cpp.merge.constants.1757040354" name="Merge Identical Constants (-fmerge-constants)" superClass="com.crt.advproject.cpp.merge.constants" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.cpp.prefixmap.1573625798" name="Remove path from __FILE__ (-fmacro-prefix-map)" superClass="com.crt.advproject.cpp.prefixmap" useByScannerDiscovery="false"/>
@@ -191,7 +191,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Eigen}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.files.1190412531" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files" useByScannerDiscovery="false"/>
-								<option id="com.crt.advproject.gcc.exe.debug.option.optimization.level.359793169" name="Optimization Level" superClass="com.crt.advproject.gcc.exe.debug.option.optimization.level" useByScannerDiscovery="true" value="gnu.c.optimization.level.none" valueType="enumerated"/>
+								<option id="com.crt.advproject.gcc.exe.debug.option.optimization.level.359793169" name="Optimization Level" superClass="com.crt.advproject.gcc.exe.debug.option.optimization.level" useByScannerDiscovery="true" value="gnu.c.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.optimization.flags.1209146634" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-fno-common" valueType="string"/>
 								<option id="com.crt.advproject.gcc.exe.debug.option.debugging.level.1266289700" name="Debug Level" superClass="com.crt.advproject.gcc.exe.debug.option.debugging.level" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.gcc.exe.debug.option.debugging.other.497722750" name="Other debugging flags" superClass="com.crt.advproject.gcc.exe.debug.option.debugging.other" useByScannerDiscovery="false"/>
@@ -231,7 +231,7 @@
 								<option id="gnu.c.compiler.option.misc.pic.962736528" name="Position Independent Code (-fPIC)" superClass="gnu.c.compiler.option.misc.pic" useByScannerDiscovery="false"/>
 								<option id="gnu.c.compiler.option.misc.hardening.41438947" name="Hardening options (-fstack-protector-all -Wformat=2 -Wformat-security -Wstrict-overflow)" superClass="gnu.c.compiler.option.misc.hardening" useByScannerDiscovery="false"/>
 								<option id="gnu.c.compiler.option.misc.randomization.2061564" name="Address randomization (-fPIE)" superClass="gnu.c.compiler.option.misc.randomization" useByScannerDiscovery="false"/>
-								<option id="com.crt.advproject.gcc.lto.806066347" name="Enable Link-time optimization (-flto)" superClass="com.crt.advproject.gcc.lto" useByScannerDiscovery="false"/>
+								<option id="com.crt.advproject.gcc.lto.806066347" name="Enable Link-time optimization (-flto)" superClass="com.crt.advproject.gcc.lto" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="com.crt.advproject.gcc.lto.fat.956393197" name="Fat lto objects (-ffat-lto-objects)" superClass="com.crt.advproject.gcc.lto.fat" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.gcc.merge.constants.1006035056" name="Merge Identical Constants (-fmerge-constants)" superClass="com.crt.advproject.gcc.merge.constants" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.gcc.prefixmap.1604747113" name="Remove path from __FILE__ (-fmacro-prefix-map)" superClass="com.crt.advproject.gcc.prefixmap" useByScannerDiscovery="false"/>
@@ -318,8 +318,8 @@
 								<option id="gnu.cpp.link.option.debugging.prof.157214348" name="Generate prof information (-p)" superClass="gnu.cpp.link.option.debugging.prof"/>
 								<option id="gnu.cpp.link.option.debugging.gprof.884036924" name="Generate gprof information (-pg)" superClass="gnu.cpp.link.option.debugging.gprof"/>
 								<option id="gnu.cpp.link.option.debugging.codecov.392982973" name="Generate gcov information (-ftest-coverage -fprofile-arcs)" superClass="gnu.cpp.link.option.debugging.codecov"/>
-								<option id="com.crt.advproject.link.cpp.lto.1368355643" name="Enable Link-time optimization (-flto)" superClass="com.crt.advproject.link.cpp.lto"/>
-								<option id="com.crt.advproject.link.cpp.lto.optmization.level.2050726562" name="Link-time optimization level" superClass="com.crt.advproject.link.cpp.lto.optmization.level"/>
+								<option id="com.crt.advproject.link.cpp.lto.1368355643" name="Enable Link-time optimization (-flto)" superClass="com.crt.advproject.link.cpp.lto" value="false" valueType="boolean"/>
+								<option id="com.crt.advproject.link.cpp.lto.optmization.level.2050726562" name="Link-time optimization level" superClass="com.crt.advproject.link.cpp.lto.optmization.level" value="link.cpp.optimization.level.most" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.cpp.fpu.1342078395" name="Floating point" superClass="com.crt.advproject.link.cpp.fpu" value="com.crt.advproject.link.cpp.fpu.fpv5sp.hard" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.cpp.manage.243898503" name="Manage linker script" superClass="com.crt.advproject.link.cpp.manage" value="true" valueType="boolean"/>
 								<option id="com.crt.advproject.link.cpp.script.1694304979" name="Linker script" superClass="com.crt.advproject.link.cpp.script" value="MIMXRT1011_FlightControllerRtos_Debug.ld" valueType="string"/>

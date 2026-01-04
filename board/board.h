@@ -18,20 +18,6 @@
 /*! @brief The board name */
 #define BOARD_NAME "METRO-M7"
 
-/* The UART to use for debug messages. */
-#define BOARD_DEBUG_UART_TYPE     kSerialPort_Uart
-#define BOARD_DEBUG_UART_BASEADDR (uint32_t) LPUART1
-#define BOARD_DEBUG_UART_INSTANCE 1U
-
-#define BOARD_DEBUG_UART_CLK_FREQ BOARD_DebugConsoleSrcFreq()
-
-#define BOARD_UART_IRQ         LPUART1_IRQn
-#define BOARD_UART_IRQ_HANDLER LPUART1_IRQHandler
-
-#ifndef BOARD_DEBUG_UART_BAUDRATE
-#define BOARD_DEBUG_UART_BAUDRATE (115200U)
-#endif /* BOARD_DEBUG_UART_BAUDRATE */
-
 /*! @brief The USER_LED used for board */
 #define LOGIC_LED_ON  (0U)
 #define LOGIC_LED_OFF (1U)
@@ -76,9 +62,6 @@ extern "C" {
 /*******************************************************************************
  * API
  ******************************************************************************/
-uint32_t BOARD_DebugConsoleSrcFreq(void);
-
-void BOARD_InitDebugConsole(void);
 void BOARD_ConfigMPU(void);
 #if defined(__cplusplus)
 }
