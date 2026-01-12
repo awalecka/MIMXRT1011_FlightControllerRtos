@@ -46,8 +46,8 @@ volatile TickType_t g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
 // --- Queue Static Allocation ---
 
 // Controls Data Queue
-#define CONTROLS_QUEUE_LENGTH 1
-#define CONTROLS_QUEUE_ITEM_SIZE sizeof(ActuatorOutput)
+#define CONTROLS_QUEUE_LENGTH 10
+#define CONTROLS_QUEUE_ITEM_SIZE sizeof(LogMessage_t)
 static StaticQueue_t xControlsQueueControlBlock;
 static uint8_t ucControlsQueueStorageArea[CONTROLS_QUEUE_LENGTH * CONTROLS_QUEUE_ITEM_SIZE];
 

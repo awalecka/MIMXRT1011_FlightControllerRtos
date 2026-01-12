@@ -296,47 +296,50 @@ void FlightController::setControlMode(ControlMode mode) {
 void FlightController::update() {
     // Update Receiver Cache
     receiver.update();
-
-    // Read Sensors
-    IMU::RawData rawSensorData;
-    int sensorStatus = imu.readData(rawSensorData);
+    uint16_t rollRaw     = receiver.getChannel(RC_CH_ROLL);
+    uint16_t pitchRaw    = receiver.getChannel(RC_CH_PITCH);
+    uint16_t yawRaw      = receiver.getChannel(RC_CH_YAW);
+    uint16_t throttleRaw = receiver.getChannel(RC_CH_THROTTLE);
+    uint16_t aux1Value   = receiver.getChannel(RC_CH_AUX1);
 
     // Determine Control Mode
-    uint16_t aux1Value = receiver.getChannel(RC_CH_AUX1);
     if (aux1Value > 1500) {
         currentControlMode = ControlMode::PASS_THROUGH;
     } else {
         currentControlMode = ControlMode::STABILIZED;
     }
 
-    // Failsafe: Force Pass-Through if Sensors Failed
-    if (sensorStatus != 0 && currentControlMode == ControlMode::STABILIZED) {
-        currentControlMode = ControlMode::PASS_THROUGH;
+    // Read Sensors
+    IMU::RawData rawSensorData;
+    int sensorStatus = imu.readData(rawSensorData);
+
+    // Estimate Attitude (ALWAYS RUN if sensors are okay)
+    if (sensorStatus == 0) {
+        estimateAttitude(rawSensorData);
+    } else if(sensorStatus != 0 && currentControlMode == ControlMode::STABILIZED) {
+    	// Failsafe: Force Pass-Through if Sensors Failed
+    	currentControlMode = ControlMode::PASS_THROUGH;
     }
+
+    // Prepare Log Messages
+    LogMessage_t attMsg;
+    attMsg.type = LOG_TYPE_ATTITUDE;
+    attMsg.data.attitude.roll = currentRollDeg;
+    attMsg.data.attitude.pitch = currentPitchDeg;
+    attMsg.data.attitude.yaw = currentYawDeg;
+
+    // Log Raw Inputs
+    LogMessage_t cmdMsg;
+    cmdMsg.type = LOG_TYPE_COMMANDS;
+    cmdMsg.data.commands.aileron = rollRaw;
+    cmdMsg.data.commands.elevator = pitchRaw;
+    cmdMsg.data.commands.rudder = yawRaw;
+    cmdMsg.data.commands.throttle = throttleRaw;
 
     // Control Logic
     if (currentControlMode == ControlMode::PASS_THROUGH) {
         // --- RAW PASS THROUGH ---
-        // Read raw channel values (microseconds) directly from Receiver
-        uint16_t rollRaw     = receiver.getChannel(RC_CH_ROLL);
-        uint16_t pitchRaw    = receiver.getChannel(RC_CH_PITCH);
-        uint16_t yawRaw      = receiver.getChannel(RC_CH_YAW);
-        uint16_t throttleRaw = receiver.getChannel(RC_CH_THROTTLE);
-
-        // Send raw values directly to Actuators (Bypassing normalization)
         actuators.setRawOutputs(rollRaw, pitchRaw, yawRaw, throttleRaw);
-
-        // For telemetry logging, we still populate surfaceCommands with normalized values
-        // so the log remains readable, but these aren't used for control.
-        Receiver::StickInput sticks;
-        receiver.getStickInput(sticks);
-        ActuatorOutput telemetryStr = { sticks.roll, sticks.pitch, sticks.yaw };
-
-        teleCounter++;
-        if (teleCounter >= teleUpdate) {
-             xQueueSend(g_controls_data_queue, &telemetryStr, (TickType_t)0);
-             teleCounter = 0;
-        }
 
     } else {
         // --- STABILIZED MODE ---
@@ -344,7 +347,7 @@ void FlightController::update() {
         float throttleOutput = 0.0f;
 
         if (sensorStatus == 0) {
-            estimateAttitude(rawSensorData);
+             // Attitude estimation already done above
 
             Receiver::Setpoint setpoint;
             receiver.getSetpoint(setpoint);
@@ -364,14 +367,16 @@ void FlightController::update() {
             throttleOutput = setpoint.throttle;
         }
 
-        // Apply Normalized Outputs
         actuators.setOutputs(surfaceCommands.aileron, surfaceCommands.elevator, surfaceCommands.rudder, throttleOutput);
+    }
 
-        teleCounter++;
-        if (teleCounter >= teleUpdate) {
-             xQueueSend(g_controls_data_queue, &surfaceCommands, (TickType_t)0);
-             teleCounter = 0;
-        }
+    // Send Telemetry
+    teleCounter++;
+    if (teleCounter >= teleUpdate) {
+        // Send both packets
+        xQueueSend(g_controls_data_queue, &attMsg, (TickType_t)0);
+        xQueueSend(g_controls_data_queue, &cmdMsg, (TickType_t)0);
+        teleCounter = 0;
     }
 }
 
@@ -380,7 +385,6 @@ void FlightController::estimateAttitude(const IMU::RawData& rawData) {
     const FusionVector accelerometer = {rawData.accelXG, rawData.accelYG, rawData.accelZG};
 
     FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, loopDt);
-
     FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
 
     currentRollDeg = euler.angle.roll;

@@ -1087,13 +1087,13 @@
                            <setting name="enableRX" value="false"/>
                            <setting name="enableRXBuffer" value="true"/>
                            <setting name="enableTX" value="false"/>
-                           <setting name="signalEventFunctionId" value="LPUART2_SignalEvent"/>
+                           <setting name="signalEventFunctionId" value="USART_SignalEvent"/>
                            <setting name="enableGetFreqFnCustomName" value="false"/>
-                           <setting name="getFreqFunctionCustomID" value="LPUART2_GetFreq"/>
+                           <setting name="getFreqFunctionCustomID" value="USART_GetFreq"/>
                            <setting name="enableInitPinsFnCustomName" value="false"/>
-                           <setting name="initPinFunctionCustomID" value="LPUART2_InitPins"/>
+                           <setting name="initPinFunctionCustomID" value="USART_InitPins"/>
                            <setting name="enableDeinitPinsFnCustomName" value="false"/>
-                           <setting name="deinitPinFunctionCustomID" value="LPUART2_DeinitPins"/>
+                           <setting name="deinitPinFunctionCustomID" value="USART_DeinitPins"/>
                         </struct>
                      </config_set>
                      <config_set name="fsl_cmsis_uart">

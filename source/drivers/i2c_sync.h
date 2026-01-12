@@ -11,7 +11,7 @@ extern "C" {
 #include "semphr.h"
 
 // Define a maximum timeout for I2C operations in FreeRTOS ticks
-#define I2C_TIMEOUT_TICKS pdMS_TO_TICKS(100) // 100ms timeout
+#define I2C_TIMEOUT_TICKS pdMS_TO_TICKS(2) // 2ms timeout
 
 /**
  * @brief Generic I2C Synchronization Handle Structure.

@@ -48,6 +48,38 @@ constexpr float radToDeg(float rad) { return rad * 180.0f / PI; }
 #define IBUS_DMA_CHANNEL        0U
 #define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART4Rx
 
+// --- Logging Data Structures ---
+
+// Packet Types
+typedef enum {
+    LOG_TYPE_ATTITUDE = 0x01,
+    LOG_TYPE_COMMANDS = 0x02
+} LogType_t;
+
+// Payload for Attitude (Packet 1)
+typedef struct {
+    float roll;
+    float pitch;
+    float yaw;
+} LogAttitude_t;
+
+// Payload for Raw Commands (Packet 2)
+typedef struct {
+    uint16_t aileron;
+    uint16_t elevator;
+    uint16_t rudder;
+    uint16_t throttle;
+} LogCommands_t;
+
+// Unified Queue Item
+typedef struct {
+    LogType_t type;
+    union {
+        LogAttitude_t attitude;
+        LogCommands_t commands;
+    } data;
+} LogMessage_t;
+
 typedef struct {
     unsigned short channels[IBUS_MAX_CHANNELS];
 } RC_Channels_t;
