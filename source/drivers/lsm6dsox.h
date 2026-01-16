@@ -1,6 +1,10 @@
 #ifndef LSM6DSOX_H
 #define LSM6DSOX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include "Driver_I2C.h" // CMSIS I2C Driver API
 #include "i2c_sync.h"   // Include common I2C synchronization functions
@@ -219,5 +223,8 @@ int32_t LSM6DSOX_ReadGyro(lsm6dsox_handle_t *handle, lsm6dsox_3axis_data_t *gyro
  */
 int32_t LSM6DSOX_RemapData(const lsm6dsox_3axis_data_t *input_data, const lsm6dsox_axis_mapping_t *mapping, lsm6dsox_3axis_data_t *output_data);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // LSM6DSOX_H

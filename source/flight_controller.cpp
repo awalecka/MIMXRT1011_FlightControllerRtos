@@ -9,9 +9,6 @@ using namespace firmware::drivers;
 // Define the global FlightController instance
 FlightController g_flightController(0.01f);
 
-// Extern the I2C driver defined in board/peripherals
-extern ARM_DRIVER_I2C LPI2C1_SENSORS_CMSIS_DRIVER;
-
 // --- PIDController Implementation ---
 PIDController::PIDController(float p, float i, float d, float alpha)
     : kp(p), ki(i), kd(d), integral(0.0f), prevError(0.0f), alpha(alpha), dTermFiltered(0.0f) {}
@@ -124,71 +121,6 @@ ActuatorOutput AttitudeController::update(const FullSensorData& sensorData, floa
     controls.rudder = std::clamp(totalYawMoment, -1.0f, 1.0f);
 
     return controls;
-}
-
-// --- IMU Implementation ---
-IMU::IMU() : gyroBiasX(0.0f), gyroBiasY(0.0f), gyroBiasZ(0.0f),
-             magCalibrator(0.99f, 500.0f, 0.01f) {
-}
-
-int IMU::init() {
-    i2c_sync_global_init();
-    if (LSM6DSOX_Init(&g_sensor_handle, &LPI2C1_SENSORS_CMSIS_DRIVER, LSM6DSOX_I2C_ADDR) != 0 ||
-        LSM6DSOX_SetAccConfig(&g_sensor_handle, LSM6DSOX_ACC_ODR_52Hz, LSM6DSOX_ACC_FS_2G) != 0 ||
-        LSM6DSOX_SetGyroConfig(&g_sensor_handle, LSM6DSOX_GYRO_ODR_104Hz, LSM6DSOX_GYRO_FS_250DPS) != 0) {
-        return -1;
-    }
-    if (LIS3MDL_Init(&g_mag_handle, &LPI2C1_SENSORS_CMSIS_DRIVER, LIS3MDL_I2C_ADDR) != 0 ||
-        LIS3MDL_SetConfig(&g_mag_handle, LIS3MDL_ODR_80_HZ_HP, LIS3MDL_FS_4_GAUSS) != 0) {
-        return -1;
-    }
-    return 0;
-}
-
-void IMU::calibrateGyro() {
-    const int sampleCount = 200;
-    float sumX = 0.0f, sumY = 0.0f, sumZ = 0.0f;
-    sensor_data_raw_t raw;
-    sensor_data_vehicle_t veh;
-
-    for (int i = 0; i < sampleCount; i++) {
-        if (LSM6DSOX_ReadGyro(&g_sensor_handle, &raw.gyro_data) == 0) {
-            LSM6DSOX_RemapData(&raw.gyro_data, &vehicleMapping, &veh.gyro_data);
-            sumX += veh.gyro_data.x;
-            sumY += veh.gyro_data.y;
-            sumZ += veh.gyro_data.z;
-        }
-        vTaskDelay(pdMS_TO_TICKS(20));
-    }
-
-    gyroBiasX = sumX / (float)sampleCount;
-    gyroBiasY = sumY / (float)sampleCount;
-    gyroBiasZ = sumZ / (float)sampleCount;
-}
-
-int IMU::readData(IMU::RawData& rawData) {
-    sensor_data_raw_t currentSensorDataRaw;
-    sensor_data_vehicle_t currentSensorDataVehicle;
-    lis3mdl_3axis_data_t magDataGauss;
-
-    if (LSM6DSOX_ReadAcc(&g_sensor_handle, &currentSensorDataRaw.acc_data) != 0 ||
-        LSM6DSOX_ReadGyro(&g_sensor_handle, &currentSensorDataRaw.gyro_data) != 0 ||
-        LIS3MDL_ReadMagnetometer(&g_mag_handle, &magDataGauss) != 0) {
-        return -1;
-    }
-
-    LSM6DSOX_RemapData(&currentSensorDataRaw.acc_data, &vehicleMapping, &currentSensorDataVehicle.acc_data);
-    LSM6DSOX_RemapData(&currentSensorDataRaw.gyro_data, &vehicleMapping, &currentSensorDataVehicle.gyro_data);
-
-    rawData.gyroXDps = currentSensorDataVehicle.gyro_data.x - gyroBiasX;
-    rawData.gyroYDps = currentSensorDataVehicle.gyro_data.y - gyroBiasY;
-    rawData.gyroZDps = currentSensorDataVehicle.gyro_data.z - gyroBiasZ;
-    rawData.accelXG = currentSensorDataVehicle.acc_data.x;
-    rawData.accelYG = currentSensorDataVehicle.acc_data.y;
-    rawData.accelZG = currentSensorDataVehicle.acc_data.z;
-    rawData.airspeedMs = 0.0f;
-
-    return 0;
 }
 
 // --- Receiver Implementation ---
@@ -309,8 +241,8 @@ void FlightController::update() {
         currentControlMode = ControlMode::STABILIZED;
     }
 
-    // Read Sensors
-    IMU::RawData rawSensorData;
+// Read Sensors
+    IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData rawSensorData;
     int sensorStatus = imu.readData(rawSensorData);
 
     // Estimate Attitude (ALWAYS RUN if sensors are okay)
@@ -380,7 +312,7 @@ void FlightController::update() {
     }
 }
 
-void FlightController::estimateAttitude(const IMU::RawData& rawData) {
+void FlightController::estimateAttitude(const IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData) {
     const FusionVector gyroscope = {rawData.gyroXDps, rawData.gyroYDps, rawData.gyroZDps};
     const FusionVector accelerometer = {rawData.accelXG, rawData.accelYG, rawData.accelZG};
 

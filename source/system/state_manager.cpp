@@ -2,10 +2,7 @@
  * @file state_manager.cpp
  * @brief Implements the main state machine controller task.
  */
-
 #include "flight_controller.h"
-#include "Driver_I2C.h"
-#include "peripherals.h"
 
 // --- Task Handle Definitions ---
 TaskHandle_t g_heartbeat_task_handle = NULL;

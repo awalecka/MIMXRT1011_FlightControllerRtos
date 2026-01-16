@@ -25,10 +25,8 @@ extern "C" {
 static edma_handle_t s_edmaHandle;
 
 // --- Global Variable Definitions ---
-// These are the actual memory definitions for the externs in flight_controller.h
+// Flight State
 volatile FlightState_t g_flight_state = STATE_BOOT;
-lsm6dsox_handle_t g_sensor_handle = {0};
-lis3mdl_handle_t g_mag_handle = {0};
 
 // Buffer must be aligned for DMA access
 uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE] __attribute__((aligned(4)));

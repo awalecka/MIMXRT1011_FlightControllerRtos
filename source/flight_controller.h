@@ -20,23 +20,23 @@
 #include "board.h"
 #include "peripherals.h"
 #include "rls_mag_calibration.h"
-#include "servo_driver.h" //
+#include "servo_driver.h"
 
-extern "C" {
-#include <lis3mdl.h>
-#include <lsm6dsox.h>
-}
+// --- Include Adapters & Concepts ---
+#include "drivers/imu_concepts.h"
+#include "drivers/lsm6dsox_adapter.hpp"
+#include "drivers/lis3mdl_adapter.hpp"
 
 // --- Utility Functions ---
 constexpr float degToRad(float deg) { return deg * PI / 180.0f; }
 constexpr float radToDeg(float rad) { return rad * 180.0f / PI; }
 
-// Channel Mapping (Assumes AETR: 0=Roll, 1=Pitch, 2=Throttle, 3=Yaw)
+// Channel Mapping
 #define RC_CH_ROLL     0
 #define RC_CH_PITCH    1
 #define RC_CH_THROTTLE 2
 #define RC_CH_YAW      3
-#define RC_CH_AUX1     4 // Switch for Mode Selection
+#define RC_CH_AUX1     4
 #define IBUS_MAX_CHANNELS 14
 
 // IBUS Configuration Constants
@@ -92,20 +92,6 @@ typedef enum {
     STATE_CALIBRATE
 } FlightState_t;
 
-typedef struct {
-    TickType_t timestamp;
-    lsm6dsox_3axis_data_t acc_data;
-    lsm6dsox_3axis_data_t gyro_data;
-    lis3mdl_3axis_raw_t  mag_data;
-} sensor_data_raw_t;
-
-typedef struct {
-    TickType_t timestamp;
-    lsm6dsox_3axis_data_t acc_data;
-    lsm6dsox_3axis_data_t gyro_data;
-    lis3mdl_3axis_data_t  mag_data;
-} sensor_data_vehicle_t;
-
 struct FullSensorData {
     float rollDeg;
     float pitchDeg;
@@ -121,7 +107,6 @@ struct ActuatorOutput {
     float elevator;
     float rudder;
 };
-
 
 // --- Task Prototypes ---
 void stateManagerTask(void *pvParameters);
@@ -170,6 +155,11 @@ private:
     const float NOMINAL_AIRSPEED_FOR_TUNING = 20.0f;
 };
 
+/**
+ * @brief Policy-Based IMU HAL.
+ * Templates resolve at compile time for zero runtime overhead.
+ */
+template <SixAxisSensor AccelPolicy, MagnetometerSensor MagPolicy>
 class IMU {
 public:
     struct RawData {
@@ -179,20 +169,98 @@ public:
         float airspeedMs;
     };
 
-    lsm6dsox_axis_mapping_t vehicleMapping = {
-        .map_x = LSM6DSOX_AXIS_X_POSITIVE,
-        .map_y = LSM6DSOX_AXIS_Y_NEGATIVE,
-        .map_z = LSM6DSOX_AXIS_Z_NEGATIVE
-    };
+    IMU() : gyroBiasX(0.0f), gyroBiasY(0.0f), gyroBiasZ(0.0f),
+            magCalibrator(0.99f, 500.0f, 0.01f) {
+        // Vehicle mapping definition
+        vehicleMapping.map_x = LSM6DSOX_AXIS_X_POSITIVE;
+        vehicleMapping.map_y = LSM6DSOX_AXIS_Y_NEGATIVE;
+        vehicleMapping.map_z = LSM6DSOX_AXIS_Z_NEGATIVE;
+    }
 
-    IMU();
-    int init();
-    int readData(RawData& rawData);
-    void calibrateGyro();
+    int init() {
+        i2c_sync_global_init();
+        if (accelDriver.init() != 0) return -1;
+        if (magDriver.init() != 0) return -1;
+        return 0;
+    }
+
+    void calibrateGyro() {
+        const int sampleCount = 200;
+        float sumX = 0.0f, sumY = 0.0f, sumZ = 0.0f;
+        Axis3f rawGyro;
+        Axis3f mappedGyro;
+
+        for (int i = 0; i < sampleCount; i++) {
+            if (accelDriver.readGyro(rawGyro) == 0) {
+                // Manually remap here since we abstracted the driver
+                remapAxis(rawGyro, mappedGyro);
+                sumX += mappedGyro.x;
+                sumY += mappedGyro.y;
+                sumZ += mappedGyro.z;
+            }
+            vTaskDelay(pdMS_TO_TICKS(20));
+        }
+
+        gyroBiasX = sumX / (float)sampleCount;
+        gyroBiasY = sumY / (float)sampleCount;
+        gyroBiasZ = sumZ / (float)sampleCount;
+    }
+
+    int readData(RawData& rawData) {
+        Axis3f rawAcc, rawGyro, rawMag;
+        Axis3f mapAcc, mapGyro;
+
+        if (accelDriver.readAccel(rawAcc) != 0 ||
+            accelDriver.readGyro(rawGyro) != 0 ||
+            magDriver.readMag(rawMag) != 0) {
+            return -1;
+        }
+
+        remapAxis(rawAcc, mapAcc);
+        remapAxis(rawGyro, mapGyro);
+
+        rawData.gyroXDps = mapGyro.x - gyroBiasX;
+        rawData.gyroYDps = mapGyro.y - gyroBiasY;
+        rawData.gyroZDps = mapGyro.z - gyroBiasZ;
+        rawData.accelXG = mapAcc.x;
+        rawData.accelYG = mapAcc.y;
+        rawData.accelZG = mapAcc.z;
+        rawData.airspeedMs = 0.0f;
+
+        // Note: Magnetometer remapping is usually handled by the calibration lib
+        // or can be added here if needed.
+        rawData.magXGauss = rawMag.x;
+        rawData.magYGauss = rawMag.y;
+        rawData.magZGauss = rawMag.z;
+
+        return 0;
+    }
 
 private:
+    AccelPolicy accelDriver;
+    MagPolicy magDriver;
     float gyroBiasX, gyroBiasY, gyroBiasZ;
     RlsMagnetometerCalibratorF magCalibrator;
+    lsm6dsox_axis_mapping_t vehicleMapping;
+
+    // Helper to replace LSM6DSOX_RemapData
+    void remapAxis(const Axis3f& input, Axis3f& output) {
+        output.x = getMappedValue(input, vehicleMapping.map_x);
+        output.y = getMappedValue(input, vehicleMapping.map_y);
+        output.z = getMappedValue(input, vehicleMapping.map_z);
+    }
+
+    float getMappedValue(const Axis3f& input, lsm6dsox_axis_source_t source) {
+        switch (source) {
+            case LSM6DSOX_AXIS_X_POSITIVE: return input.x;
+            case LSM6DSOX_AXIS_X_NEGATIVE: return -input.x;
+            case LSM6DSOX_AXIS_Y_POSITIVE: return input.y;
+            case LSM6DSOX_AXIS_Y_NEGATIVE: return -input.y;
+            case LSM6DSOX_AXIS_Z_POSITIVE: return input.z;
+            case LSM6DSOX_AXIS_Z_NEGATIVE: return -input.z;
+            default: return 0.0f;
+        }
+    }
 };
 
 class Receiver {
@@ -262,9 +330,11 @@ public:
     RC_Channels_t getRcData() const;
 
 private:
-    void estimateAttitude(const IMU::RawData& rawData);
+    void estimateAttitude(const IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData);
 
-    IMU imu;
+    // Concrete instantiation of the Policy-Based IMU
+    IMU<Lsm6dsoxAdapter, Lis3mdlAdapter> imu;
+
     Receiver receiver;
     Actuators actuators;
     AttitudeController attitudeController;
@@ -277,9 +347,6 @@ private:
 };
 
 // --- Globals ---
-extern lsm6dsox_handle_t g_sensor_handle;
-extern lis3mdl_handle_t g_mag_handle;
-
 extern TaskHandle_t g_state_manager_task_handle;
 extern TaskHandle_t g_command_handler_task_handle;
 extern TaskHandle_t g_idle_task_handle;
@@ -288,7 +355,6 @@ extern TaskHandle_t g_calibrate_task_handle;
 extern TaskHandle_t g_logging_task_handle;
 extern TaskHandle_t g_heartbeat_task_handle;
 
-extern QueueHandle_t g_sensor_data_queue;
 extern QueueHandle_t g_controls_data_queue;
 extern QueueHandle_t g_command_data_queue;
 extern QueueHandle_t g_state_change_request_queue;

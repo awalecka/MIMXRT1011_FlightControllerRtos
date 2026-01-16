@@ -1,6 +1,10 @@
 #ifndef LIS3MDL_H
 #define LIS3MDL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include "Driver_I2C.h" // CMSIS I2C Driver API
 #include "i2c_sync.h"   // Include common I2C synchronization functions
@@ -112,5 +116,9 @@ int32_t LIS3MDL_ReadMagnetometerRaw(lis3mdl_handle_t *handle, lis3mdl_3axis_raw_
  * @return 0 on success, -1 on failure.
  */
 int32_t LIS3MDL_ReadMagnetometer(lis3mdl_handle_t *handle, lis3mdl_3axis_data_t *mag_data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // LIS3MDL_H
