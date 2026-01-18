@@ -57,6 +57,15 @@ void loggingTask(void *pvParameters) {
             } else if (message.type == LOG_TYPE_COMMANDS) {
                 payloadSize = sizeof(LogCommands_t);
                 pPayloadData = &message.data.commands;
+            } else if (message.type == LOG_TYPE_MAG_RAW) {
+                payloadSize = sizeof(LogMagRaw_t);
+                pPayloadData = &message.data.magRaw;
+            } else if (message.type == LOG_TYPE_CAL_STATUS) {
+                payloadSize = sizeof(LogCalStatus_t);
+                pPayloadData = &message.data.calStatus;
+            } else if (message.type == LOG_TYPE_SYSTEM_STATUS) {
+				payloadSize = sizeof(LogSystemStatus_t);
+				pPayloadData = &message.data.sysStatus;
             } else {
                 continue; // Unknown type
             }

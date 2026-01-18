@@ -48,20 +48,31 @@ constexpr float radToDeg(float rad) { return rad * 180.0f / PI; }
 #define IBUS_DMA_CHANNEL        0U
 #define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART4Rx
 
+// Gesture Thresholds (Mode 2)
+#define GESTURE_STICK_LOW   1050
+#define GESTURE_STICK_HIGH  1900
+#define GESTURE_TIME_MS     1000
+
 // --- Logging Data Structures ---
 
 // Packet Types
 typedef enum {
-    LOG_TYPE_ATTITUDE = 0x01,
-    LOG_TYPE_COMMANDS = 0x02
+    LOG_TYPE_ATTITUDE   = 0x01,
+    LOG_TYPE_COMMANDS   = 0x02,
+    LOG_TYPE_MAG_RAW    = 0x03,  // Raw Mag X,Y,Z
+    LOG_TYPE_CAL_STATUS = 0x04,  // Calibration Status
+	LOG_TYPE_SYSTEM_STATUS= 0x05 // Flight State & System Info
 } LogType_t;
+
+// Force byte-alignment to match Python struct.unpack
+#define PACKED __attribute__((packed))
 
 // Payload for Attitude (Packet 1)
 typedef struct {
     float roll;
     float pitch;
     float yaw;
-} LogAttitude_t;
+} PACKED LogAttitude_t;
 
 // Payload for Raw Commands (Packet 2)
 typedef struct {
@@ -69,7 +80,27 @@ typedef struct {
     uint16_t elevator;
     uint16_t rudder;
     uint16_t throttle;
-} LogCommands_t;
+} PACKED LogCommands_t;
+
+// Payload for Raw Magnetometer (Packet 3)
+typedef struct {
+    float x;
+    float y;
+    float z;
+} PACKED LogMagRaw_t;
+
+// Payload for Calibration Status (Packet 4)
+typedef struct {
+    uint8_t status;
+    float fitError;
+} PACKED LogCalStatus_t;
+
+// Payload for System Status (Packet 5)
+typedef struct {
+    uint8_t flightState;
+    uint8_t reserved;
+    uint16_t cpuLoad;
+} PACKED LogSystemStatus_t;
 
 // Unified Queue Item
 typedef struct {
@@ -77,6 +108,9 @@ typedef struct {
     union {
         LogAttitude_t attitude;
         LogCommands_t commands;
+        LogMagRaw_t magRaw;
+        LogCalStatus_t calStatus;
+        LogSystemStatus_t sysStatus;
     } data;
 } LogMessage_t;
 
@@ -106,6 +140,21 @@ struct ActuatorOutput {
     float aileron;
     float elevator;
     float rudder;
+};
+
+// --- Persistent Settings ---
+struct MagCalibrationParams {
+    float hardIron[3];
+    float softIron[9]; // 3x3 Flattened
+    bool isValid;
+};
+
+class Settings {
+public:
+    static void saveMagCal(const MagCalibrationParams& params);
+    static bool loadMagCal(MagCalibrationParams& params);
+private:
+    static MagCalibrationParams s_activeParams; // RAM emulation
 };
 
 // --- Task Prototypes ---
@@ -170,7 +219,7 @@ public:
     };
 
     IMU() : gyroBiasX(0.0f), gyroBiasY(0.0f), gyroBiasZ(0.0f),
-            magCalibrator(0.99f, 500.0f, 0.01f) {
+            magCalibrator(0.98f, 1000.0f, 0.01f) {
         // Vehicle mapping definition
         vehicleMapping.map_x = LSM6DSOX_AXIS_X_POSITIVE;
         vehicleMapping.map_y = LSM6DSOX_AXIS_Y_NEGATIVE;
@@ -206,6 +255,9 @@ public:
         gyroBiasZ = sumZ / (float)sampleCount;
     }
 
+    /**
+     * @brief Reads sensor data and applies CURRENT calibration.
+     */
     int readData(RawData& rawData) {
         Axis3f rawAcc, rawGyro, rawMag;
         Axis3f mapAcc, mapGyro;
@@ -227,13 +279,61 @@ public:
         rawData.accelZG = mapAcc.z;
         rawData.airspeedMs = 0.0f;
 
-        // Note: Magnetometer remapping is usually handled by the calibration lib
-        // or can be added here if needed.
+        // Apply Magnetometer Calibration
+        // 1. Convert to Eigen vector
+        RlsMagnetometerCalibratorF::Vector3 rawMagVec(rawMag.x, rawMag.y, rawMag.z);
+        // 2. Apply Soft/Hard Iron corrections
+        RlsMagnetometerCalibratorF::Vector3 calMagVec = magCalibrator.getCalibratedData(rawMagVec);
+
+        rawData.magXGauss = calMagVec.x();
+        rawData.magYGauss = calMagVec.y();
+        rawData.magZGauss = calMagVec.z();
+
+        return 0;
+    }
+
+    /**
+     * @brief Reads raw mag data, feeds the RLS filter, and outputs the raw values for logging.
+     * Does NOT apply calibration to the output.
+     */
+    int feedMagCalibration(RawData& rawData) {
+        Axis3f rawMag;
+        if (magDriver.readMag(rawMag) != 0) return -1;
+
+        // Feed RLS
+        //RlsMagnetometerCalibratorF::Vector3 input(rawMag.x, rawMag.y, rawMag.z);
+        //magCalibrator.update(input);
+
+        // Store Raw for Logging
         rawData.magXGauss = rawMag.x;
         rawData.magYGauss = rawMag.y;
         rawData.magZGauss = rawMag.z;
 
         return 0;
+    }
+
+    void setCalibration(const float hardIron[3], const float softIron[9]) {
+        RlsMagnetometerCalibratorF::Vector3 offset(hardIron[0], hardIron[1], hardIron[2]);
+        RlsMagnetometerCalibratorF::Matrix3 matrix;
+        // Eigen comma initializer
+        matrix << softIron[0], softIron[1], softIron[2],
+                  softIron[3], softIron[4], softIron[5],
+                  softIron[6], softIron[7], softIron[8];
+        magCalibrator.setInitialCalibration(matrix, offset);
+    }
+
+    void getCalibration(float hardIron[3], float softIron[9]) {
+        auto offset = magCalibrator.getHardIronOffset();
+        auto matrix = magCalibrator.getSoftIronCorrection();
+
+        hardIron[0] = offset.x(); hardIron[1] = offset.y(); hardIron[2] = offset.z();
+
+        // Flatten row-major
+        for(int r=0; r<3; r++) {
+            for(int c=0; c<3; c++) {
+                softIron[r*3 + c] = matrix(r, c);
+            }
+        }
     }
 
 private:
@@ -328,6 +428,11 @@ public:
     void calibrateSensors();
     void setControlMode(ControlMode mode);
     RC_Channels_t getRcData() const;
+
+    // --- New Calibration & Gesture Helpers ---
+    bool calibrateMagnetometerStep();
+    void saveCalibration();
+    void getStickInput(Receiver::StickInput& input);
 
 private:
     void estimateAttitude(const IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData);

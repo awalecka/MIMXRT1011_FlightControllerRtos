@@ -9,6 +9,23 @@ using namespace firmware::drivers;
 // Define the global FlightController instance
 FlightController g_flightController(0.01f);
 
+// --- Settings Implementation (RAM Stub) ---
+MagCalibrationParams Settings::s_activeParams = { .isValid = false };
+
+void Settings::saveMagCal(const MagCalibrationParams& params) {
+    s_activeParams = params;
+    s_activeParams.isValid = true;
+    // TODO: Persist to Flash/EEPROM here
+}
+
+bool Settings::loadMagCal(MagCalibrationParams& params) {
+    if (s_activeParams.isValid) {
+        params = s_activeParams;
+        return true;
+    }
+    return false;
+}
+
 // --- PIDController Implementation ---
 PIDController::PIDController(float p, float i, float d, float alpha)
     : kp(p), ki(i), kd(d), integral(0.0f), prevError(0.0f), alpha(alpha), dTermFiltered(0.0f) {}
@@ -211,6 +228,13 @@ int FlightController::init() {
     if (imu.init() != 0) {
         return -1;
     }
+
+    // Load Calibration from Settings if available
+    MagCalibrationParams calParams;
+    if (Settings::loadMagCal(calParams)) {
+        imu.setCalibration(calParams.hardIron, calParams.softIron);
+    }
+
     receiver.init();
     actuators.init();
     FusionAhrsInitialise(&ahrs);
@@ -223,6 +247,43 @@ void FlightController::calibrateSensors() {
 
 void FlightController::setControlMode(ControlMode mode) {
     currentControlMode = mode;
+}
+
+void FlightController::getStickInput(Receiver::StickInput& input) {
+    receiver.getStickInput(input);
+}
+
+bool FlightController::calibrateMagnetometerStep() {
+    // 1. Read Raw Sensor Data via new helper
+    IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData rawData;
+    // Note: We use feedMagCalibration to get the raw data AND update the RLS
+    if (imu.feedMagCalibration(rawData) != 0) return false;
+
+    // 2. Queue Raw Data for Telemetry (Red Dots on Viz)
+    LogMessage_t msg;
+    msg.type = LOG_TYPE_MAG_RAW;
+    msg.data.magRaw.x = rawData.magXGauss;
+    msg.data.magRaw.y = rawData.magYGauss;
+    msg.data.magRaw.z = rawData.magZGauss;
+    xQueueSend(g_controls_data_queue, &msg, 0);
+
+    return true; // Running
+}
+
+void FlightController::saveCalibration() {
+    MagCalibrationParams params;
+    // Extract parameters from RLS estimator
+    imu.getCalibration(params.hardIron, params.softIron);
+
+    // Save to Settings
+    Settings::saveMagCal(params);
+
+    // Send Success Status
+    LogMessage_t msg;
+    msg.type = LOG_TYPE_CAL_STATUS;
+    msg.data.calStatus.status = 1; // 1 = Saved/Converged
+    msg.data.calStatus.fitError = 0.0f; // Placeholder
+    xQueueSend(g_controls_data_queue, &msg, 0);
 }
 
 void FlightController::update() {
@@ -241,7 +302,7 @@ void FlightController::update() {
         currentControlMode = ControlMode::STABILIZED;
     }
 
-// Read Sensors
+    // Read Sensors
     IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData rawSensorData;
     int sensorStatus = imu.readData(rawSensorData);
 
@@ -303,19 +364,37 @@ void FlightController::update() {
     }
 
     // Send Telemetry
-    teleCounter++;
-    if (teleCounter >= teleUpdate) {
-        // Send both packets
-        xQueueSend(g_controls_data_queue, &attMsg, (TickType_t)0);
-        xQueueSend(g_controls_data_queue, &cmdMsg, (TickType_t)0);
-        teleCounter = 0;
-    }
+	teleCounter++;
+	if (teleCounter >= teleUpdate) {
+		// Send existing packets
+		xQueueSend(g_controls_data_queue, &attMsg, (TickType_t)0);
+		xQueueSend(g_controls_data_queue, &cmdMsg, (TickType_t)0);
+
+		// --- ADD THIS BLOCK ---
+		// Send System Status (Low Priority: 10Hz if teleUpdate is 50Hz)
+		static int statusDivider = 0;
+		if (++statusDivider >= 5) {
+			LogMessage_t sysMsg;
+			sysMsg.type = LOG_TYPE_SYSTEM_STATUS;
+			// Cast the global enum to uint8_t for the packet
+			sysMsg.data.sysStatus.flightState = (uint8_t)g_flight_state;
+			sysMsg.data.sysStatus.reserved = 0;
+			sysMsg.data.sysStatus.cpuLoad = 0; // Placeholder for future use
+
+			xQueueSend(g_controls_data_queue, &sysMsg, (TickType_t)0);
+			statusDivider = 0;
+		}
+		// ----------------------
+
+		teleCounter = 0;
+	}
 }
 
 void FlightController::estimateAttitude(const IMU<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData) {
     const FusionVector gyroscope = {rawData.gyroXDps, rawData.gyroYDps, rawData.gyroZDps};
     const FusionVector accelerometer = {rawData.accelXG, rawData.accelYG, rawData.accelZG};
 
+    // Once calibration is confirmed robust, we can use FusionAhrsUpdate with magnetometer
     FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, loopDt);
     FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
 

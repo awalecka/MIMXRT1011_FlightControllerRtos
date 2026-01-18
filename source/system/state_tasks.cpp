@@ -7,17 +7,67 @@
 #include <board.h>
 #include <utils.h>
 
+// --- Gesture Detection Helper ---
+static uint32_t s_gestureStartTime = 0;
+static bool s_gestureActive = false;
+
+// Stick Patterns (Mode 2):
+// ARM: Throttle Low + Yaw Right
+// CALIBRATE: Throttle Low + Yaw Left + Pitch Up
+FlightState_t checkGestures(const Receiver::StickInput& s) {
+    // Map stick inputs (approx -1.0 to 1.0, Throttle 0.0 to 100.0)
+    // Thresholds: Low ~ 1050us (5%), High/Right ~ 1900us (>0.9)
+
+    bool thrLow  = (s.throttle < 5.0f);
+    bool yawRight = (s.yaw > 0.9f);
+    bool yawLeft  = (s.yaw < -0.9f);
+    bool pitchUp  = (s.pitch > 0.9f);
+
+    bool isArm = thrLow && yawRight;
+    bool isCal = thrLow && yawLeft && pitchUp;
+
+    if (isArm || isCal) {
+        uint32_t now = xTaskGetTickCount();
+        if (!s_gestureActive) {
+            s_gestureStartTime = now;
+            s_gestureActive = true;
+        } else if ((now - s_gestureStartTime) > pdMS_TO_TICKS(GESTURE_TIME_MS)) {
+            s_gestureActive = false; // Reset to prevent re-trigger
+            return isArm ? STATE_FLIGHT : STATE_CALIBRATE;
+        }
+    } else {
+        s_gestureActive = false;
+    }
+
+    return STATE_IDLE; // No change
+}
+
+
 /**
  * @brief Task for the FLIGHT state.
  */
 void flightTask(void *pvParameters) {
     const TickType_t xFlightLoopFrequency = pdMS_TO_TICKS(10); // 100Hz
 	TickType_t xLastWakeTime = xTaskGetTickCount();
-
-	g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
+    static uint32_t disarmStart = 0;
 
     while (true) {
         vTaskDelayUntil(&xLastWakeTime, xFlightLoopFrequency);
+
+        // --- Disarm Check (Throttle Low + Yaw Left) ---
+        Receiver::StickInput s;
+        g_flightController.getStickInput(s);
+        if (s.throttle < 5.0f && s.yaw < -0.9f) {
+             if (disarmStart == 0) disarmStart = xTaskGetTickCount();
+             else if ((xTaskGetTickCount() - disarmStart) > pdMS_TO_TICKS(GESTURE_TIME_MS)) {
+                 FlightState_t next = STATE_IDLE;
+                 xQueueSend(g_state_change_request_queue, &next, 0);
+                 disarmStart = 0;
+             }
+        } else {
+            disarmStart = 0;
+        }
+
         // Use the global controller instance
         USER_TIMING_ON();
         g_flightController.update();
@@ -29,19 +79,26 @@ void flightTask(void *pvParameters) {
  * @brief Task for the IDLE state.
  */
 void idleTask(void *pvParameters) {
-	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
+
+	TickType_t xLastWakeTime = xTaskGetTickCount();
 
 	while (true) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // 100Hz update
 
-        // --- Request transition to flight ---
-        // Instead of writing to g_flight_state, send a request to the state manager.
-        FlightState_t new_state = STATE_CALIBRATE;
-        xQueueSend(g_state_change_request_queue, &new_state, 0);
+        // 1. Run Controller (Keeps AHRS updated, sensors read, telemetry sending)
+        // Note: Actuators are typically disabled or neutral in IDLE, handled by update() state logic if needed
+        g_flightController.update();
 
-        // This task will now be suspended by the state manager once it
-        // processes the request. The vTaskDelay ensures this loop
-        // doesn't spin, repeatedly sending requests.
+        // 2. Check Gestures
+        Receiver::StickInput sticks;
+        g_flightController.getStickInput(sticks);
+
+        FlightState_t next = checkGestures(sticks);
+
+        if (next != STATE_IDLE) {
+            xQueueSend(g_state_change_request_queue, &next, 0);
+            vTaskDelay(pdMS_TO_TICKS(500)); // Wait for switch
+        }
     }
 }
 
@@ -49,17 +106,41 @@ void idleTask(void *pvParameters) {
  * @brief Task for the CALIBRATE state.
  */
 void calibrateTask(void *pvParameters) {
-	g_heartbeat_frequency = pdMS_TO_TICKS(100); // Fast blink for calibration
+
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+
+    // Auto-exit timeout
+    uint32_t entryTime = xTaskGetTickCount();
+    const uint32_t TIMEOUT = pdMS_TO_TICKS(60000); // 60s
 
 	while (true) {
-        // Blocking call to perform calibration
-        g_flightController.calibrateSensors();
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(20));
 
-        // Automatically transition back to IDLE
-        FlightState_t new_state = STATE_FLIGHT;
-        xQueueSend(g_state_change_request_queue, &new_state, 0);
+        g_flightController.update();
 
-        // Wait to be suspended by state manager
-        vTaskDelay(pdMS_TO_TICKS(1000));
+        // 1. Interactive Calibration Step
+        g_flightController.calibrateMagnetometerStep();
+
+        // 2. Check Exit (Throttle Low + Yaw Left) or Timeout
+        Receiver::StickInput s;
+        g_flightController.getStickInput(s);
+
+        //bool exitGesture = (s.throttle < 5.0f && s.yaw < -0.9f);
+        bool timedOut = (xTaskGetTickCount() - entryTime) > TIMEOUT;
+
+        //if (exitGesture || timedOut) {
+        if (timedOut) {
+
+        	// Save
+            //g_flightController.saveCalibration();
+
+            // Return to IDLE
+            FlightState_t new_state = STATE_IDLE;
+            xQueueSend(g_state_change_request_queue, &new_state, 0);
+
+            // Reset
+            entryTime = xTaskGetTickCount();
+            vTaskDelay(pdMS_TO_TICKS(1000));
+        }
     }
 }
