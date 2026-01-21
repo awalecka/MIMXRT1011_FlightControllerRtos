@@ -3,7 +3,7 @@
  * @brief Implements the state-specific tasks for the flight controller.
  */
 #include "system/state_tasks.h"
-#include <flight_controller.h>
+#include "flight_controller.h"
 #include <board.h>
 #include <utils.h>
 

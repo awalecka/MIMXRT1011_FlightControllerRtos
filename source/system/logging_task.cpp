@@ -8,7 +8,6 @@
 #include <cstring>
 #include <algorithm>
 #include "system/logging_task.h"
-#include "flight_controller.h"
 #include "fsl_lpuart.h"
 
 // Telemetry Protocol Definition
