@@ -2,8 +2,8 @@
  * @file tasks.cpp
  * @brief Implements the state-specific tasks for the flight controller.
  */
+#include "system/state_tasks.h"
 #include <flight_controller.h>
-#include <fsl_debug_console.h>
 #include <board.h>
 #include <utils.h>
 

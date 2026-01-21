@@ -4,6 +4,13 @@
  */
 #include "flight_controller.h"
 
+// Include Task Definitions
+#include "system/state_manager.h"
+#include "system/state_tasks.h"
+#include "system/heartbeat_task.h"
+#include "system/logging_task.h"
+#include "radio/command_handler.h"
+
 // --- Task Handle Definitions ---
 TaskHandle_t g_heartbeat_task_handle = NULL;
 TaskHandle_t g_command_handler_task_handle = NULL;
@@ -104,17 +111,17 @@ void stateManagerTask(void *pvParameters) {
             // Resume next
             switch (g_flight_state) {
                 case STATE_IDLE:
-                	vTaskResume(g_idle_task_handle);
-                	g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
-                	break;
+                    vTaskResume(g_idle_task_handle);
+                    g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
+                    break;
                 case STATE_FLIGHT:
-                	vTaskResume(g_flight_task_handle);
-                	g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
-                	break;
+                    vTaskResume(g_flight_task_handle);
+                    g_heartbeat_frequency = pdMS_TO_TICKS(250); // 2Hz
+                    break;
                 case STATE_CALIBRATE:
-                	vTaskResume(g_calibrate_task_handle);
-					g_heartbeat_frequency = pdMS_TO_TICKS(50); // Fast blink for calibration
-					break;
+                    vTaskResume(g_calibrate_task_handle);
+                    g_heartbeat_frequency = pdMS_TO_TICKS(50); // Fast blink for calibration
+                    break;
                 case STATE_FAILSAFE:
                     g_heartbeat_frequency = pdMS_TO_TICKS(125);
                     vTaskSuspend(g_command_handler_task_handle);

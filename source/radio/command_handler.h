@@ -17,7 +17,7 @@
  * Defined with C++ linkage.
  * @param pvParameters Task parameters (unused).
  */
-void command_handler_task(void *pvParameters);
+void commandHandlerTask(void *pvParameters);
 
 #ifdef __cplusplus
 extern "C" {
