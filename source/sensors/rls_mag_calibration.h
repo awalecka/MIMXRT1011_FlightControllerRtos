@@ -1,7 +1,7 @@
 #ifndef RLS_MAGNETOMETER_CALIBRATION_H
 #define RLS_MAGNETOMETER_CALIBRATION_H
 
-#include "Eigen.h"
+#include <Eigen>
 #include <random>
 #include <cmath>
 #include <limits>
