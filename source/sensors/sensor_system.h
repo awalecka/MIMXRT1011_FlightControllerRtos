@@ -9,6 +9,31 @@
 #include <task.h>
 
 /**
+ * @brief Defines a mapping from a single sensor axis to an output axis.
+ * Used to specify which sensor axis (and its sign) corresponds to the
+ * canonical axes of the vehicle/device (e.g., Forward, Right, Down).
+ */
+typedef enum {
+    AXIS_X_POSITIVE,
+    AXIS_X_NEGATIVE,
+    AXIS_Y_POSITIVE,
+    AXIS_Y_NEGATIVE,
+    AXIS_Z_POSITIVE,
+    AXIS_Z_NEGATIVE,
+} axis_source_t;
+
+/**
+ * @brief Structure to hold the complete axis mapping configuration.
+ * The user defines this based on the physical orientation of the sensor.
+ */
+typedef struct {
+	axis_source_t map_x; // Defines the source for the output X-axis.
+	axis_source_t map_y; // Defines the source for the output Y-axis.
+	axis_source_t map_z; // Defines the source for the output Z-axis.
+} axis_mapping_t;
+
+
+/**
  * @brief Policy-Based Sensor System.
  * Templates resolve at compile time for zero runtime overhead.
  */
@@ -25,9 +50,15 @@ public:
     SensorSystem() : gyroBiasX(0.0f), gyroBiasY(0.0f), gyroBiasZ(0.0f),
                      magCalibrator(0.98f, 1000.0f, 0.01f) {
         // Vehicle mapping definition
-        vehicleMapping.map_x = LSM6DSOX_AXIS_X_POSITIVE;
-        vehicleMapping.map_y = LSM6DSOX_AXIS_Y_NEGATIVE;
-        vehicleMapping.map_z = LSM6DSOX_AXIS_Z_NEGATIVE;
+        vehicleMapping.map_x = AXIS_X_POSITIVE;
+        vehicleMapping.map_y = AXIS_Y_NEGATIVE;
+        vehicleMapping.map_z = AXIS_Z_NEGATIVE;
+
+        // Assuming LIS3MDL is on same plane. If IMU Z is flipped (Up->Down),
+		// Mag Z likely needs flipping too. Adjust these to match your board!
+		magMapping.map_x = AXIS_X_POSITIVE;
+		magMapping.map_y = AXIS_Y_NEGATIVE;
+		magMapping.map_z = AXIS_Z_NEGATIVE; // Align Mag Z with Body Z (Down)
     }
 
     int init() {
@@ -63,7 +94,7 @@ public:
      */
     int readData(RawData& rawData) {
         Axis3f rawAcc, rawGyro, rawMag;
-        Axis3f mapAcc, mapGyro;
+        Axis3f mapAcc, mapGyro, mapMag;
 
         if (accelDriver.readAccel(rawAcc) != 0 ||
             accelDriver.readGyro(rawGyro) != 0 ||
@@ -87,9 +118,14 @@ public:
         RlsMagnetometerCalibratorF::Vector3 rawMagVec(rawMag.x, rawMag.y, rawMag.z);
         RlsMagnetometerCalibratorF::Vector3 calMagVec = magCalibrator.getCalibratedData(rawMagVec);
 
-        rawData.magXGauss = calMagVec.x();
-        rawData.magYGauss = calMagVec.y();
-        rawData.magZGauss = calMagVec.z();
+        // Remap Magnetometer (Sensor Frame -> Body Frame)
+		// We convert the Eigen vector back to Axis3f for remapping
+		Axis3f calMagAxis = { calMagVec.x(), calMagVec.y(), calMagVec.z() };
+		remapAxis(calMagAxis, mapMag);
+
+		rawData.magXGauss = mapMag.x;
+		rawData.magYGauss = mapMag.y;
+		rawData.magZGauss = mapMag.z;
 
         return 0;
     }
@@ -136,7 +172,8 @@ private:
     MagPolicy magDriver;
     float gyroBiasX, gyroBiasY, gyroBiasZ;
     RlsMagnetometerCalibration<float> magCalibrator;
-    lsm6dsox_axis_mapping_t vehicleMapping;
+    axis_mapping_t vehicleMapping;
+    axis_mapping_t magMapping;
 
     void remapAxis(const Axis3f& input, Axis3f& output) {
         output.x = getMappedValue(input, vehicleMapping.map_x);
@@ -144,14 +181,14 @@ private:
         output.z = getMappedValue(input, vehicleMapping.map_z);
     }
 
-    float getMappedValue(const Axis3f& input, lsm6dsox_axis_source_t source) {
+    float getMappedValue(const Axis3f& input, axis_source_t source) {
         switch (source) {
-            case LSM6DSOX_AXIS_X_POSITIVE: return input.x;
-            case LSM6DSOX_AXIS_X_NEGATIVE: return -input.x;
-            case LSM6DSOX_AXIS_Y_POSITIVE: return input.y;
-            case LSM6DSOX_AXIS_Y_NEGATIVE: return -input.y;
-            case LSM6DSOX_AXIS_Z_POSITIVE: return input.z;
-            case LSM6DSOX_AXIS_Z_NEGATIVE: return -input.z;
+            case AXIS_X_POSITIVE: return input.x;
+            case AXIS_X_NEGATIVE: return -input.x;
+            case AXIS_Y_POSITIVE: return input.y;
+            case AXIS_Y_NEGATIVE: return -input.y;
+            case AXIS_Z_POSITIVE: return input.z;
+            case AXIS_Z_NEGATIVE: return -input.z;
             default: return 0.0f;
         }
     }

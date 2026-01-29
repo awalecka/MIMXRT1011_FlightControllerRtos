@@ -240,7 +240,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '7'
+              - dutyCyclePercent: '0'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -254,7 +254,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '7'
+              - dutyCyclePercent: '0'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -305,7 +305,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '7'
+              - dutyCyclePercent: '0'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -319,7 +319,7 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '7'
+              - dutyCyclePercent: '0'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -370,7 +370,7 @@ instance:
             - channel_id: 'A'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '7'
+              - dutyCyclePercent: '0'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
@@ -384,12 +384,12 @@ instance:
             - channel_id: 'B'
             - functionSel: 'pwmOutput'
             - pwm:
-              - dutyCyclePercent: '7'
+              - dutyCyclePercent: '0'
               - level: 'kPWM_HighTrue'
               - fault_channel0:
                 - dismap: ''
               - faultState: 'kPWM_PwmFaultState0'
-              - pwmchannelenable: 'true'
+              - pwmchannelenable: 'false'
               - deadtime_input_by_force: 'kPWM_UsePwm'
               - clockSource: 'kPWM_BusClock'
               - deadtimeValue: '0'
@@ -466,7 +466,7 @@ pwm_config_t PWM1_SM0_config = {
 pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 7U,
+    .dutyCyclePercent = 0U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -474,7 +474,7 @@ pwm_signal_param_t PWM1_SM0_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 7U,
+    .dutyCyclePercent = 0U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -498,7 +498,7 @@ pwm_config_t PWM1_SM2_config = {
 pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 7U,
+    .dutyCyclePercent = 0U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -506,7 +506,7 @@ pwm_signal_param_t PWM1_SM2_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 7U,
+    .dutyCyclePercent = 0U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -530,7 +530,7 @@ pwm_config_t PWM1_SM3_config = {
 pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   {
     .pwmChannel = kPWM_PwmA,
-    .dutyCyclePercent = 7U,
+    .dutyCyclePercent = 0U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
     .pwmchannelenable = true,
@@ -538,10 +538,10 @@ pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   },
   {
     .pwmChannel = kPWM_PwmB,
-    .dutyCyclePercent = 7U,
+    .dutyCyclePercent = 0U,
     .level = kPWM_HighTrue,
     .faultState = kPWM_PwmFaultState0,
-    .pwmchannelenable = true,
+    .pwmchannelenable = false,
     .deadtimeValue = 0U
   },
 };

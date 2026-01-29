@@ -131,15 +131,6 @@
                         <pin_feature name="direction" value="OUTPUT"/>
                      </pin_features>
                   </pin>
-                  <pin peripheral="PWM1" signal="B, 0" pin_num="75" pin_signal="GPIO_SD_01">
-                     <pin_features>
-                        <pin_feature name="identifier" value="PWM0B"/>
-                        <pin_feature name="direction" value="OUTPUT"/>
-                        <pin_feature name="slew_rate" value="Fast"/>
-                        <pin_feature name="software_input_on" value="Enable"/>
-                        <pin_feature name="pull_keeper_enable" value="Enable"/>
-                     </pin_features>
-                  </pin>
                   <pin peripheral="PWM1" signal="A, 0" pin_num="74" pin_signal="GPIO_SD_02">
                      <pin_features>
                         <pin_feature name="identifier" value="PWM0A"/>
@@ -757,7 +748,7 @@
                                     <setting name="channel_id" value="A"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="7"/>
+                                       <setting name="dutyCyclePercent" value="0"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -778,7 +769,7 @@
                                     <setting name="channel_id" value="B"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="7"/>
+                                       <setting name="dutyCyclePercent" value="0"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -848,7 +839,7 @@
                                     <setting name="channel_id" value="A"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="7"/>
+                                       <setting name="dutyCyclePercent" value="0"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -869,7 +860,7 @@
                                     <setting name="channel_id" value="B"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="7"/>
+                                       <setting name="dutyCyclePercent" value="0"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -939,7 +930,7 @@
                                     <setting name="channel_id" value="A"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="7"/>
+                                       <setting name="dutyCyclePercent" value="0"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -960,7 +951,7 @@
                                     <setting name="channel_id" value="B"/>
                                     <setting name="functionSel" value="pwmOutput"/>
                                     <struct name="pwm">
-                                       <setting name="dutyCyclePercent" value="7"/>
+                                       <setting name="dutyCyclePercent" value="0"/>
                                        <setting name="level" value="kPWM_HighTrue"/>
                                        <struct name="fault_channel0">
                                           <set name="dismap">
@@ -968,7 +959,7 @@
                                           </set>
                                        </struct>
                                        <setting name="faultState" value="kPWM_PwmFaultState0"/>
-                                       <setting name="pwmchannelenable" value="true"/>
+                                       <setting name="pwmchannelenable" value="false"/>
                                        <setting name="deadtime_input_by_force" value="kPWM_UsePwm"/>
                                        <setting name="clockSource" value="kPWM_BusClock"/>
                                        <setting name="deadtimeValue" value="0"/>

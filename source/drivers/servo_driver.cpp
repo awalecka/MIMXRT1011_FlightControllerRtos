@@ -58,29 +58,24 @@ void ServoDriver::disableServo(size_t servoIndex) {
 }
 
 void ServoDriver::writeHardwareRegister(const ServoChannelConfig& config, uint16_t pulseWidthUs) {
-    // Get the current Period (Modulo) in ticks from the hardware.
-    // VAL1 register holds the maximum count value (Period) for the submodule.
     uint16_t periodTicks = config.base->SM[config.subModule].VAL1;
-
-    // Calculate the target tick count for the desired pulse width.
-    // Logic: (TargetUS / TotalPeriodUS) * TotalPeriodTicks
-    // We use uint32_t for the intermediate calculation to prevent overflow.
     uint32_t targetTicks = (static_cast<uint32_t>(pulseWidthUs) * periodTicks) / PERIOD_US;
 
-    // Write to the Value Register.
-    // For Edge-Aligned PWM (standard for Servos):
-    // - PWM A uses VAL3 as the turn-off point.
-    // - PWM B uses VAL5 as the turn-off point.
-    // - VAL0/VAL2/VAL4 are usually 0 (start of cycle).
     if (config.channel == kPWM_PwmA) {
+        config.base->SM[config.subModule].VAL2 = 0;
         config.base->SM[config.subModule].VAL3 = static_cast<uint16_t>(targetTicks);
     } else {
+        config.base->SM[config.subModule].VAL4 = 0;
         config.base->SM[config.subModule].VAL5 = static_cast<uint16_t>(targetTicks);
     }
+}
 
-    // Set the Load OK bit to latch the new values into the active registers
-    // at the next PWM reload opportunity.
-    PWM_SetPwmLdok(config.base, (1U << config.subModule), true);
+void ServoDriver::commitUpdates() {
+    // Iterate through all configured channels and set the LDOK bit.
+    // It is safe to set LDOK multiple times for the same submodule (hardware ORs the bits).
+    for (const auto& cfg : m_config) {
+        PWM_SetPwmLdok(cfg.base, (1U << cfg.subModule), true);
+    }
 }
 
 } // namespace firmware::drivers

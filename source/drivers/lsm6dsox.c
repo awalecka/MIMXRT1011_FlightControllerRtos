@@ -190,38 +190,3 @@ int32_t LSM6DSOX_ReadGyro(lsm6dsox_handle_t *handle, lsm6dsox_3axis_data_t *gyro
 
     return 0;
 }
-
-/**
- * @brief Helper function to get a single axis value based on the source definition.
- * @param[in] input The source data vector.
- * @param[in] source The axis source enum value.
- * @return The selected and correctly signed float value.
- */
-static float get_mapped_value(const lsm6dsox_3axis_data_t *input, lsm6dsox_axis_source_t source) {
-    switch (source) {
-        case LSM6DSOX_AXIS_X_POSITIVE: return input->x;
-        case LSM6DSOX_AXIS_X_NEGATIVE: return -input->x;
-        case LSM6DSOX_AXIS_Y_POSITIVE: return input->y;
-        case LSM6DSOX_AXIS_Y_NEGATIVE: return -input->y;
-        case LSM6DSOX_AXIS_Z_POSITIVE: return input->z;
-        case LSM6DSOX_AXIS_Z_NEGATIVE: return -input->z;
-        default: return 0.0f;
-    }
-}
-
-int32_t LSM6DSOX_RemapData(const lsm6dsox_3axis_data_t *input_data, const lsm6dsox_axis_mapping_t *mapping, lsm6dsox_3axis_data_t *output_data) {
-    if (input_data == NULL || mapping == NULL || output_data == NULL) {
-        return -1; // Invalid parameters
-    }
-
-    // Use a temporary structure to prevent issues if input_data and output_data point to the same memory
-    lsm6dsox_3axis_data_t temp_data;
-
-    temp_data.x = get_mapped_value(input_data, mapping->map_x);
-    temp_data.y = get_mapped_value(input_data, mapping->map_y);
-    temp_data.z = get_mapped_value(input_data, mapping->map_z);
-
-    *output_data = temp_data;
-
-    return 0; // Success
-}

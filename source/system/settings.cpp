@@ -1,19 +1,16 @@
 #include "system/settings.h"
 
-// --- FACTORY CALIBRATION DATA ---
-// PASTE OUTPUT FROM runViz.py BELOW THIS LINE
-// ==============================================================================
-
-// Example default (Unit Sphere / No Offset) - Replace with Python Output
-static constexpr float kFactoryHardIron[3] = { 0.0f, 0.0f, 0.0f };
+//========================================
+// CALIBRATION RESULTS (Copy to C++)
+//========================================
+// Field Strength: 0.47
+static constexpr float kFactoryHardIron[3] = { -0.6500f, 0.3527f, -0.4722f };
 static constexpr float kFactorySoftIron[9] = {
-    1.0f, 0.0f, 0.0f,
-    0.0f, 1.0f, 0.0f,
-    0.0f, 0.0f, 1.0f
+    1.0064f, 0.0486f, 0.0027f,
+    0.0486f, 0.9971f, -0.0100f,
+    0.0027f, -0.0100f, 0.9990f
 };
-
-// ==============================================================================
-// END FACTORY CALIBRATION DATA
+//========================================
 
 // Initialize the active parameters with the factory defaults
 MagCalibrationParams Settings::s_activeParams = {

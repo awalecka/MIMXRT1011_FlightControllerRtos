@@ -63,7 +63,7 @@ void FlightController::saveCalibration() {
 }
 
 void FlightController::update() {
-    // 1. Update Receiver
+    // Update Receiver
     receiver.update();
 
     // Check for AUX switch to toggle mode
@@ -73,7 +73,7 @@ void FlightController::update() {
         currentControlMode = ControlMode::STABILIZED;
     }
 
-    // 2. Read Sensors & Estimate Attitude
+    // Read Sensors & Estimate Attitude
     SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData rawSensorData;
     int sensorStatus = sensorSystem.readData(rawSensorData);
 
@@ -83,7 +83,7 @@ void FlightController::update() {
         currentControlMode = ControlMode::PASS_THROUGH; // Failsafe
     }
 
-    // 3. Control Loop
+    // Control Loop
     if (currentControlMode == ControlMode::PASS_THROUGH) {
         actuators.setRawOutputs(
             receiver.getChannel(RC_CH_ROLL),
@@ -116,7 +116,7 @@ void FlightController::update() {
         actuators.setOutputs(surfaceCommands.aileron, surfaceCommands.elevator, surfaceCommands.rudder, throttleOutput);
     }
 
-    // 4. Telemetry
+    // Telemetry
     // Construct local FullSensorData for telemetry (reusing computed attitude)
     FullSensorData teleData;
     teleData.rollDeg = currentRollDeg;
@@ -131,8 +131,9 @@ void FlightController::update() {
 void FlightController::estimateAttitude(const SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData) {
     const FusionVector gyroscope = {rawData.gyroXDps, rawData.gyroYDps, rawData.gyroZDps};
     const FusionVector accelerometer = {rawData.accelXG, rawData.accelYG, rawData.accelZG};
+    const FusionVector magnetometer = {rawData.magXGauss, rawData.magYGauss, rawData.magZGauss};
 
-    FusionAhrsUpdateNoMagnetometer(&ahrs, gyroscope, accelerometer, loopDt);
+    FusionAhrsUpdate(&ahrs, gyroscope, accelerometer, magnetometer, loopDt);
     FusionEuler euler = FusionQuaternionToEuler(FusionAhrsGetQuaternion(&ahrs));
 
     currentRollDeg = euler.angle.roll;

@@ -110,32 +110,6 @@ typedef struct {
     float z;
 } lsm6dsox_3axis_data_t;
 
-// --- NEW: Axis Remapping Structures ---
-/**
- * @brief Defines a mapping from a single sensor axis to an output axis.
- * Used to specify which sensor axis (and its sign) corresponds to the
- * canonical axes of the vehicle/device (e.g., Forward, Right, Down).
- */
-typedef enum {
-    LSM6DSOX_AXIS_X_POSITIVE,
-    LSM6DSOX_AXIS_X_NEGATIVE,
-    LSM6DSOX_AXIS_Y_POSITIVE,
-    LSM6DSOX_AXIS_Y_NEGATIVE,
-    LSM6DSOX_AXIS_Z_POSITIVE,
-    LSM6DSOX_AXIS_Z_NEGATIVE,
-} lsm6dsox_axis_source_t;
-
-/**
- * @brief Structure to hold the complete axis mapping configuration.
- * The user defines this based on the physical orientation of the sensor.
- */
-typedef struct {
-    lsm6dsox_axis_source_t map_x; // Defines the source for the output X-axis.
-    lsm6dsox_axis_source_t map_y; // Defines the source for the output Y-axis.
-    lsm6dsox_axis_source_t map_z; // Defines the source for the output Z-axis.
-} lsm6dsox_axis_mapping_t;
-
-
 // --- LSM6DSOX Handle Structure ---
 typedef struct {
     i2c_sync_handle_t i2c_sync;   // Embedded generic I2C synchronization handle
@@ -211,17 +185,6 @@ int32_t LSM6DSOX_ReadAcc(lsm6dsox_handle_t *handle, lsm6dsox_3axis_data_t *acc_d
  * @return 0 on success, -1 on failure.
  */
 int32_t LSM6DSOX_ReadGyro(lsm6dsox_handle_t *handle, lsm6dsox_3axis_data_t *gyro_data);
-
-/**
- * @brief NEW: Remaps sensor data from the sensor's body frame to the device's canonical frame.
- * This is a crucial step before using the data in a sensor fusion algorithm.
- * The mapping must be defined by the user based on the physical mounting of the sensor.
- * @param[in] input_data Pointer to the source data (e.g., from LSM6DSOX_ReadAcc).
- * @param[in] mapping Pointer to the user-defined axis mapping configuration.
- * @param[out] output_data Pointer to a structure where the remapped data will be stored.
- * @return 0 on success, -1 if any parameters are NULL.
- */
-int32_t LSM6DSOX_RemapData(const lsm6dsox_3axis_data_t *input_data, const lsm6dsox_axis_mapping_t *mapping, lsm6dsox_3axis_data_t *output_data);
 
 #ifdef __cplusplus
 }

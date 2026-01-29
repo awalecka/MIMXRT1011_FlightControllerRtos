@@ -54,12 +54,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_SAI1_RXD0_PIN                                          3U   /*!< PORT pin number */
 #define BOARD_INITPINS_SAI1_RXD0_PIN_MASK                             (1U << 3U)   /*!< PORT pin mask */
 
-/* GPIO_SD_01 (number 75), PWM0B */
-/* Routed pin properties */
-#define BOARD_INITPINS_PWM0B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
-#define BOARD_INITPINS_PWM0B_SIGNAL                                            B   /*!< Signal name */
-#define BOARD_INITPINS_PWM0B_CHANNEL                                          0U   /*!< Signal channel */
-
 /* GPIO_SD_02 (number 74), PWM0A */
 /* Routed pin properties */
 #define BOARD_INITPINS_PWM0A_PERIPHERAL                                     PWM1   /*!< Peripheral name */

@@ -33,8 +33,8 @@ public:
      */
     static constexpr uint32_t PWM_FREQUENCY_HZ = 50U;
     static constexpr uint32_t PERIOD_US = 1000000U / PWM_FREQUENCY_HZ;
-    static constexpr uint16_t MIN_PULSE_US = 500;
-    static constexpr uint16_t MAX_PULSE_US = 2500;
+    static constexpr uint16_t MIN_PULSE_US = 500U;
+    static constexpr uint16_t MAX_PULSE_US = 2500U;
     static constexpr uint16_t CENTER_PULSE_US = 1500U;
 
     /**
@@ -66,6 +66,12 @@ public:
      * @param servoIndex Index corresponding to the initialization config array.
      */
     void disableServo(size_t servoIndex);
+
+    /**
+	 * @brief Commits all pending register updates by setting the Load OK bit.
+	 * Must be called after setting outputs to ensure they take effect.
+	 */
+	void commitUpdates();
 
 private:
     /**
