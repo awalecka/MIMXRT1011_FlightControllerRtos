@@ -39,7 +39,7 @@ static StaticTask_t xHeartbeatTaskControlBlock;
 static StackType_t xLoggingStack[LOGGING_STACK_SIZE];
 static StaticTask_t xLoggingTaskControlBlock;
 
-#define IDLE_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 128)
+#define IDLE_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 1024)
 static StackType_t xIdleStack[IDLE_TASK_STACK_SIZE];
 static StaticTask_t xIdleTaskTCB;
 
@@ -47,7 +47,7 @@ static StaticTask_t xIdleTaskTCB;
 static StackType_t xFlightStack[FLIGHT_TASK_STACK_SIZE];
 static StaticTask_t xFlightTaskTCB;
 
-#define CALIBRATE_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 256)
+#define CALIBRATE_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 1024)
 static StackType_t xCalibrateStack[CALIBRATE_TASK_STACK_SIZE];
 static StaticTask_t xCalibrateTaskTCB;
 

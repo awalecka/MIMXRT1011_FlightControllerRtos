@@ -10,7 +10,18 @@
 #include <queue.h>
 
 #include "common_types.h"
+
+// --- ESTIMATOR SELECTION ---
+// Uncomment the following line to use the UKF (gnc/attitude_ukf.hpp)
+// instead of the default Fusion AHRS.
+#define ENABLE_UKF_ESTIMATOR
+// ---------------------------
+
+#ifdef ENABLE_UKF_ESTIMATOR
+#include "attitude_ukf.hpp"
+#else
 #include "fusion.h" // FusionAhrs
+#endif
 
 // Subsystems
 #include "controllers/attitude_controller.h"
@@ -24,15 +35,6 @@
 // Drivers & Adapters
 #include "drivers/lsm6dsox_adapter.hpp"
 #include "drivers/lis3mdl_adapter.hpp"
-
-// IBUS Configuration Constants
-#define IBUS_DMA_BUFFER_SIZE    128U
-#define IBUS_LPUART_INSTANCE    LPUART4
-#define IBUS_LPUART_IRQn        LPUART4_IRQn
-#define IBUS_DMA_BASE           DMA0
-#define IBUS_DMAMUX_BASE        DMAMUX
-#define IBUS_DMA_CHANNEL        0U
-#define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART4Rx
 
 // Gesture Thresholds
 #define GESTURE_STICK_LOW   1050
@@ -67,7 +69,13 @@ private:
     AttitudeController attitudeController;
     TelemetryManager telemetry;
 
+    // Estimator State
+#ifdef ENABLE_UKF_ESTIMATOR
+    gnc::AttitudeUkf ukf;
+    gnc::AttitudeUkf::Vector3 magRefVector; // Local magnetic field reference
+#else
     FusionAhrs ahrs;
+#endif
 
     float loopDt;
     float currentRollDeg, currentPitchDeg, currentYawDeg;

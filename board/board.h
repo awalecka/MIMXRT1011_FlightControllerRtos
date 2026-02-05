@@ -52,6 +52,15 @@
     GPIO_PinWrite(BOARD_USER_TIMING_GPIO, BOARD_USER_TIMING_GPIO_PIN, \
                   0x1 ^ GPIO_PinRead(BOARD_USER_TIMING_GPIO, BOARD_USER_TIMING_GPIO_PIN)) /*!< Toggle target USER_LED */
 
+// IBUS Configuration Constants
+#define IBUS_DMA_BUFFER_SIZE    128U
+#define IBUS_LPUART_INSTANCE    LPUART4
+#define IBUS_LPUART_IRQn        LPUART4_IRQn
+#define IBUS_DMA_BASE           DMA0
+#define IBUS_DMAMUX_BASE        DMAMUX
+#define IBUS_DMA_CHANNEL        0U
+#define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART4Rx
+
 /*! @brief The flash size */
 #define BOARD_FLASH_SIZE (0x800000U)
 
