@@ -33,9 +33,6 @@ public:
      */
     static constexpr uint32_t PWM_FREQUENCY_HZ = 50U;
     static constexpr uint32_t PERIOD_US = 1000000U / PWM_FREQUENCY_HZ;
-    static constexpr uint16_t MIN_PULSE_US = 500U;
-    static constexpr uint16_t MAX_PULSE_US = 2500U;
-    static constexpr uint16_t CENTER_PULSE_US = 1500U;
 
     /**
      * @brief Initializes the driver with the provided channel configuration.
@@ -48,18 +45,27 @@ public:
      * @brief Sets the servo output using a normalized range.
      * @param servoIndex Index corresponding to the initialization config array.
      * @param value Normalized value between -1.0 and 1.0.
-     * -1.0 maps to MIN_PULSE_US.
-     * 0.0 maps to CENTER_PULSE_US.
-     * 1.0 maps to MAX_PULSE_US.
+     * -1.0 maps to minLimitUs.
+     * 0.0 maps to center of min/max.
+     * 1.0 maps to maxLimitUs.
+     * @param minLimitUs The lower bound of the output pulse in microseconds.
+     * @param maxLimitUs The upper bound of the output pulse in microseconds.
      */
-    void setNormalizedOutput(size_t servoIndex, float value);
+    void setNormalizedOutput(size_t servoIndex, float value,
+                             uint16_t minLimitUs,
+                             uint16_t maxLimitUs);
 
     /**
-     * @brief Sets the servo output using raw microseconds (Direct Pass Through).
-     * @param servoIndex Index corresponding to the initialization config array.
-     * @param pulseWidthUs Pulse width in microseconds (typically 1000-2000).
+     * @brief Sets the servo output using raw microseconds (Standard RC Input).
+     * Maps the standard 1000-2000us input range to the specified output range.
+     * * @param servoIndex Index corresponding to the initialization config array.
+     * @param pulseWidthUs Standard RC pulse width input (typically 1000-2000).
+     * @param minLimitUs The lower bound of the output pulse in microseconds.
+     * @param maxLimitUs The upper bound of the output pulse in microseconds.
      */
-    void setPulseWidthUs(size_t servoIndex, uint16_t pulseWidthUs);
+    void setPulseWidthUs(size_t servoIndex, uint16_t pulseWidthUs,
+                         uint16_t minLimitUs,
+                         uint16_t maxLimitUs);
 
     /**
      * @brief Disables output for a specific servo (sets duty to 0).

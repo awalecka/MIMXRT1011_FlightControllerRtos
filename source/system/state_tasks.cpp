@@ -85,11 +85,12 @@ void idleTask(void *pvParameters) {
 	while (true) {
         vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10)); // 100Hz update
 
-        // 1. Run Controller (Keeps AHRS updated, sensors read, telemetry sending)
+        // Run Controller (Keeps AHRS updated, sensors read, telemetry sending)
         // Note: Actuators are typically disabled or neutral in IDLE, handled by update() state logic if needed
+        USER_TIMING_ON();
         g_flightController.update();
 
-        // 2. Check Gestures
+        // Check Gestures
         Receiver::StickInput sticks;
         g_flightController.getStickInput(sticks);
 
@@ -99,6 +100,9 @@ void idleTask(void *pvParameters) {
             xQueueSend(g_state_change_request_queue, &next, 0);
             vTaskDelay(pdMS_TO_TICKS(500)); // Wait for switch
         }
+
+        USER_TIMING_OFF();
+
     }
 }
 

@@ -18,18 +18,23 @@ void Actuators::init() {
     m_servoDriver.init(s_servoConfig);
 
     // Set safe defaults immediately upon startup
-	// Surfaces to Center (1500us), Throttle to Minimum (1000us)
-	setRawOutputs(1500, 1500, 1500, 1000);
+	// Surfaces to Center, Throttle to Minimum
+	setRawOutputs(CENTER_PULSE_US, CENTER_PULSE_US, CENTER_PULSE_US, THROTTLE_MIN_PULSE_US);
 }
 
 void Actuators::setOutputs(float aileron, float elevator, float rudder, float throttle) {
-	m_servoDriver.setNormalizedOutput(0, aileron);   // Left Aileron (Normal)
-	m_servoDriver.setNormalizedOutput(1, -aileron);  // Right Aileron (Inverted)
-    m_servoDriver.setNormalizedOutput(2, elevator);
-    m_servoDriver.setNormalizedOutput(3, rudder);
+    // Control Surfaces: Use extended range for max throw
+    m_servoDriver.setNormalizedOutput(0, aileron, MIN_PULSE_US, MAX_PULSE_US);   // Left Aileron
+    m_servoDriver.setNormalizedOutput(1, -aileron, MIN_PULSE_US, MAX_PULSE_US);  // Right Aileron
+    m_servoDriver.setNormalizedOutput(2, elevator, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setNormalizedOutput(3, rudder, MIN_PULSE_US, MAX_PULSE_US);
 
-    float throttleNormalized = mapFloat(throttle, 0.0f, 100.0f, -1.0f, 1.0f);
-    m_servoDriver.setNormalizedOutput(4, throttleNormalized); // Throttle
+    // Throttle: Map 0-100% directly to target microseconds
+    uint16_t throttleUs = mapFloat(throttle, 0.0f, 100.0f, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
+
+    // Pass the calculated microseconds directly.
+    // We pass the same Min/Max limits to ensure the driver doesn't re-scale it further.
+    m_servoDriver.setPulseWidthUs(4, throttleUs, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
 
     // Latch all values at once
     m_servoDriver.commitUpdates();
@@ -37,21 +42,21 @@ void Actuators::setOutputs(float aileron, float elevator, float rudder, float th
 
 void Actuators::setRawOutputs(uint16_t aileronUs, uint16_t elevatorUs, uint16_t rudderUs, uint16_t throttleUs) {
     // Channel 0: Left Aileron (Direct)
-    m_servoDriver.setPulseWidthUs(0, aileronUs);
+    m_servoDriver.setPulseWidthUs(0, aileronUs, MIN_PULSE_US, MAX_PULSE_US);
 
-    // Channel 1: Right Aileron (Inverted around 1500us center)
-    // 3000 - 1000 = 2000
-    // 3000 - 2000 = 1000
-    m_servoDriver.setPulseWidthUs(1, 3000 - aileronUs);
+    // Channel 1: Right Aileron (Inverted around CENTER)
+    // Formula: (CENTER + (CENTER - Input)) = 2*CENTER - Input
+    uint16_t invertedAileron = (2 * CENTER_PULSE_US) - aileronUs;
+    m_servoDriver.setPulseWidthUs(1, invertedAileron, MIN_PULSE_US, MAX_PULSE_US);
 
     // Channel 2: Elevator
-    m_servoDriver.setPulseWidthUs(2, elevatorUs);
+    m_servoDriver.setPulseWidthUs(2, elevatorUs, MIN_PULSE_US, MAX_PULSE_US);
 
     // Channel 3: Rudder
-    m_servoDriver.setPulseWidthUs(3, rudderUs);
+    m_servoDriver.setPulseWidthUs(3, rudderUs, MIN_PULSE_US, MAX_PULSE_US);
 
-    // Channel 4: Throttle
-    m_servoDriver.setPulseWidthUs(4, throttleUs);
+    // Channel 4: Throttle (Direct 1:1 mapping typically, but clamped to limits)
+    m_servoDriver.setPulseWidthUs(4, throttleUs, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
 
     // Latch all values at once
     m_servoDriver.commitUpdates();

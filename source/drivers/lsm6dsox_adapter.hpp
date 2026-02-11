@@ -22,14 +22,11 @@ public:
 			return -1;
 		}
 
-		// WAKE UP: Configure ODR and Full Scale to match original settings
-		// Accel: 52Hz, 2G
-		if (LSM6DSOX_SetAccConfig(&m_handle, LSM6DSOX_ACC_ODR_104Hz, LSM6DSOX_ACC_FS_2G) != 0) {
+		if (LSM6DSOX_SetAccConfig(&m_handle, LSM6DSOX_ACC_ODR_416Hz, LSM6DSOX_ACC_FS_2G) != 0) {
 			return -1;
 		}
 
-		// Gyro: 104Hz, 250dps
-		if (LSM6DSOX_SetGyroConfig(&m_handle, LSM6DSOX_GYRO_ODR_104Hz, LSM6DSOX_GYRO_FS_250DPS) != 0) {
+		if (LSM6DSOX_SetGyroConfig(&m_handle, LSM6DSOX_GYRO_ODR_416Hz, LSM6DSOX_GYRO_FS_250DPS) != 0) {
 			return -1;
 		}
 

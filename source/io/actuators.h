@@ -6,6 +6,16 @@
 
 class Actuators {
 public:
+    // --- Configuration Constants ---
+    // Extended range for control surfaces (Max throw)
+    static constexpr uint16_t MIN_PULSE_US = 500U;
+    static constexpr uint16_t MAX_PULSE_US = 2500U;
+    static constexpr uint16_t CENTER_PULSE_US = 1500U;
+
+    // Standard range for ESCs (Throttle)
+    static constexpr uint16_t THROTTLE_MIN_PULSE_US = 1000U;
+    static constexpr uint16_t THROTTLE_MAX_PULSE_US = 2000U;
+
     void init();
 
     /**

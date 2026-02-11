@@ -21,7 +21,7 @@ void ServoDriver::init(std::span<const ServoChannelConfig> channelConfig) {
     }
 }
 
-void ServoDriver::setNormalizedOutput(size_t servoIndex, float value) {
+void ServoDriver::setNormalizedOutput(size_t servoIndex, float value, uint16_t minLimitUs, uint16_t maxLimitUs) {
     if (servoIndex >= m_config.size()) {
         return;
     }
@@ -30,19 +30,22 @@ void ServoDriver::setNormalizedOutput(size_t servoIndex, float value) {
     float clampedValue = std::clamp(value, -1.0f, 1.0f);
 
     // Map -1.0...1.0 to standard RC range 1000...2000
-    // setPulseWidthUs will then map this to the physical range MIN_PULSE_US...MAX_PULSE_US
+    // setPulseWidthUs will then map this to the specific physical range (minLimitUs...maxLimitUs)
     float usFloat = mapFloat(clampedValue, -1.0f, 1.0f, 1000.0f, 2000.0f);
 
-    setPulseWidthUs(servoIndex, static_cast<uint16_t>(usFloat));
+    setPulseWidthUs(servoIndex, static_cast<uint16_t>(usFloat), minLimitUs, maxLimitUs);
 }
 
-void ServoDriver::setPulseWidthUs(size_t servoIndex, uint16_t pulseWidthUs) {
+void ServoDriver::setPulseWidthUs(size_t servoIndex, uint16_t pulseWidthUs, uint16_t minLimitUs, uint16_t maxLimitUs) {
     if (servoIndex >= m_config.size()) {
         return;
     }
 
-    // Map standard RC input (1000-2000) to the driver's configured physical range (500-2500)
-    uint16_t mappedWidth = mapUshort(pulseWidthUs, 1000, 2000, MIN_PULSE_US, MAX_PULSE_US);
+    // Map standard RC input (1000-2000) to the requested physical range (minLimitUs-maxLimitUs)
+    uint16_t mappedWidth = mapUshort(pulseWidthUs, 1000, 2000, minLimitUs, maxLimitUs);
+
+    // Clamp to ensure we never exceed the requested physical limits
+    mappedWidth = std::clamp(mappedWidth, minLimitUs, maxLimitUs);
 
     const auto& cfg = m_config[servoIndex];
     writeHardwareRegister(cfg, mappedWidth);
