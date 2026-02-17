@@ -5,7 +5,7 @@
 #include <FreeRTOS.h>
 #include <queue.h>
 
-extern QueueHandle_t g_command_data_queue; // External reference to the queue
+extern QueueHandle_t g_command_data_queue;
 
 class Receiver {
 public:
