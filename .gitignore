@@ -9,6 +9,15 @@ build/
 bin/
 out/
 
+# Visual Studio Professional/Community/Enterprise
+.vs/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
 # ----------------------------------------------------------------------
 # MCUXpresso / Eclipse Metadata
 # ----------------------------------------------------------------------
