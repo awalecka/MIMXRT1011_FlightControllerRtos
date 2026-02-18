@@ -1,10 +1,10 @@
 #ifndef SENSOR_SYSTEM_H
 #define SENSOR_SYSTEM_H
 
-#include "sensors/rls_mag_calibration.h"
-#include "drivers/imu_concepts.h"
-#include "drivers/i2c_sync.h"
-#include "drivers/lsm6dsox.h"
+#include "rls_mag_calibration.h"
+#include "imu_concepts.h"
+#include "i2c_sync.h"
+#include "lsm6dsox.h"
 #include <FreeRTOS.h>
 #include <task.h>
 

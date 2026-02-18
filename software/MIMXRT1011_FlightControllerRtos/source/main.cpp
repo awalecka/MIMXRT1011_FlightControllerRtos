@@ -38,7 +38,9 @@ TaskHandle_t g_state_manager_task_handle = NULL;
 QueueHandle_t g_controls_data_queue = NULL;
 QueueHandle_t g_command_data_queue = NULL;
 QueueHandle_t g_state_change_request_queue = NULL;
+QueueHandle_t g_sensor_data_queue = NULL;
 
+// Heartbeat frequency
 volatile TickType_t g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
 
 // --- Queue Static Allocation ---
@@ -60,6 +62,12 @@ static uint8_t ucCommandQueueStorageArea[COMMAND_QUEUE_LENGTH * COMMAND_QUEUE_IT
 #define STATE_CHANGE_QUEUE_ITEM_SIZE sizeof(FlightState_t)
 static StaticQueue_t xStateChangeQueueControlBlock;
 static uint8_t ucStateChangeQueueStorageArea[STATE_CHANGE_QUEUE_LENGTH * STATE_CHANGE_QUEUE_ITEM_SIZE];
+
+// Sensor Data Queue
+#define SENSOR_QUEUE_LENGTH 1
+#define SENSOR_QUEUE_ITEM_SIZE sizeof(SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData)
+static StaticQueue_t xSensorQueueControlBlock;
+static uint8_t ucSensorQueueStorageArea[SENSOR_QUEUE_LENGTH * SENSOR_QUEUE_ITEM_SIZE];
 
 // State Manager Task Allocation
 #define STATE_MANAGER_TASK_PRIORITY     (tskIDLE_PRIORITY + 4)
@@ -89,9 +97,11 @@ int main(void) {
     // Create Queues
     g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
     g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
+    g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
     g_state_change_request_queue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, STATE_CHANGE_QUEUE_ITEM_SIZE, ucStateChangeQueueStorageArea, &xStateChangeQueueControlBlock);
+    g_sensor_data_queue = xQueueCreateStatic(SENSOR_QUEUE_LENGTH, SENSOR_QUEUE_ITEM_SIZE, ucSensorQueueStorageArea, &xSensorQueueControlBlock);
 
-    if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL) {
+    if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL || g_sensor_data_queue == NULL) {
         while(1);
     }
 
