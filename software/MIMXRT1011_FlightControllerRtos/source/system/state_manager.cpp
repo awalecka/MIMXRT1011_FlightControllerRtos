@@ -158,9 +158,7 @@ static void runCalibrateState() {
 
 static void runFailsafeState() {
     g_heartbeat_frequency = pdMS_TO_TICKS(125);
-    vTaskSuspend(g_command_handler_task_handle);
-    vTaskSuspend(g_logging_task_handle); // Optional but good for safety
-    
+
     while (g_flight_state == STATE_FAILSAFE) {
         // Blink fast, minimal activity
         vTaskDelay(pdMS_TO_TICKS(100));
