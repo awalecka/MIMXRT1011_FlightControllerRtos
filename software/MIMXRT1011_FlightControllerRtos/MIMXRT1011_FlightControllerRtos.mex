@@ -87,6 +87,11 @@
                         <data>true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="Peripheral" resourceId="LPUART1" description="Peripheral LPUART1 signals are routed in the Pins Tool, but the peripheral is not initialized in the Peripherals Tool." problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins:BOARD_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
@@ -193,6 +198,14 @@
                   </pin>
                   <pin peripheral="LPUART4" signal="TXD" pin_num="58" pin_signal="GPIO_AD_02"/>
                   <pin peripheral="LPUART4" signal="RXD" pin_num="59" pin_signal="GPIO_AD_01"/>
+                  <pin peripheral="PWM1" signal="B, 0" pin_num="75" pin_signal="GPIO_SD_01">
+                     <pin_features>
+                        <pin_feature name="identifier" value="PWM0B"/>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="LPUART1" signal="TXD" pin_num="2" pin_signal="GPIO_10"/>
+                  <pin peripheral="LPUART1" signal="RXD" pin_num="3" pin_signal="GPIO_09"/>
                </pins>
             </function>
          </functions_list>
@@ -622,6 +635,21 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="UART_CLK_ROOT" description="UART_CLK_ROOT is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="LPUART1.uart_rx" description="Signal RX is not routed." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="ClockOutput" resourceId="UART_CLK_ROOT" description="UART_CLK_ROOT is inactive." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                </dependencies>
                <instances>
                   <instance name="NVIC" uuid="151b12a1-0054-4ebe-8847-b2f9af0b9797" type="nvic" type_id="nvic" mode="general" peripheral="NVIC" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
@@ -629,6 +657,7 @@
                         <array name="interrupt_table">
                            <struct name="0"/>
                            <struct name="1"/>
+                           <struct name="2"/>
                         </array>
                         <array name="interrupts">
                            <struct name="0">
@@ -1064,34 +1093,74 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="LPUART4_IBUS" uuid="4e98ba49-294f-4b22-a2f3-5bf9133da39e" type="lpuart_cmsis" type_id="lpuart_cmsis_2.4.0" mode="interrupt" peripheral="LPUART4" enabled="false" comment="" custom_name_enabled="true" editing_lock="false">
-                     <config_set name="general" quick_selection="default">
-                        <struct name="main_config">
-                           <setting name="operationMode" value="ARM_USART_MODE_ASYNCHRONOUS"/>
+                  <instance name="LPUART1_GPS" uuid="ae7f6066-edbb-4a33-8103-14553b3d83f5" type="lpuart" type_id="lpuart_2.8.1" mode="interrupts" peripheral="LPUART1" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
+                     <config_set name="lpuartConfig_t">
+                        <struct name="lpuartConfig">
                            <setting name="clockSource" value="LpuartClock"/>
-                           <setting name="clockSourceFreq" value="ClocksTool_DefaultInit"/>
-                           <setting name="power_state" value="ARM_POWER_FULL"/>
-                           <setting name="baudRate_Bps" value="115200"/>
-                           <setting name="dataBits" value="ARM_USART_DATA_BITS_8"/>
-                           <setting name="parityBit" value="ARM_USART_PARITY_NONE"/>
-                           <setting name="stopBit" value="ARM_USART_STOP_BITS_1"/>
-                           <setting name="enableRX" value="false"/>
-                           <setting name="enableRXBuffer" value="true"/>
-                           <setting name="enableTX" value="false"/>
-                           <setting name="signalEventFunctionId" value="USART_SignalEvent"/>
-                           <setting name="enableGetFreqFnCustomName" value="false"/>
-                           <setting name="getFreqFunctionCustomID" value="USART_GetFreq"/>
-                           <setting name="enableInitPinsFnCustomName" value="false"/>
-                           <setting name="initPinFunctionCustomID" value="USART_InitPins"/>
-                           <setting name="enableDeinitPinsFnCustomName" value="false"/>
-                           <setting name="deinitPinFunctionCustomID" value="USART_DeinitPins"/>
+                           <setting name="lpuartSrcClkFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="baudRate_Bps" value="9600"/>
+                           <setting name="parityMode" value="kLPUART_ParityDisabled"/>
+                           <setting name="dataBitsCount" value="kLPUART_EightDataBits"/>
+                           <setting name="isMsb" value="false"/>
+                           <setting name="stopBitCount" value="kLPUART_OneStopBit"/>
+                           <setting name="enableMatchAddress1" value="false"/>
+                           <setting name="matchAddress1" value="0"/>
+                           <setting name="enableMatchAddress2" value="false"/>
+                           <setting name="matchAddress2" value="0"/>
+                           <setting name="txFifoWatermark" value="0"/>
+                           <setting name="rxFifoWatermark" value="1"/>
+                           <setting name="enableRxRTS" value="false"/>
+                           <setting name="enableTxCTS" value="false"/>
+                           <setting name="txCtsSource" value="kLPUART_CtsSourcePin"/>
+                           <setting name="txCtsConfig" value="kLPUART_CtsSampleAtStart"/>
+                           <setting name="rxIdleType" value="kLPUART_IdleTypeStartBit"/>
+                           <setting name="rxIdleConfig" value="kLPUART_IdleCharacter1"/>
+                           <setting name="enableTx" value="false"/>
+                           <setting name="enableRx" value="true"/>
                         </struct>
                      </config_set>
-                     <config_set name="fsl_cmsis_uart">
-                        <struct name="interrupt">
-                           <setting name="IRQn" value="LPUART4_IRQn"/>
-                           <setting name="enable_priority" value="false"/>
-                           <setting name="priority" value="0"/>
+                     <config_set name="interruptsCfg">
+                        <set name="interrupts">
+                           <selected>
+                              <id>kLPUART_RxDataRegFullInterruptEnable</id>
+                           </selected>
+                        </set>
+                        <struct name="interrupt_vectors">
+                           <setting name="enable_rx_tx_irq" value="true"/>
+                           <struct name="interrupt_rx_tx">
+                              <setting name="IRQn" value="LPUART1_IRQn"/>
+                              <setting name="enable_interrrupt" value="enabled"/>
+                              <setting name="enable_priority" value="true"/>
+                              <setting name="priority" value="4"/>
+                              <setting name="enable_custom_name" value="false"/>
+                           </struct>
+                        </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="LPUART4_IBUS" uuid="612ea1e9-f714-4538-ba82-b6c7043632fc" type="lpuart" type_id="lpuart_2.8.1" mode="polling" peripheral="LPUART4" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
+                     <config_set name="lpuartConfig_t">
+                        <struct name="lpuartConfig">
+                           <setting name="clockSource" value="LpuartClock"/>
+                           <setting name="lpuartSrcClkFreq" value="ClocksTool_DefaultInit"/>
+                           <setting name="baudRate_Bps" value="115200"/>
+                           <setting name="parityMode" value="kLPUART_ParityDisabled"/>
+                           <setting name="dataBitsCount" value="kLPUART_EightDataBits"/>
+                           <setting name="isMsb" value="false"/>
+                           <setting name="stopBitCount" value="kLPUART_OneStopBit"/>
+                           <setting name="enableMatchAddress1" value="false"/>
+                           <setting name="matchAddress1" value="0"/>
+                           <setting name="enableMatchAddress2" value="false"/>
+                           <setting name="matchAddress2" value="0"/>
+                           <setting name="txFifoWatermark" value="0"/>
+                           <setting name="rxFifoWatermark" value="1"/>
+                           <setting name="enableRxRTS" value="false"/>
+                           <setting name="enableTxCTS" value="false"/>
+                           <setting name="txCtsSource" value="kLPUART_CtsSourcePin"/>
+                           <setting name="txCtsConfig" value="kLPUART_CtsSampleAtStart"/>
+                           <setting name="rxIdleType" value="kLPUART_IdleTypeStartBit"/>
+                           <setting name="rxIdleConfig" value="kLPUART_IdleCharacter1"/>
+                           <setting name="enableTx" value="false"/>
+                           <setting name="enableRx" value="false"/>
                         </struct>
                      </config_set>
                   </instance>

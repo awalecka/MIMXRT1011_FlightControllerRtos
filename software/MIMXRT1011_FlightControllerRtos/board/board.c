@@ -139,6 +139,31 @@ uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE] __attribute__((aligned(4)));
 static edma_handle_t s_edmaHandle;
 static ibus_rx_idle_callback_t s_ibus_callback = NULL;
 
+static uart_rx_callback_t s_gps_callback = NULL;
+
+void BOARD_InitGPS(uart_rx_callback_t callback) {
+    s_gps_callback = callback;
+    // Note: The MCUXpresso configuration handles the Peripheral setup 
+    // and NVIC priority/enable. See LPUART1_GPS_init() in peripherals.c.
+}
+
+void LPUART1_IRQHandler(void) {
+    uint32_t statusFlags = LPUART_GetStatusFlags(LPUART1);
+
+    if ((statusFlags & kLPUART_RxDataRegFullFlag) != 0U) {
+        // Read byte clears the flag automatically
+        uint8_t byte = LPUART_ReadByte(LPUART1);
+        if (s_gps_callback) {
+            s_gps_callback(byte);
+        }
+    }
+
+    if ((statusFlags & kLPUART_RxOverrunFlag) != 0U) {
+        LPUART_ClearStatusFlags(LPUART1, kLPUART_RxOverrunFlag);
+    }
+    __DSB();
+}
+
 void BOARD_InitIBUS(ibus_rx_idle_callback_t callback)
 {
     s_ibus_callback = callback;

@@ -8,6 +8,8 @@
 #include "logging_task.h"
 #include "heartbeat_task.h"
 #include "flight_controller.h"
+#include "gps_handler.h"
+#include "nmea.h"
 
 extern "C" {
 #include "i2c_sync.h"
@@ -24,6 +26,7 @@ TaskHandle_t g_logging_task_handle = NULL;
 TaskHandle_t g_idle_task_handle = NULL;
 TaskHandle_t g_flight_task_handle = NULL;
 TaskHandle_t g_calibrate_task_handle = NULL;
+TaskHandle_t g_gps_task_handle = NULL;
 
 // Main State Manager Handle
 TaskHandle_t g_state_manager_task_handle = NULL;
@@ -33,6 +36,8 @@ QueueHandle_t g_controls_data_queue = NULL;
 QueueHandle_t g_command_data_queue = NULL;
 QueueHandle_t g_state_change_request_queue = NULL;
 QueueHandle_t g_sensor_data_queue = NULL;
+QueueHandle_t g_gps_rx_queue = NULL;
+QueueHandle_t g_gps_data_queue = NULL;
 
 // Heartbeat frequency
 volatile TickType_t g_heartbeat_frequency = pdMS_TO_TICKS(500); // 1Hz
@@ -63,6 +68,17 @@ static uint8_t ucStateChangeQueueStorageArea[STATE_CHANGE_QUEUE_LENGTH * STATE_C
 static StaticQueue_t xSensorQueueControlBlock;
 static uint8_t ucSensorQueueStorageArea[SENSOR_QUEUE_LENGTH * SENSOR_QUEUE_ITEM_SIZE];
 
+// GPS Queues
+#define GPS_RX_QUEUE_LENGTH 128
+#define GPS_RX_QUEUE_ITEM_SIZE sizeof(uint8_t)
+static StaticQueue_t xGpsRxQueueControlBlock;
+static uint8_t ucGpsRxQueueStorageArea[GPS_RX_QUEUE_LENGTH * GPS_RX_QUEUE_ITEM_SIZE];
+
+#define GPS_DATA_QUEUE_LENGTH 1
+#define GPS_DATA_QUEUE_ITEM_SIZE sizeof(firmware::sensors::GpsData)
+static StaticQueue_t xGpsDataQueueControlBlock;
+static uint8_t ucGpsDataQueueStorageArea[GPS_DATA_QUEUE_LENGTH * GPS_DATA_QUEUE_ITEM_SIZE];
+
 // State Manager Task Allocation
 #define STATE_MANAGER_TASK_PRIORITY     (tskIDLE_PRIORITY + 4)
 #define STATE_MGR_STACK_SIZE (configMINIMAL_STACK_SIZE + 512)
@@ -87,8 +103,13 @@ static StackType_t s_sensorStack[SENSOR_TASK_STACK_SIZE];
 static StaticTask_t s_sensorTaskTCB;
 static TaskHandle_t s_sensorTaskHandle = NULL;
 
+#define GPS_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 1024)
+static StackType_t s_gpsStack[GPS_TASK_STACK_SIZE];
+static StaticTask_t s_gpsTaskControlBlock;
+
 #define SENSOR_TASK_PRIORITY            (tskIDLE_PRIORITY + 3)
 #define COMMAND_HANDLER_TASK_PRIORITY   (tskIDLE_PRIORITY + 2)
+#define GPS_TASK_PRIORITY               (tskIDLE_PRIORITY + 2)
 #define LOGGING_TASK_PRIORITY           (tskIDLE_PRIORITY + 1)
 #define HEARTBEAT_TASK_PRIORITY         (tskIDLE_PRIORITY + 1)
 
@@ -107,14 +128,19 @@ int main(void) {
 
     // Initialize custom hardware for IBUS via BSP
     BOARD_InitIBUS(ibus_idle_interrupt_callback);
+    
+    // Initialize GPS UART via BSP
+    BOARD_InitGPS(gps_rx_callback);
 
     // Create Queues
     g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
     g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
     g_state_change_request_queue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, STATE_CHANGE_QUEUE_ITEM_SIZE, ucStateChangeQueueStorageArea, &xStateChangeQueueControlBlock);
     g_sensor_data_queue = xQueueCreateStatic(SENSOR_QUEUE_LENGTH, SENSOR_QUEUE_ITEM_SIZE, ucSensorQueueStorageArea, &xSensorQueueControlBlock);
+    g_gps_rx_queue = xQueueCreateStatic(GPS_RX_QUEUE_LENGTH, GPS_RX_QUEUE_ITEM_SIZE, ucGpsRxQueueStorageArea, &xGpsRxQueueControlBlock);
+    g_gps_data_queue = xQueueCreateStatic(GPS_DATA_QUEUE_LENGTH, GPS_DATA_QUEUE_ITEM_SIZE, ucGpsDataQueueStorageArea, &xGpsDataQueueControlBlock);
 
-    if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL || g_sensor_data_queue == NULL) {
+    if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL || g_sensor_data_queue == NULL || g_gps_rx_queue == NULL || g_gps_data_queue == NULL) {
         while(1);
     }
 
@@ -129,6 +155,7 @@ int main(void) {
     g_command_handler_task_handle = xTaskCreateStatic(commandHandlerTask, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, s_cmdHandlerStack, &s_cmdHandlerTaskControlBlock);
     g_logging_task_handle = xTaskCreateStatic(loggingTask, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, s_loggingStack, &s_loggingTaskControlBlock);
     s_sensorTaskHandle = xTaskCreateStatic(sensorTask, "SensorTask", SENSOR_TASK_STACK_SIZE, NULL, SENSOR_TASK_PRIORITY, s_sensorStack, &s_sensorTaskTCB);
+    g_gps_task_handle = xTaskCreateStatic(gpsTask, "GpsTask", GPS_TASK_STACK_SIZE, NULL, GPS_TASK_PRIORITY, s_gpsStack, &s_gpsTaskControlBlock);
 
     // Start Scheduler
     vTaskStartScheduler();

@@ -109,6 +109,22 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_MEAS_TIME_PIN                                          4U   /*!< PORT pin number */
 #define BOARD_INITPINS_MEAS_TIME_PIN_MASK                             (1U << 4U)   /*!< PORT pin mask */
 
+/* GPIO_SD_01 (number 75), PWM0B */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM0B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM0B_SIGNAL                                            B   /*!< Signal name */
+#define BOARD_INITPINS_PWM0B_CHANNEL                                          0U   /*!< Signal channel */
+
+/* GPIO_10 (number 2), UART1_TXD */
+/* Routed pin properties */
+#define BOARD_INITPINS_UART1_TXD_PERIPHERAL                              LPUART1   /*!< Peripheral name */
+#define BOARD_INITPINS_UART1_TXD_SIGNAL                                      TXD   /*!< Signal name */
+
+/* GPIO_09 (number 3), UART1_RXD */
+/* Routed pin properties */
+#define BOARD_INITPINS_UART1_RXD_PERIPHERAL                              LPUART1   /*!< Peripheral name */
+#define BOARD_INITPINS_UART1_RXD_SIGNAL                                      RXD   /*!< Signal name */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

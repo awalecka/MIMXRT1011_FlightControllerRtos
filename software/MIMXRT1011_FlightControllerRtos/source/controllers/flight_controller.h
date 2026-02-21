@@ -22,6 +22,7 @@
 #include "telemetry_manager.h"
 #include "settings.h"
 #include "state_manager.h"
+#include "nmea.h"
 
 // Drivers & Adapters
 #include "lsm6dsox_adapter.hpp"
@@ -81,6 +82,12 @@ public:
     RC_Channels_t getRcData() const;
 
     /**
+     * @brief Retrieves the latest GPS data.
+     * @return GpsData struct.
+     */
+    const firmware::sensors::GpsData& getGpsData() const { return m_latestGps; }
+
+    /**
      * @brief Performs one step of the interactive magnetometer calibration.
      * @return true if successful.
      */
@@ -132,6 +139,8 @@ private:
 	int staleDataCounter;
 	uint32_t lastUpdateTick;
 	QueueHandle_t sensorQueue;
+	
+	firmware::sensors::GpsData m_latestGps;
 };
 
 // --- Globals ---

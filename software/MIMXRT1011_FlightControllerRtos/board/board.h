@@ -76,6 +76,9 @@ void BOARD_ConfigMPU(void);
 typedef void (*ibus_rx_idle_callback_t)(void);
 void BOARD_InitIBUS(ibus_rx_idle_callback_t callback);
 
+typedef void (*uart_rx_callback_t)(uint8_t data);
+void BOARD_InitGPS(uart_rx_callback_t callback);
+
 extern uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE];
 
 #if defined(__cplusplus)

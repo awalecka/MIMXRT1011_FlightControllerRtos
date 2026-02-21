@@ -9,6 +9,8 @@ using namespace firmware::drivers;
 
 FlightController g_flightController(FlightController::LOOP_DT_S);
 
+extern QueueHandle_t g_gps_data_queue;
+
 static constexpr float DEG_TO_RAD = 3.1415926535f / 180.0f;
 static constexpr float RAD_TO_DEG = 180.0f / 3.1415926535f;
 static constexpr float GRAVITY_MSS = 9.80665f;
@@ -119,6 +121,12 @@ void FlightController::update() {
         currentControlMode = ControlMode::PASS_THROUGH;
     } else {
         currentControlMode = ControlMode::STABILIZED;
+    }
+
+    // Process new GPS data
+    firmware::sensors::GpsData newGpsData;
+    if (xQueueReceive(g_gps_data_queue, &newGpsData, 0) == pdPASS) {
+        m_latestGps = newGpsData;
     }
 
     // Sensor data is now read via Queue

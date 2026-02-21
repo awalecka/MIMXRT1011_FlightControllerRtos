@@ -102,6 +102,20 @@ extern "C" {
 #define LPUART3_TELE_PERIPHERAL LPUART3
 /* Definition of the clock source frequency */
 #define LPUART3_TELE_CLOCK_SOURCE 80000000UL
+/* Definition of peripheral ID */
+#define LPUART1_GPS_PERIPHERAL LPUART1
+/* Definition of the clock source frequency */
+#define LPUART1_GPS_CLOCK_SOURCE 80000000UL
+/* LPUART1_GPS interrupt vector ID (number). */
+#define LPUART1_GPS_SERIAL_RX_TX_IRQN LPUART1_IRQn
+/* LPUART1_GPS interrupt vector priority. */
+#define LPUART1_GPS_SERIAL_RX_TX_IRQ_PRIORITY 4
+/* LPUART1_GPS interrupt handler identifier. */
+#define LPUART1_GPS_SERIAL_RX_TX_IRQHANDLER LPUART1_IRQHandler
+/* Definition of peripheral ID */
+#define LPUART4_IBUS_PERIPHERAL LPUART4
+/* Definition of the clock source frequency */
+#define LPUART4_IBUS_CLOCK_SOURCE 80000000UL
 
 /***********************************************************************************************************************
  * Global variables
@@ -122,6 +136,8 @@ extern const pwm_fault_param_t PWM1_Fault1_fault_config;
 extern const pwm_fault_param_t PWM1_Fault2_fault_config;
 extern const pwm_fault_param_t PWM1_Fault3_fault_config;
 extern const lpuart_config_t LPUART3_TELE_config;
+extern const lpuart_config_t LPUART1_GPS_config;
+extern const lpuart_config_t LPUART4_IBUS_config;
 
 /***********************************************************************************************************************
  * Global functions

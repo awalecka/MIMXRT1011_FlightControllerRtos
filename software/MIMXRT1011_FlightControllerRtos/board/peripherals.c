@@ -118,6 +118,7 @@ instance:
     - interrupt_table:
       - 0: []
       - 1: []
+      - 2: []
     - interrupts:
       - 0:
         - channelId: 'int_0'
@@ -679,6 +680,143 @@ static void LPUART3_TELE_init(void) {
 }
 
 /***********************************************************************************************************************
+ * LPUART1_GPS initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'LPUART1_GPS'
+- type: 'lpuart'
+- mode: 'interrupts'
+- custom_name_enabled: 'true'
+- type_id: 'lpuart_2.8.1'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'LPUART1'
+- config_sets:
+  - lpuartConfig_t:
+    - lpuartConfig:
+      - clockSource: 'LpuartClock'
+      - lpuartSrcClkFreq: 'ClocksTool_DefaultInit'
+      - baudRate_Bps: '9600'
+      - parityMode: 'kLPUART_ParityDisabled'
+      - dataBitsCount: 'kLPUART_EightDataBits'
+      - isMsb: 'false'
+      - stopBitCount: 'kLPUART_OneStopBit'
+      - enableMatchAddress1: 'false'
+      - matchAddress1: '0'
+      - enableMatchAddress2: 'false'
+      - matchAddress2: '0'
+      - txFifoWatermark: '0'
+      - rxFifoWatermark: '1'
+      - enableRxRTS: 'false'
+      - enableTxCTS: 'false'
+      - txCtsSource: 'kLPUART_CtsSourcePin'
+      - txCtsConfig: 'kLPUART_CtsSampleAtStart'
+      - rxIdleType: 'kLPUART_IdleTypeStartBit'
+      - rxIdleConfig: 'kLPUART_IdleCharacter1'
+      - enableTx: 'false'
+      - enableRx: 'true'
+  - interruptsCfg:
+    - interrupts: 'kLPUART_RxDataRegFullInterruptEnable'
+    - interrupt_vectors:
+      - enable_rx_tx_irq: 'true'
+      - interrupt_rx_tx:
+        - IRQn: 'LPUART1_IRQn'
+        - enable_interrrupt: 'enabled'
+        - enable_priority: 'true'
+        - priority: '4'
+        - enable_custom_name: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const lpuart_config_t LPUART1_GPS_config = {
+  .baudRate_Bps = 9600UL,
+  .parityMode = kLPUART_ParityDisabled,
+  .dataBitsCount = kLPUART_EightDataBits,
+  .isMsb = false,
+  .stopBitCount = kLPUART_OneStopBit,
+  .txFifoWatermark = 0U,
+  .rxFifoWatermark = 1U,
+  .enableRxRTS = false,
+  .enableTxCTS = false,
+  .txCtsSource = kLPUART_CtsSourcePin,
+  .txCtsConfig = kLPUART_CtsSampleAtStart,
+  .rxIdleType = kLPUART_IdleTypeStartBit,
+  .rxIdleConfig = kLPUART_IdleCharacter1,
+  .enableTx = false,
+  .enableRx = true,
+};
+
+static void LPUART1_GPS_init(void) {
+  LPUART_Init(LPUART1_GPS_PERIPHERAL, &LPUART1_GPS_config, LPUART1_GPS_CLOCK_SOURCE);
+  LPUART_EnableInterrupts(LPUART1_GPS_PERIPHERAL, kLPUART_RxDataRegFullInterruptEnable);
+  /* Interrupt vector LPUART1_IRQn priority settings in the NVIC. */
+  NVIC_SetPriority(LPUART1_GPS_SERIAL_RX_TX_IRQN, LPUART1_GPS_SERIAL_RX_TX_IRQ_PRIORITY);
+  /* Enable interrupt LPUART1_GPS_SERIAL_RX_TX_IRQN request in the NVIC */
+  EnableIRQ(LPUART1_GPS_SERIAL_RX_TX_IRQN);
+}
+
+/***********************************************************************************************************************
+ * LPUART4_IBUS initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'LPUART4_IBUS'
+- type: 'lpuart'
+- mode: 'polling'
+- custom_name_enabled: 'true'
+- type_id: 'lpuart_2.8.1'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'LPUART4'
+- config_sets:
+  - lpuartConfig_t:
+    - lpuartConfig:
+      - clockSource: 'LpuartClock'
+      - lpuartSrcClkFreq: 'ClocksTool_DefaultInit'
+      - baudRate_Bps: '115200'
+      - parityMode: 'kLPUART_ParityDisabled'
+      - dataBitsCount: 'kLPUART_EightDataBits'
+      - isMsb: 'false'
+      - stopBitCount: 'kLPUART_OneStopBit'
+      - enableMatchAddress1: 'false'
+      - matchAddress1: '0'
+      - enableMatchAddress2: 'false'
+      - matchAddress2: '0'
+      - txFifoWatermark: '0'
+      - rxFifoWatermark: '1'
+      - enableRxRTS: 'false'
+      - enableTxCTS: 'false'
+      - txCtsSource: 'kLPUART_CtsSourcePin'
+      - txCtsConfig: 'kLPUART_CtsSampleAtStart'
+      - rxIdleType: 'kLPUART_IdleTypeStartBit'
+      - rxIdleConfig: 'kLPUART_IdleCharacter1'
+      - enableTx: 'false'
+      - enableRx: 'false'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const lpuart_config_t LPUART4_IBUS_config = {
+  .baudRate_Bps = 115200UL,
+  .parityMode = kLPUART_ParityDisabled,
+  .dataBitsCount = kLPUART_EightDataBits,
+  .isMsb = false,
+  .stopBitCount = kLPUART_OneStopBit,
+  .txFifoWatermark = 0U,
+  .rxFifoWatermark = 1U,
+  .enableRxRTS = false,
+  .enableTxCTS = false,
+  .txCtsSource = kLPUART_CtsSourcePin,
+  .txCtsConfig = kLPUART_CtsSampleAtStart,
+  .rxIdleType = kLPUART_IdleTypeStartBit,
+  .rxIdleConfig = kLPUART_IdleCharacter1,
+  .enableTx = false,
+  .enableRx = false,
+};
+
+static void LPUART4_IBUS_init(void) {
+  LPUART_Init(LPUART4_IBUS_PERIPHERAL, &LPUART4_IBUS_config, LPUART4_IBUS_CLOCK_SOURCE);
+}
+
+/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 static void BOARD_InitPeripherals_CommonPostInit(void)
@@ -704,6 +842,8 @@ void BOARD_InitPeripherals(void)
   LPI2C1_Sensors_init();
   PWM1_init();
   LPUART3_TELE_init();
+  LPUART1_GPS_init();
+  LPUART4_IBUS_init();
   /* Common post-initialization */
   BOARD_InitPeripherals_CommonPostInit();
 }
