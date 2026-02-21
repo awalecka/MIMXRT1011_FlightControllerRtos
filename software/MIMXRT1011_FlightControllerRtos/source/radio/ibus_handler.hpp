@@ -10,7 +10,6 @@ namespace firmware::drivers {
 /**
  * @class IbusHandler
  * @brief Handles parsing, validation, and data extraction for IBUS RC packets.
- * * Design for NXP RT1011:
  * - No heap allocation.
  * - Uses C++23 std::span for zero-copy buffer processing.
  * - Designed to be called from a FreeRTOS task or ISR context (keep processing short).

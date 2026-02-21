@@ -122,13 +122,8 @@ void FlightController::update() {
     }
 
     // Sensor data is now read via Queue
-    
-    // Check for mode switch on AUX1
-    if (receiver.getChannel(RC_CH_AUX1) > 1500) {
-        currentControlMode = ControlMode::PASS_THROUGH;
-    } else {
-        currentControlMode = ControlMode::STABILIZED;
-    }
+    SensorData rawSensorData;
+    bool hasNewSensorData = (xQueuePeek(g_sensor_data_queue, &rawSensorData, 0) == pdTRUE);
 
     if (currentControlMode == ControlMode::PASS_THROUGH) {
         actuators.setRawOutputs(
@@ -141,24 +136,22 @@ void FlightController::update() {
         ActuatorOutput surfaceCommands = {0.0f, 0.0f, 0.0f};
         float throttleOutput = 0.0f;
     
-    SensorData rawSensorData;
-    if (xQueuePeek(g_sensor_data_queue, &rawSensorData, 0) == pdTRUE) {
-        
-        // --- Dynamic DT Calculation ---
-        uint32_t now = xTaskGetTickCount();
-        if (lastUpdateTick > 0) {
-            // Convert ticks to seconds
-            float dt = (now - lastUpdateTick) * (1.0f / configTICK_RATE_HZ);
-            
-            // Simple sanity check/clamping (0.001s to 0.1s)
-            if (dt > 0.001f && dt < 0.1f) {
-                loopDt = dt; 
+        if (hasNewSensorData) {
+            // --- Dynamic DT Calculation ---
+            uint32_t now = xTaskGetTickCount();
+            if (lastUpdateTick > 0) {
+                // Convert ticks to seconds
+                float dt = (now - lastUpdateTick) * (1.0f / configTICK_RATE_HZ);
+                
+                // Simple sanity check/clamping (0.001s to 0.1s)
+                if (dt > 0.001f && dt < 0.1f) {
+                    loopDt = dt; 
+                }
             }
-        }
-        lastUpdateTick = now;
+            lastUpdateTick = now;
 
-        // Staleness Check
-        estimateAttitude(rawSensorData);
+            // Staleness Check
+            estimateAttitude(rawSensorData);
             
             Receiver::Setpoint setpoint;
             receiver.getSetpoint(setpoint);
@@ -180,12 +173,14 @@ void FlightController::update() {
         actuators.setOutputs(surfaceCommands.aileron, surfaceCommands.elevator, surfaceCommands.rudder, throttleOutput);
     }
 
-    FullSensorData teleData;
-    teleData.rollDeg = currentRollDeg;
-    teleData.pitchDeg = currentPitchDeg;
-    teleData.yawDeg = currentYawDeg;
+    if (hasNewSensorData) {
+        FullSensorData teleData;
+        teleData.rollDeg = currentRollDeg;
+        teleData.pitchDeg = currentPitchDeg;
+        teleData.yawDeg = currentYawDeg;
 
-    telemetry.update(teleData, receiver.getCachedData(), g_flight_state);
+        telemetry.update(teleData, receiver.getCachedData(), g_flight_state);
+    }
 }
 
 void FlightController::estimateAttitude(const SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData) {

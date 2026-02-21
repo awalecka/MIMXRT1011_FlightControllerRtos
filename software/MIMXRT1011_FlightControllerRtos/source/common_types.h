@@ -2,7 +2,7 @@
 #define COMMON_TYPES_H
 
 #include <stdint.h>
-#include "drivers/lsm6dsox.h" // For mapping enums if needed
+#include "lsm6dsox.h"
 
 // --- Constants ---
 #define IBUS_MAX_CHANNELS 14

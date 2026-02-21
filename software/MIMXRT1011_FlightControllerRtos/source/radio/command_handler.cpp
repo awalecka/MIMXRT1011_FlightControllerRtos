@@ -6,13 +6,10 @@
 #include "ibus_handler.hpp"
 #include "flight_controller.h"
 #include "fsl_lpuart.h"
-#include <cstdint> // Required for uintptr_t
+#include "board.h"
 
 using namespace firmware::drivers;
 using namespace firmware::protocols::ibus;
-
-// Buffer must be aligned for DMA access
-extern uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE] __attribute__((aligned(4)));
 
 // --- Static Data ---
 static IbusHandler s_ibusHandler;
@@ -21,29 +18,13 @@ static size_t s_readIndex = 0;
 // --- Private Function Prototypes ---
 static void processReceivedData(void);
 
-// --- Interrupt Service Routine (extern "C") ---
-extern "C" void LPUART4_IRQHandler(void) {
-    uint32_t statusFlags = LPUART_GetStatusFlags(IBUS_LPUART_INSTANCE);
-
-    // Check for Idle Line Flag (Line high for >1 character time)
-    if ((statusFlags & kLPUART_IdleLineFlag) != 0U) {
-        LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_IdleLineFlag);
-
-        // Notify task
-        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-        if (g_command_handler_task_handle != NULL) {
-            vTaskNotifyGiveFromISR(g_command_handler_task_handle, &xHigherPriorityTaskWoken);
-        }
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+extern "C" void ibus_idle_interrupt_callback(void) {
+    // Notify task
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    if (g_command_handler_task_handle != NULL) {
+        vTaskNotifyGiveFromISR(g_command_handler_task_handle, &xHigherPriorityTaskWoken);
     }
-
-    // Check for Overrun (Buffer full in hardware FIFO)
-    if ((statusFlags & kLPUART_RxOverrunFlag) != 0U) {
-        LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_RxOverrunFlag);
-    }
-
-    // Check if DMA Major Loop finished (Circular wrap-around event)
-    __DSB();
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 // --- Main Task (C++ Linkage) ---
@@ -60,8 +41,8 @@ void commandHandlerTask(void* pvParameters) {
 
 static void processReceivedData(void) {
     // Robust Index Calculation (AV Rule 96 Compliance):
-    // We strictly avoid pointer arithmetic (ptrA - ptrB) to calculate the index.
-    // Instead, we cast addresses to `uintptr_t` and perform integer arithmetic.
+    // Strictly avoid pointer arithmetic (ptrA - ptrB) to calculate the index.
+    // Instead, cast addresses to `uintptr_t` and perform integer arithmetic.
 
     // DADDR is a uint32_t register value, so we use static_cast (integer to integer)
     uintptr_t dmaAddr = static_cast<uintptr_t>(IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR);

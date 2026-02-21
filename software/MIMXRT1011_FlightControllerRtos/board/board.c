@@ -128,3 +128,72 @@ void SystemInitHook(void)
     FLEXSPI->AHBCR |= FLEXSPI_AHBCR_READADDROPT_MASK;
 }
 #endif
+
+#include "fsl_lpuart.h"
+#include "fsl_edma.h"
+#include "fsl_dmamux.h"
+
+// Define the global DMA buffer for IBUS in board.c
+uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE] __attribute__((aligned(4)));
+
+static edma_handle_t s_edmaHandle;
+static ibus_rx_idle_callback_t s_ibus_callback = NULL;
+
+void BOARD_InitIBUS(ibus_rx_idle_callback_t callback)
+{
+    s_ibus_callback = callback;
+
+    lpuart_config_t lpuartConfig;
+    LPUART_GetDefaultConfig(&lpuartConfig);
+    lpuartConfig.baudRate_Bps = 115200;
+    lpuartConfig.enableTx = false;
+    lpuartConfig.enableRx = true;
+    lpuartConfig.rxFifoWatermark = 0; // DMA request on every byte
+
+    LPUART_Init(IBUS_LPUART_INSTANCE, &lpuartConfig, BOARD_BOOTCLOCKRUN_UART_CLK_ROOT);
+
+    EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
+
+    DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
+    DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
+
+    edma_transfer_config_t transferConfig;
+    EDMA_PrepareTransfer(&transferConfig,
+                         (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE),
+                         1,
+                         g_dmaRxBuffer,
+                         1,
+                         1,
+                         IBUS_DMA_BUFFER_SIZE,
+                         kEDMA_PeripheralToMemory);
+
+    EDMA_SubmitTransfer(&s_edmaHandle, &transferConfig);
+
+    // Hardware Loop / Ring Buffer Logic
+    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DLAST_SGA = -((int32_t)IBUS_DMA_BUFFER_SIZE);
+    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].CSR &= ~(DMA_CSR_DREQ_MASK);
+
+    EDMA_StartTransfer(&s_edmaHandle);
+
+    LPUART_EnableInterrupts(IBUS_LPUART_INSTANCE, kLPUART_IdleLineInterruptEnable);
+    // Note: Assuming priority 3 is safe above configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY (usually 2 for M7)
+    NVIC_SetPriority(IBUS_LPUART_IRQn, 3);
+    NVIC_EnableIRQ(IBUS_LPUART_IRQn);
+    LPUART_EnableRxDMA(IBUS_LPUART_INSTANCE, true);
+}
+
+void LPUART4_IRQHandler(void) {
+    uint32_t statusFlags = LPUART_GetStatusFlags(IBUS_LPUART_INSTANCE);
+
+    if ((statusFlags & kLPUART_IdleLineFlag) != 0U) {
+        LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_IdleLineFlag);
+        if (s_ibus_callback) {
+            s_ibus_callback();
+        }
+    }
+
+    if ((statusFlags & kLPUART_RxOverrunFlag) != 0U) {
+        LPUART_ClearStatusFlags(IBUS_LPUART_INSTANCE, kLPUART_RxOverrunFlag);
+    }
+    __DSB();
+}

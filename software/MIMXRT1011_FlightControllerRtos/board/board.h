@@ -72,6 +72,12 @@ extern "C" {
  * API
  ******************************************************************************/
 void BOARD_ConfigMPU(void);
+
+typedef void (*ibus_rx_idle_callback_t)(void);
+void BOARD_InitIBUS(ibus_rx_idle_callback_t callback);
+
+extern uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE];
+
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus */

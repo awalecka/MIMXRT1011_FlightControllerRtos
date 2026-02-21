@@ -3,33 +3,27 @@
  * @brief   Application entry point.
  */
 
-#include "board.h"
 #include "pin_mux.h"
-#include "clock_config.h"
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "flight_controller.h"
-#include "fsl_debug_console.h"
-#include "peripherals.h"
 #include "command_handler.h"
-#include "fsl_lpuart.h"
-#include "fsl_edma.h"
-#include "fsl_dmamux.h"
+#include "logging_task.h"
+#include "heartbeat_task.h"
+#include "flight_controller.h"
 
 extern "C" {
 #include "i2c_sync.h"
 }
 
-// EDMA Handle
-static edma_handle_t s_edmaHandle;
-
 // --- Global Variable Definitions ---
 // Flight State
 volatile FlightState_t g_flight_state = STATE_BOOT;
 
-// Buffer must be aligned for DMA access
-uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE] __attribute__((aligned(4)));
+// Task Handles
+TaskHandle_t g_heartbeat_task_handle = NULL;
+TaskHandle_t g_command_handler_task_handle = NULL;
+TaskHandle_t g_logging_task_handle = NULL;
+TaskHandle_t g_idle_task_handle = NULL;
+TaskHandle_t g_flight_task_handle = NULL;
+TaskHandle_t g_calibrate_task_handle = NULL;
 
 // Main State Manager Handle
 TaskHandle_t g_state_manager_task_handle = NULL;
@@ -75,8 +69,28 @@ static uint8_t ucSensorQueueStorageArea[SENSOR_QUEUE_LENGTH * SENSOR_QUEUE_ITEM_
 static StackType_t xStateMgrStack[STATE_MGR_STACK_SIZE];
 static StaticTask_t xStateMgrTaskControlBlock;
 
-// Local functions
-static void initCustomConfig();
+// Other Task Allocations
+#define CMD_HANDLER_STACK_SIZE (configMINIMAL_STACK_SIZE + 256)
+static StackType_t s_cmdHandlerStack[CMD_HANDLER_STACK_SIZE];
+static StaticTask_t s_cmdHandlerTaskControlBlock;
+
+#define HEARTBEAT_STACK_SIZE (configMINIMAL_STACK_SIZE)
+static StackType_t s_heartbeatStack[HEARTBEAT_STACK_SIZE];
+static StaticTask_t s_heartbeatTaskControlBlock;
+
+#define LOGGING_STACK_SIZE (configMINIMAL_STACK_SIZE + 512)
+static StackType_t s_loggingStack[LOGGING_STACK_SIZE];
+static StaticTask_t s_loggingTaskControlBlock;
+
+#define SENSOR_TASK_STACK_SIZE (configMINIMAL_STACK_SIZE + 512)
+static StackType_t s_sensorStack[SENSOR_TASK_STACK_SIZE];
+static StaticTask_t s_sensorTaskTCB;
+static TaskHandle_t s_sensorTaskHandle = NULL;
+
+#define SENSOR_TASK_PRIORITY            (tskIDLE_PRIORITY + 3)
+#define COMMAND_HANDLER_TASK_PRIORITY   (tskIDLE_PRIORITY + 2)
+#define LOGGING_TASK_PRIORITY           (tskIDLE_PRIORITY + 1)
+#define HEARTBEAT_TASK_PRIORITY         (tskIDLE_PRIORITY + 1)
 
 /**
  * @brief Main Application Entry Point.
@@ -91,12 +105,11 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-    // Custom initialization not possible in the configuration tools
-    initCustomConfig();
+    // Initialize custom hardware for IBUS via BSP
+    BOARD_InitIBUS(ibus_idle_interrupt_callback);
 
     // Create Queues
     g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
-    g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
     g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
     g_state_change_request_queue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, STATE_CHANGE_QUEUE_ITEM_SIZE, ucStateChangeQueueStorageArea, &xStateChangeQueueControlBlock);
     g_sensor_data_queue = xQueueCreateStatic(SENSOR_QUEUE_LENGTH, SENSOR_QUEUE_ITEM_SIZE, ucSensorQueueStorageArea, &xSensorQueueControlBlock);
@@ -111,6 +124,12 @@ int main(void) {
         while(1);
     }
 
+    // Create the Other Tasks
+    g_heartbeat_task_handle = xTaskCreateStatic(heartbeatTask, "HeartbeatTask", HEARTBEAT_STACK_SIZE, NULL, HEARTBEAT_TASK_PRIORITY, s_heartbeatStack, &s_heartbeatTaskControlBlock);
+    g_command_handler_task_handle = xTaskCreateStatic(commandHandlerTask, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, s_cmdHandlerStack, &s_cmdHandlerTaskControlBlock);
+    g_logging_task_handle = xTaskCreateStatic(loggingTask, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, s_loggingStack, &s_loggingTaskControlBlock);
+    s_sensorTaskHandle = xTaskCreateStatic(sensorTask, "SensorTask", SENSOR_TASK_STACK_SIZE, NULL, SENSOR_TASK_PRIORITY, s_sensorStack, &s_sensorTaskTCB);
+
     // Start Scheduler
     vTaskStartScheduler();
 
@@ -118,62 +137,4 @@ int main(void) {
     while(1);
 
     return 0;
-}
-
-/**
- * @brief Initializes custom peripheral configurations.
- * Sets up the LPUART for IBUS communication using EDMA with a circular buffer.
- * Configures interrupts for Idle Line detection.
- */
-static void initCustomConfig()
-{
-    // GLOBAL INIT REMOVED:
-    // DMAMUX_Init, EDMA_Init, and EDMA_CreateHandle are removed.
-    // The Controller is already initialized by BOARD_InitBootPeripherals (via MEX).
-
-    // LPUART Initialization (disabled in MEX):
-    lpuart_config_t lpuartConfig;
-    LPUART_GetDefaultConfig(&lpuartConfig);
-    lpuartConfig.baudRate_Bps = 115200;
-    lpuartConfig.enableTx = false;
-    lpuartConfig.enableRx = true;
-    lpuartConfig.rxFifoWatermark = 0; // DMA request on every byte
-
-    // Manually init the clock if we disabled the component in MEX,
-    // or ensure BOARD_BootClockRUN configures it.
-    LPUART_Init(IBUS_LPUART_INSTANCE, &lpuartConfig, BOARD_BOOTCLOCKRUN_UART_CLK_ROOT);
-
-    // Re-create the EDMA Handle for the IBUS Channel (0)
-    // Need s_edmaHandle valid for our local usage, even if EDMA is globally init.
-    EDMA_CreateHandle(&s_edmaHandle, IBUS_DMA_BASE, IBUS_DMA_CHANNEL);
-
-    // Configure DMAMUX for Channel 0 (IBUS)
-    // (DMAMUX global init is done by BOARD_Init, but we must set the source for Ch0)
-    DMAMUX_SetSource(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL, IBUS_DMA_SOURCE);
-    DMAMUX_EnableChannel(IBUS_DMAMUX_BASE, IBUS_DMA_CHANNEL);
-
-    // Configure TCD for Circular Buffer
-    edma_transfer_config_t transferConfig;
-    EDMA_PrepareTransfer(&transferConfig,
-                         (void *)(uint32_t)LPUART_GetDataRegisterAddress(IBUS_LPUART_INSTANCE),
-                         1,
-                         g_dmaRxBuffer,
-                         1,
-                         1,
-                         IBUS_DMA_BUFFER_SIZE,
-                         kEDMA_PeripheralToMemory);
-
-    EDMA_SubmitTransfer(&s_edmaHandle, &transferConfig);
-
-    // Hardware Loop / Ring Buffer Logic
-    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DLAST_SGA = -((int32_t)IBUS_DMA_BUFFER_SIZE);
-    IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].CSR &= ~(DMA_CSR_DREQ_MASK);
-
-    EDMA_StartTransfer(&s_edmaHandle);
-
-    // Enable LPUART specific features
-    LPUART_EnableInterrupts(IBUS_LPUART_INSTANCE, kLPUART_IdleLineInterruptEnable);
-    NVIC_SetPriority(IBUS_LPUART_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 1);
-    NVIC_EnableIRQ(IBUS_LPUART_IRQn);
-    LPUART_EnableRxDMA(IBUS_LPUART_INSTANCE, true);
 }
