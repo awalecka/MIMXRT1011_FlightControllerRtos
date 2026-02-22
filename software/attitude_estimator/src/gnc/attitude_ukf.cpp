@@ -19,7 +19,7 @@ namespace gnc {
     // Public API
     // ----------------------------------------------------------------------------
 
-    AttitudeUkf::AttitudeUkf(const Config& config)
+    AttitudeUkf::AttitudeUkf(const FilterConfig& config)
         : config(config)
     {
         // Default initialization
@@ -311,14 +311,25 @@ namespace gnc {
 
         float sinp = 2.0f * (qw * qy - qz * qx);
         float pitch;
-        if (std::abs(sinp) >= 1.0f)
+        if (std::abs(sinp) >= 1.0f) {
             pitch = std::copysign(90.0f, sinp);
-        else
+        } else {
             pitch = std::asin(sinp) * RAD_TO_DEG;
+        }
 
         float yaw = std::atan2(2.0f * (qw * qz + qx * qy), 1.0f - 2.0f * (qy * qy + qz * qz)) * RAD_TO_DEG;
 
         return Vector3(roll, pitch, yaw);
+    }
+
+    AttitudeUkf::Vector3 AttitudeUkf::getBias() const
+    {
+        return stateVector.segment<3>(3);
+    }
+
+    uint32_t AttitudeUkf::getCovarianceFaultCount() const
+    {
+        return m_covFaultCount;
     }
 
     // ----------------------------------------------------------------------------
@@ -361,8 +372,7 @@ namespace gnc {
                 // Repair failed: the matrix is too corrupted to salvage. Reset to a
                 // conservative scalar identity and increment the fault counter so
                 // the caller can detect repeated failures via a telemetry flag.
-                static uint32_t s_choleskyFaultCount = 0u;
-                ++s_choleskyFaultCount;
+                ++m_covFaultCount;
                 errorCovariance = MatrixState::Identity() * 0.001f;
                 llt.compute(errorCovariance);
             }

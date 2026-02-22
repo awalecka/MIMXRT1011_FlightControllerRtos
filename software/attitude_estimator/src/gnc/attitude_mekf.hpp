@@ -3,7 +3,7 @@
  * @brief Multiplicative Extended Kalman Filter (MEKF) for Attitude Estimation.
  *
  * Implements a linearised MEKF over a 6D error state:
- *   [delta_r (3D rotation vector error), delta_b (3D gyro bias error)]
+ * [delta_r (3D rotation vector error), delta_b (3D gyro bias error)]
  *
  * A nominal quaternion is maintained separately and updated via a
  * multiplicative reset after each measurement correction. This avoids
@@ -20,15 +20,16 @@
  * Target: NXP RT1011 (Cortex-M7, 500 MHz, single-precision FPU).
  *
  * References:
- *   Crassidis & Markley, "Unscented Filtering for Spacecraft Attitude
- *   Estimation", AIAA Journal of Guidance, 2003.
- *   Trawny & Roumeliotis, "Indirect Kalman Filter for 3D Attitude
- *   Estimation", UMN TR-2005-002, 2005.
+ * Crassidis & Markley, "Unscented Filtering for Spacecraft Attitude
+ * Estimation", AIAA Journal of Guidance, 2003.
+ * Trawny & Roumeliotis, "Indirect Kalman Filter for 3D Attitude
+ * Estimation", UMN TR-2005-002, 2005.
  */
 
 #ifndef ATTITUDE_MEKF_HPP
 #define ATTITUDE_MEKF_HPP
 
+#include "attitude_filter_concept.hpp"
 #include <Eigen/Dense>
 #include <cmath>
 #include <cstdint>
@@ -37,10 +38,10 @@ namespace gnc {
 
 /**
  * @brief Linearised Multiplicative Extended Kalman Filter for attitude
- *        estimation from gyroscope, accelerometer, and magnetometer.
+ * estimation from gyroscope, accelerometer, and magnetometer.
  *
  * Error State x_err [6x1]: [delta_rx, delta_ry, delta_rz,
- *                            delta_bx, delta_by, delta_bz]
+ * delta_bx, delta_by, delta_bz]
  *
  * The attitude error (delta_r) is a 3D rotation vector representing the
  * small rotation from the nominal quaternion to the true quaternion.
@@ -68,39 +69,10 @@ public:
     using Jacobian     = Eigen::Matrix<float, MEAS_DIM, ERROR_DIM>;
 
     /**
-     * @brief Filter tuning and noise configuration.
-     *
-     * All noise parameters are variances (sigma^2), not standard deviations.
-     */
-    struct Config {
-        /// @brief Gyroscope angle-rate noise PSD [rad^2/s].
-        /// Discrete Q attitude block = qGyro * dt * I_3x3 per prediction step.
-        float qGyro;
-
-        /// @brief Gyro bias random-walk PSD [rad^2/s^3].
-        /// Discrete Q bias block = qBias * dt * I_3x3 per prediction step.
-        float qBias;
-
-        /// @brief Accelerometer measurement noise variance [(m/s^2)^2].
-        /// Applied as rAccel * I_3x3 in the innovation covariance.
-        float rAccel;
-
-        /// @brief Magnetometer measurement noise variance [uT^2] or
-        /// dimensionless if measurements are normalised before updateMag().
-        /// Applied as rMag * I_3x3 in the innovation covariance.
-        float rMag;
-
-        /// @brief Accelerometer magnitude gate half-width [m/s^2].
-        /// updateAccel() is skipped when ||accel|| is outside
-        /// [g - accelGate, g + accelGate]. Set to 0 to disable gating.
-        float accelGate;
-    };
-
-    /**
      * @brief Construct the filter with the given tuning configuration.
-     * @param config Noise parameters and gate thresholds.
+     * @param config Unified filter configuration parameters.
      */
-    explicit AttitudeMekf(const Config& config);
+    explicit AttitudeMekf(const FilterConfig& config);
 
     /**
      * @brief Set the nominal state directly.
@@ -109,14 +81,14 @@ public:
      * conservative diagonal. Use align() for sensor-derived initialisation.
      *
      * @param initialQuat Initial attitude quaternion [w, x, y, z], need not
-     *                    be normalised (will be normalised internally).
+     * be normalised (will be normalised internally).
      * @param initialBias Initial gyro bias estimate [rad/s].
      */
     void init(const Eigen::Quaternionf& initialQuat, const Vector3& initialBias);
 
     /**
      * @brief Derive initial attitude and magnetic reference from static
-     *        sensor averages (TRIAD method).
+     * sensor averages (TRIAD method).
      *
      * Computes the initial Roll, Pitch, and tilt-compensated Yaw from the
      * averaged accelerometer and magnetometer readings. Sets the nominal
@@ -128,12 +100,12 @@ public:
      * rather than atan2-based decomposition.
      *
      * @param accelMean  Static-averaged accelerometer reading [m/s^2].
-     *                   NED convention: gravity is along +Z, so a level
-     *                   stationary vehicle reads approximately [0, 0, 9.81].
+     * NED convention: gravity is along +Z, so a level
+     * stationary vehicle reads approximately [0, 0, 9.81].
      * @param magMean    Static-averaged magnetometer reading [uT or Gauss].
      * @param magRefOut  [out] Normalised inertial magnetic reference vector
-     *                   [North, 0, Down] in the NED frame. Store this and
-     *                   pass it to every subsequent updateMag() call.
+     * [North, 0, Down] in the NED frame. Store this and
+     * pass it to every subsequent updateMag() call.
      */
     void align(const Vector3& accelMean, const Vector3& magMean, Vector3& magRefOut);
 
@@ -155,7 +127,7 @@ public:
      * Treats the normalised accelerometer reading as a gravity vector
      * observation. The update is gated on the accelerometer magnitude:
      * readings too far from 1g are rejected as contaminated by linear
-     * acceleration. Configure the gate width via Config::accelGate.
+     * acceleration. Configure the gate width via FilterConfig::accelGate.
      *
      * Both the measurement and the predicted gravity are normalised before
      * computing the residual to make the update scale-invariant.
@@ -172,7 +144,7 @@ public:
      *
      * @param magMeas  Raw magnetometer measurement [uT or Gauss].
      * @param magRef   Inertial magnetic reference vector (output of align()).
-     *                 Need not be unit-length; will be normalised internally.
+     * Need not be unit-length; will be normalised internally.
      */
     void updateMag(const Vector3& magMeas, const Vector3& magRef);
 
@@ -191,7 +163,7 @@ public:
     /**
      * @brief Return the 6x6 error covariance matrix.
      * @return Const reference — upper-left 3x3 is attitude uncertainty,
-     *         lower-right 3x3 is bias uncertainty.
+     * lower-right 3x3 is bias uncertainty.
      */
     [[nodiscard]] const ErrorMat& getCovariance() const;
 
@@ -227,7 +199,7 @@ private:
     // -------------------------------------------------------------------------
     // Configuration
     // -------------------------------------------------------------------------
-    Config config;
+    FilterConfig config;
 
     // -------------------------------------------------------------------------
     // Diagnostics
@@ -258,7 +230,7 @@ private:
 
     /**
      * @brief Repair or reset the covariance matrix if it is no longer
-     *        symmetric positive-definite.
+     * symmetric positive-definite.
      *
      * Attempts re-symmetrisation and a small ridge addition first.
      * Falls back to a conservative diagonal identity reset only if the
