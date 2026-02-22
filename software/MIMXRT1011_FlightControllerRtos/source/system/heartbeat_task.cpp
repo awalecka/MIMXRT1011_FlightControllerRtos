@@ -2,7 +2,7 @@
  * @file heartbeat_task.cpp
  * @brief Implements the heartbeat task.
  */
-#include "system/heartbeat_task.h"
+#include "heartbeat_task.h"
 #include "flight_controller.h"
 #include "board.h"
 

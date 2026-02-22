@@ -15,16 +15,17 @@
 namespace gnc {
 
 /**
- * @brief Unscented Kalman Filter for Attitude Estimation.
+ * @brief Unscented Kalman Filter for Attitude Estimation (MEKF formulation).
  *
- * State Vector x [7x1]: [qw, qx, qy, qz, bx, by, bz]
- *
+ * State Vector Error x [6x1]: [dx, dy, dz, dbx, dby, dbz]
+ * (3D Rotation Vector Error + 3D Gyro Bias Error)
+ * 
  * Uses static allocation via Eigen::Matrix fixed sizes.
  */
 class AttitudeUkf {
 public:
     // Constants
-    static constexpr int STATE_DIM = 7;
+    static constexpr int STATE_DIM = 6;
     static constexpr int MEAS_DIM_VEC = 3; // For Accel/Mag (3-axis)
     static constexpr int SIGMA_COUNT = 2 * STATE_DIM + 1;
 
@@ -39,13 +40,31 @@ public:
      * @brief Configuration struct for process and measurement noise.
      */
     struct Config {
-        float alpha;        // Spread of sigma points (usually 1e-3 to 1)
-        float beta;         // Prior knowledge of distribution (2 for Gaussian)
-        float kappa;        // Secondary scaling parameter (usually 0)
-        float qGyro;        // Process noise: Gyroscope (rad/s)
-        float qBias;        // Process noise: Bias random walk (rad/s^2)
-        float rAccel;       // Measurement noise: Accelerometer (m/s^2)
-        float rMag;         // Measurement noise: Magnetometer (uT)
+        float alpha;  ///< Sigma-point spread factor (typical range: 1e-3 to 1).
+        float beta;   ///< Distribution prior; 2 is optimal for a Gaussian.
+        float kappa;  ///< Secondary scaling parameter (typically 0).
+
+        /// @brief Gyroscope angle-rate noise power spectral density [rad^2/s].
+        /// Pass the variance per unit time (sigma_gyro^2), NOT the standard
+        /// deviation. The filter adds (qGyro * dt) to the attitude error
+        /// variance each prediction step.
+        float qGyro;
+
+        /// @brief Gyro bias random-walk power spectral density [rad^2/s^3].
+        /// Pass the variance per unit time (sigma_bias^2), NOT the standard
+        /// deviation. The filter adds (qBias * dt) to the bias variance each
+        /// prediction step.
+        float qBias;
+
+        /// @brief Accelerometer measurement noise variance [(m/s^2)^2].
+        /// Pass sigma_accel^2. Applied as a scalar multiple of the 3x3
+        /// identity matrix in the innovation covariance.
+        float rAccel;
+
+        /// @brief Magnetometer measurement noise variance [uT^2] (or
+        /// dimensionless if the measurement is normalised before calling
+        /// updateMag). Pass sigma_mag^2.
+        float rMag;
     };
 
     /**
@@ -126,8 +145,9 @@ public:
 
 private:
     // Filter State
-    VectorState stateVector;       // State Estimate
-    MatrixState errorCovariance;   // Error Covariance
+    Eigen::Quaternionf nominalQuat; // Global Reference Attitude
+    VectorState stateVector;       // State Estimate Error (6D)
+    MatrixState errorCovariance;   // Error Covariance (6x6)
 
     // UKF Parameters
     Config config;
@@ -143,6 +163,13 @@ private:
     // Helper Methods
     void generateSigmaPoints();
     void computeWeights();
+    
+    // MEKF Quaternion Math Helpers
+    static Vector3 quaternionToRotationVector(const Eigen::Quaternionf& q);
+    static Eigen::Quaternionf rotationVectorToQuaternion(const Vector3& rv);
+    
+    // Generic Observation Update
+    void updateGenericObservation(const Vector3& meas, const Vector3& refInertial, float rNoise);
 };
 
 } // namespace gnc
