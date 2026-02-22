@@ -12,7 +12,7 @@
 #include <random>
 #include "attitude_ukf.hpp" 
 
-// Define PI if not available (Standard C++17/20 difference safety)
+ // Define PI if not available (Standard C++17/20 difference safety)
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
 #endif
@@ -57,7 +57,7 @@ TEST_F(AttitudeUkfTest, InitializationStateIsIdentity) {
 
     // Default constructor should result in Identity [1, 0, 0, 0]
     Eigen::Quaternionf q = ukf.getQuaternion();
-    
+
     EXPECT_NEAR(q.w(), 1.0f, 1e-5f);
     EXPECT_NEAR(q.x(), 0.0f, 1e-5f);
     EXPECT_NEAR(q.y(), 0.0f, 1e-5f);
@@ -65,9 +65,9 @@ TEST_F(AttitudeUkfTest, InitializationStateIsIdentity) {
 
     // Biases should be zero
     const auto& state = ukf.getState();
-    EXPECT_NEAR(state(4), 0.0f, 1e-5f); // Bx
-    EXPECT_NEAR(state(5), 0.0f, 1e-5f); // By
-    EXPECT_NEAR(state(6), 0.0f, 1e-5f); // Bz
+    EXPECT_NEAR(state(3), 0.0f, 1e-5f); // Bx
+    EXPECT_NEAR(state(4), 0.0f, 1e-5f); // By
+    EXPECT_NEAR(state(5), 0.0f, 1e-5f); // Bz
 }
 
 // ----------------------------------------------------------------------------
@@ -80,7 +80,7 @@ TEST_F(AttitudeUkfTest, PredictPureZRotation) {
     // Result should be 90 degree yaw.
     float dt = 0.01f; // 100 Hz
     int steps = 100;
-    
+
     Eigen::Vector3f omegaMeas(0.0f, 0.0f, static_cast<float>(M_PI) / 2.0f); // 90 deg/s
 
     for (int i = 0; i < steps; ++i) {
@@ -88,14 +88,14 @@ TEST_F(AttitudeUkfTest, PredictPureZRotation) {
     }
 
     Eigen::Quaternionf q = ukf.getQuaternion();
-    
+
     // Euler angles from quaternion
     // Yaw = atan2(2(wz + xy), 1 - 2(y^2 + z^2))
-    float yaw = std::atan2(2.0f * (q.w() * q.z() + q.x() * q.y()), 
-                           1.0f - 2.0f * (q.y() * q.y() + q.z() * q.z()));
+    float yaw = std::atan2(2.0f * (q.w() * q.z() + q.x() * q.y()),
+        1.0f - 2.0f * (q.y() * q.y() + q.z() * q.z()));
 
     // Expect 90 degrees (approx 1.5707 rad)
-    EXPECT_NEAR(yaw, static_cast<float>(M_PI) / 2.0f, 0.05f); 
+    EXPECT_NEAR(yaw, static_cast<float>(M_PI) / 2.0f, 0.05f);
 }
 
 // ----------------------------------------------------------------------------
@@ -115,11 +115,11 @@ TEST_F(AttitudeUkfTest, UpdateAccelCorrectsPitch) {
     //   -> Component X is NEGATIVE (-sin(45)*g)
     // Z_body points "Down and Back". Gravity points "Down".
     //   -> Component Z is POSITIVE (cos(45)*g)
-    
+
     float g = 9.81f;
     float angle = static_cast<float>(M_PI) / 4.0f; // 45 deg
     Eigen::Vector3f accelMeas(
-        -std::sin(angle) * g, 
+        -std::sin(angle) * g,
         0.0f,
         std::cos(angle) * g   // Positive Z component for NED Pitch Up
     );
@@ -135,7 +135,7 @@ TEST_F(AttitudeUkfTest, UpdateAccelCorrectsPitch) {
     Eigen::Quaternionf q = ukf.getQuaternion();
     float pitch = std::asin(2.0f * (q.w() * q.y() - q.z() * q.x()));
 
-    EXPECT_NEAR(pitch, angle, 0.05f); 
+    EXPECT_NEAR(pitch, angle, 0.05f);
 }
 
 TEST_F(AttitudeUkfTest, UpdateMagCorrectsYaw) {
@@ -167,8 +167,8 @@ TEST_F(AttitudeUkfTest, UpdateMagCorrectsYaw) {
 
     // 4. Check Yaw
     Eigen::Quaternionf q = ukf.getQuaternion();
-    float yaw = std::atan2(2.0f * (q.w() * q.z() + q.x() * q.y()), 
-                           1.0f - 2.0f * (q.y() * q.y() + q.z() * q.z()));
+    float yaw = std::atan2(2.0f * (q.w() * q.z() + q.x() * q.y()),
+        1.0f - 2.0f * (q.y() * q.y() + q.z() * q.z()));
 
     // Expect +90 degrees (approx 1.57 rad)
     EXPECT_NEAR(yaw, static_cast<float>(M_PI) / 2.0f, 0.05f);
@@ -197,10 +197,12 @@ TEST_F(AttitudeUkfTest, UpdateFusedCorrectsCombinedOrientation) {
     Eigen::Vector3f magMeas = qTrue.conjugate() * mag_ned;
 
     // 4. Run Filter
+    // The MEKF correctly shrinks covariance without collapsing, so its gains drop off naturally.
+    // It takes a little longer to completely eliminate a massive 90-degree starting error.
     Eigen::Vector3f omegaZero = Eigen::Vector3f::Zero();
     float dt = 0.01f;
 
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 5000; ++i) {
         ukf.predict(dt, omegaZero);
         ukf.updateAccel(accelMeas);
         ukf.updateMag(magMeas, mag_ned);
@@ -231,10 +233,17 @@ TEST_F(AttitudeUkfTest, EstimateGyroBias) {
     // The Accel reports perfect gravity (Level).
     // The filter should detect that the rotation indicated by gyro is FAKE
     // because the accelerometer vector isn't changing. It should learn the bias.
-    
+    //
+    // NOTE — Observability: a 3-axis accelerometer alone cannot observe yaw-axis
+    // (Z) gyro bias because the gravity vector has no yaw sensitivity. Only Roll
+    // and Pitch biases are observable from accelerometer updates. A magnetometer
+    // update is required to make yaw-axis bias observable. This test therefore
+    // only validates convergence of the X-axis bias; a Z-axis bias input would
+    // not converge and must not be asserted here.
+
     Eigen::Vector3f trueBias(0.1f, 0.0f, 0.0f);
     Eigen::Vector3f omegaMeas = trueBias; // We read bias, not motion
-    
+
     // Stationary Accel (NED Level): [0, 0, 9.81]
     Eigen::Vector3f accelMeas(0.0f, 0.0f, 9.81f);
     float dt = 0.01f;
@@ -245,9 +254,9 @@ TEST_F(AttitudeUkfTest, EstimateGyroBias) {
     }
 
     const auto& state = ukf.getState();
-    
-    // Check if Bias X (state index 4) has converged to ~0.1
-    EXPECT_NEAR(state(4), 0.1f, 0.02f); 
+
+    // Check if Bias X (state index 3) has converged to ~0.1
+    EXPECT_NEAR(state(3), 0.1f, 0.02f);
 }
 
 // ----------------------------------------------------------------------------
@@ -259,26 +268,26 @@ TEST_F(AttitudeUkfTest, CovarianceSanityCheck) {
     // Increase Bias Process Noise so the growth is obvious
     AttitudeUkf::Config config = m_default_config;
     config.alpha = 1.0f;
-    config.qBias = 0.1f; 
+    config.qBias = 0.1f;
 
     AttitudeUkf ukf(config);
     ukf.init(Eigen::Quaternionf::Identity(), Eigen::Vector3f::Zero());
 
     // Helper to get the Trace (sum of diagonals) of the Bias block (last 3 states)
     auto getBiasTrace = [&]() {
-        return ukf.getCovariance().block<3, 3>(4, 4).trace();
-    };
+        return ukf.getCovariance().block<3, 3>(3, 3).trace();
+        };
 
     // --- PREDICTION STEP ---
     float initBiasTrace = getBiasTrace();
-    
+
     // Predict should ADD Process Noise to the Bias estimate.
     // Since Bias is a linear random walk, this MUST increase variance.
     ukf.predict(0.01f, Eigen::Vector3f::Zero());
-    
+
     float predBiasTrace = getBiasTrace();
-    
-    EXPECT_GT(predBiasTrace, initBiasTrace) 
+
+    EXPECT_GT(predBiasTrace, initBiasTrace)
         << "Bias uncertainty must grow during prediction (Process Noise).";
 
     // --- UPDATE STEP ---
@@ -286,13 +295,13 @@ TEST_F(AttitudeUkfTest, CovarianceSanityCheck) {
     // The measurement update provides information about orientation, 
     // which should reduce the overall uncertainty of the system.
     float predTotalTrace = ukf.getCovariance().trace();
-    
+
     // Perfect gravity measurement
     ukf.updateAccel(Eigen::Vector3f(0.0f, 0.0f, 9.81f));
-    
+
     float updateTotalTrace = ukf.getCovariance().trace();
 
-    EXPECT_LT(updateTotalTrace, predTotalTrace) 
+    EXPECT_LT(updateTotalTrace, predTotalTrace)
         << "Total uncertainty must shrink after a valid measurement update.";
 }
 
@@ -302,81 +311,90 @@ TEST_F(AttitudeUkfTest, CovarianceSanityCheck) {
 TEST_F(AttitudeUkfTest, CompleteFlightSimulation) {
     // 1. Setup - Use high mag trust for cleaner simulation tracking
     AttitudeUkf::Config simConfig = m_default_config;
-    simConfig.rMag = 0.01f; 
-    
+    simConfig.rMag = 0.01f;
+
     AttitudeUkf ukf(simConfig);
-    
+
     // Truth State
     Eigen::Quaternionf qTrue = Eigen::Quaternionf::Identity();
-    
+
     // Environmental Constants (NED)
     Eigen::Vector3f g_ned(0.0f, 0.0f, 9.81f);   // Gravity Down
     Eigen::Vector3f mag_ned(1.0f, 0.0f, 0.0f);  // North Forward
-    
+
     float dt = 0.01f; // 100 Hz
-    
+
     // Helper Lambda: Run Simulation Steps
     auto run_segment = [&](Eigen::Vector3f body_rates, float duration_sec) {
         int steps = static_cast<int>(duration_sec / dt);
-        
-        for(int i = 0; i < steps; ++i) {
+
+        for (int i = 0; i < steps; ++i) {
             // A. Propagate Truth (Kinematics)
+            // Exact closed-form quaternion integration. Setting w=1 and normalising
+            // is only valid for |omega|*dt << 1; at rates above ~0.5 rad/s the
+            // approximation accumulates systematic under-rotation error every step.
             Eigen::Quaternionf dq;
-            Eigen::Vector3f vec = body_rates * dt * 0.5f;
-            dq.w() = 1.0f;
-            dq.vec() = vec;
-            dq.normalize();
-            
+            const float theta = body_rates.norm() * dt;
+            if (theta > 1e-6f) {
+                dq.w() = std::cos(theta * 0.5f);
+                dq.vec() = (body_rates / body_rates.norm()) * std::sin(theta * 0.5f);
+            }
+            else {
+                dq.w() = 1.0f;
+                dq.vec() = body_rates * dt * 0.5f;
+                dq.normalize();
+            }
+
             qTrue = qTrue * dq;
             qTrue.normalize();
-            
+
             // B. Generate Synthetic Measurements
             // Sensors measure the inertial vector rotated into the body frame
             // Accel = R_nb^T * g_n
             Eigen::Vector3f accel_body = qTrue.conjugate() * g_ned;
             Eigen::Vector3f mag_body = qTrue.conjugate() * mag_ned;
-            Eigen::Vector3f gyro_meas = body_rates; 
-            
+            Eigen::Vector3f gyro_meas = body_rates;
+
             // C. Run UKF
             ukf.predict(dt, gyro_meas);
             ukf.updateAccel(accel_body);
             ukf.updateMag(mag_body, mag_ned);
         }
-    };
-    
+        };
+
     // --- PHASE 1: Warmup (Stationary) ---
     // Duration: 1.0s
-    run_segment(Eigen::Vector3f(0,0,0), 1.0f);
-    
+    run_segment(Eigen::Vector3f(0, 0, 0), 1.0f);
+
     // Check: Should remain at Identity
     EXPECT_NEAR(ukf.getQuaternion().w(), 1.0f, 0.01f);
-    
+
     // --- PHASE 2: Pitch Up Maneuver ---
     // Duration: 1.0s, Rate: 45 deg/s
     float pitch_rate = static_cast<float>(M_PI) / 4.0f;
     run_segment(Eigen::Vector3f(0, pitch_rate, 0), 1.0f);
-    
+
     // Check: Pitch should be approx 45 degrees
     // Truth Check
     Eigen::Quaternionf qEst = ukf.getQuaternion();
     // Dot product == 1.0 means identical orientation
     EXPECT_NEAR(std::abs(qEst.dot(qTrue)), 1.0f, 0.01f);
-    
+
     // --- PHASE 3: Coordinated Turn (Yawing while Pitched) ---
     // Duration: 1.0s, Yaw Rate: 90 deg/s
     // Note: Yawing in body frame while pitched results in Roll+Yaw in Inertial frame
     float yaw_rate = static_cast<float>(M_PI) / 2.0f;
     run_segment(Eigen::Vector3f(0, 0, yaw_rate), 1.0f);
-    
+
     // Check: Orientation should still match truth closely
     qEst = ukf.getQuaternion();
     EXPECT_NEAR(std::abs(qEst.dot(qTrue)), 1.0f, 0.02f);
-    
+
     // --- PHASE 4: Return to Level ---
     // Duration: 1.0s, Negative Pitch Rate
     // We need to unwind the pitch. 
     run_segment(Eigen::Vector3f(0, -pitch_rate, 0), 1.0f);
-    
+
     // Final check: Filter should track the return
     qEst = ukf.getQuaternion();
     EXPECT_NEAR(std::abs(qEst.dot(qTrue)), 1.0f, 0.02f);
@@ -390,7 +408,7 @@ TEST_F(AttitudeUkfTest, GetEulerAngles_Identity) {
     // Setup
     AttitudeUkf::Config simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
-    
+
     // Identity Quaternion -> 0, 0, 0
     Eigen::Quaternionf q = Eigen::Quaternionf::Identity();
     AttitudeUkf::Vector3 bias = AttitudeUkf::Vector3::Zero();
@@ -441,7 +459,7 @@ TEST_F(AttitudeUkfTest, GetEulerAngles_ComplexOrientation) {
     // Setup
     AttitudeUkf::Config simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
-    
+
     // R=10, P=20, Y=30
     Eigen::Quaternionf q = createQuat(10.0f, 20.0f, 30.0f);
     AttitudeUkf::Vector3 bias = AttitudeUkf::Vector3::Zero();
@@ -539,17 +557,18 @@ TEST_F(AttitudeUkfTest, Align_Pitched90DegreesUp) {
 
     // Mag (North) is now along -Z (Belly)
     // Mag (Down) is along -X.
-    // Input Mag = [-0.9, 0.0, -0.4]
-    AttitudeUkf::Vector3 magMean = { -0.9f, 0.0f, -0.4f };
+    // Input Mag = [-0.9, 0.0, 0.4] => Z must be positive to represent North pointing towards the belly when Pitched 90 Up
+    AttitudeUkf::Vector3 magMean = { -0.9f, 0.0f, 0.4f };
 
     AttitudeUkf::Vector3 magRefOut;
     ukf.align(accelMean, magMean, magRefOut);
 
     // 1. Verify Attitude
-    AttitudeUkf::Vector3 euler = ukf.getEulerAnglesDeg();
-    EXPECT_NEAR(euler.x(), 0.0f, 1.0f);
-    EXPECT_NEAR(euler.y(), 90.0f, 1.0f); // Pitch 90
-    EXPECT_NEAR(euler.z(), 0.0f, 1.0f);
+    // At Pitch=90, Euler angles suffer from Gimbal Lock. `getEulerAnglesDeg` may output {0, 90, 0} or {180, 90, 180},
+    // which represent the EXACT same physical orientation. Therefore, we evaluate the quaternion directly.
+    Eigen::Quaternionf q = ukf.getQuaternion();
+    Eigen::Quaternionf expectedQ = createQuat(0.0f, 90.0f, 0.0f);
+    EXPECT_NEAR(std::abs(q.dot(expectedQ)), 1.0f, 1e-3f);
 
     // 2. Verify Reference Vector (Inertial Frame)
     Eigen::Vector3f expectedRef = Eigen::Vector3f(0.4f, 0.0f, 0.9f).normalized();
@@ -565,7 +584,7 @@ TEST_F(AttitudeUkfTest, SignConvention_NED) {
     // Setup
     AttitudeUkf::Config simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
-    
+
     // 1. Verify Positive Roll (Right Wing Down)
     // We create a quaternion representing a 30-degree positive roll
     Eigen::Quaternionf qRoll = createQuat(30.0f, 0.0f, 0.0f);
@@ -639,12 +658,21 @@ TEST_F(AttitudeUkfTest, AccuracyWithSensorNoise) {
         float pitchRate = amp * freq * std::sin(freq * t);
         Eigen::Vector3f trueRates(rollRate, pitchRate, 0.0f);
 
-        // Propagate Truth State
+        // Propagate Truth State.
+        // Exact closed-form integration prevents the truth model from sharing the
+        // same first-order under-rotation error as the filter under test, which
+        // would otherwise mask Bug 1 (both halves making the same approximation).
         Eigen::Quaternionf dq;
-        Eigen::Vector3f vec = trueRates * dt * 0.5f;
-        dq.w() = 1.0f;
-        dq.vec() = vec;
-        dq.normalize();
+        const float theta = trueRates.norm() * dt;
+        if (theta > 1e-6f) {
+            dq.w() = std::cos(theta * 0.5f);
+            dq.vec() = (trueRates / trueRates.norm()) * std::sin(theta * 0.5f);
+        }
+        else {
+            dq.w() = 1.0f;
+            dq.vec() = trueRates * dt * 0.5f;
+            dq.normalize();
+        }
 
         qTrue = qTrue * dq;
         qTrue.normalize();
@@ -690,7 +718,7 @@ TEST_F(AttitudeUkfTest, AccuracyWithSensorNoise) {
     float rmsError = std::sqrt(sumSquaredError / evaluatedSteps);
 
     // Log results for debugging if needed
-     std::cout << "Max Error: " << maxErrorDeg << " deg, RMS: " << rmsError << " deg" << std::endl;
+    std::cout << "Max Error: " << maxErrorDeg << " deg, RMS: " << rmsError << " deg" << std::endl;
 
     // Assertions:
     // With these noise levels, a well-tuned UKF should keep RMS error well below 2.0 degrees.
@@ -698,7 +726,56 @@ TEST_F(AttitudeUkfTest, AccuracyWithSensorNoise) {
     EXPECT_LT(maxErrorDeg, 1.0f) << "Max Peak Error is too high (" << maxErrorDeg << " deg)";
 }
 
-int main(int argc, char **argv) {
+// ============================================================================
+// Test: Rank Deficiency / Cholesky Failure Catch
+// ============================================================================
+
+TEST_F(AttitudeUkfTest, CholeskyRankDeficiencyTrigger) {
+    // This test artificially accelerates the rank-deficiency issue inherently
+    // present in a 7D covariance matrix for a 6DOF space (4D quaternion).
+    // It does this by continuously applying pure prediction (no measurement
+    // corrections to anchor the covariance) under high dynamics and noise.
+
+    AttitudeUkf::Config config = m_default_config;
+    config.qGyro = 0.5f; // High process noise to blow up the covariance quickly
+
+    AttitudeUkf ukf(config);
+
+    float dt = 0.01f;
+    int steps = 2000; // 20 seconds of pure integration
+
+    // We simulate a constant, aggressive rotation on all 3 axes
+    Eigen::Vector3f aggressiveRates(1.0f, -0.5f, 2.0f);
+
+    // Extract the initial covariance trace 
+    float previousTrace = ukf.getCovariance().trace();
+    bool fallbackTriggered = false;
+
+    for (int i = 0; i < steps; ++i) {
+        ukf.predict(dt, aggressiveRates);
+
+        float currentTrace = ukf.getCovariance().trace();
+
+        // During a pure PREDICTION step without measurement correction, 
+        // the addition of Process Noise guarantees the covariance trace MUST increase.
+        // If it ever shrinks, it's because the internal Cholesky decomposition 
+        // failed and triggered a covariance reset.
+        if (currentTrace < previousTrace) {
+            fallbackTriggered = true;
+        }
+        previousTrace = currentTrace;
+    }
+
+    // The covariance trace must grow monotonically under pure prediction because
+    // process noise is added unconditionally every step. A decrease means the
+    // Cholesky decomposition failed and triggered an identity reset, which
+    // destroys all accumulated uncertainty information and indicates a bug.
+    EXPECT_FALSE(fallbackTriggered)
+        << "Covariance trace decreased during pure prediction: Cholesky fallback "
+        "triggered an identity reset.";
+}
+
+int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

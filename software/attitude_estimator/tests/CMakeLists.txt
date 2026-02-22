@@ -1,6 +1,7 @@
 # Define the test executable
 add_executable(unit_tests 
     test_attitude_ukf.cpp
+    test_attitude_mekf.cpp
 )
 
 # Link against your library (gnc_lib) and GoogleTest

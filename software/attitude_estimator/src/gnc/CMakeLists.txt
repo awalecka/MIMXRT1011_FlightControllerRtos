@@ -2,6 +2,8 @@
 add_library(gnc_lib STATIC
     attitude_ukf.cpp
     attitude_ukf.hpp
+    attitude_mekf.cpp
+    attitude_mekf.hpp
 )
 
 # 1. Allow other targets (like tests) to find headers in this folder
