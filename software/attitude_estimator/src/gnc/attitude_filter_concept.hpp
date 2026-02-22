@@ -54,7 +54,7 @@
 #ifndef ATTITUDE_FILTER_CONCEPT_HPP
 #define ATTITUDE_FILTER_CONCEPT_HPP
 
-#include <Eigen>
+#include <Eigen/Dense>
 #include <concepts>
 #include <cstdint>
 

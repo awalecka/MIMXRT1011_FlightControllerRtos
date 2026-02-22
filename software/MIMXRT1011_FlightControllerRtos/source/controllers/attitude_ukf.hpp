@@ -9,6 +9,7 @@
 #ifndef ATTITUDE_UKF_HPP
 #define ATTITUDE_UKF_HPP
 
+#include "attitude_filter_concept.hpp"
 #include <Eigen>
 #include <cmath>
 
@@ -19,8 +20,7 @@ namespace gnc {
  *
  * State Vector Error x [6x1]: [dx, dy, dz, dbx, dby, dbz]
  * (3D Rotation Vector Error + 3D Gyro Bias Error)
- * 
- * Uses static allocation via Eigen::Matrix fixed sizes.
+ * * Uses static allocation via Eigen::Matrix fixed sizes.
  */
 class AttitudeUkf {
 public:
@@ -37,41 +37,10 @@ public:
     using VectorWeights = Eigen::Matrix<float, SIGMA_COUNT, 1>;
 
     /**
-     * @brief Configuration struct for process and measurement noise.
-     */
-    struct Config {
-        float alpha;  ///< Sigma-point spread factor (typical range: 1e-3 to 1).
-        float beta;   ///< Distribution prior; 2 is optimal for a Gaussian.
-        float kappa;  ///< Secondary scaling parameter (typically 0).
-
-        /// @brief Gyroscope angle-rate noise power spectral density [rad^2/s].
-        /// Pass the variance per unit time (sigma_gyro^2), NOT the standard
-        /// deviation. The filter adds (qGyro * dt) to the attitude error
-        /// variance each prediction step.
-        float qGyro;
-
-        /// @brief Gyro bias random-walk power spectral density [rad^2/s^3].
-        /// Pass the variance per unit time (sigma_bias^2), NOT the standard
-        /// deviation. The filter adds (qBias * dt) to the bias variance each
-        /// prediction step.
-        float qBias;
-
-        /// @brief Accelerometer measurement noise variance [(m/s^2)^2].
-        /// Pass sigma_accel^2. Applied as a scalar multiple of the 3x3
-        /// identity matrix in the innovation covariance.
-        float rAccel;
-
-        /// @brief Magnetometer measurement noise variance [uT^2] (or
-        /// dimensionless if the measurement is normalised before calling
-        /// updateMag). Pass sigma_mag^2.
-        float rMag;
-    };
-
-    /**
      * @brief Constructor.
-     * @param config Initial filter configuration.
+     * @param config Unified filter configuration.
      */
-    explicit AttitudeUkf(const Config& config);
+    explicit AttitudeUkf(const FilterConfig& config);
 
     /**
      * @brief Initialize the state.
@@ -143,6 +112,18 @@ public:
      */
     [[nodiscard]] Vector3 getEulerAnglesDeg() const;
 
+    /**
+     * @brief Get the current gyro bias estimate [rad/s].
+     * @return Vector3 [bx, by, bz].
+     */
+    [[nodiscard]] Vector3 getBias() const;
+
+    /**
+     * @brief Return the number of hard covariance resets since construction.
+     * @return Reset count.
+     */
+    [[nodiscard]] uint32_t getCovarianceFaultCount() const;
+
 private:
     // Filter State
     Eigen::Quaternionf nominalQuat; // Global Reference Attitude
@@ -150,8 +131,9 @@ private:
     MatrixState errorCovariance;   // Error Covariance (6x6)
 
     // UKF Parameters
-    Config config;
+    FilterConfig config;
     float lambdaParam;
+    uint32_t m_covFaultCount{0};
 
     // FIX: Use fixed-size members
     VectorWeights weightsMean;

@@ -3,17 +3,7 @@
  * @brief Implementation of the main flight controller logic.
  *
  * This file is filter-agnostic. The concrete filter type is resolved by
- * flight_controller.h based on the GNC_FILTER_* compile definition. All
- * filter interaction goes through:
- *
- *   filter_          — the policy member (init, align, predict, updateAccel,
- *                       updateMag, getQuaternion, getEulerAnglesDeg)
- *   Traits::makeConfig    — constructs the correct Config type from kFilterTuning
- *   Traits::getBias       — uniform bias accessor (MEKF: getBias(); UKF: getState()[3:6])
- *   Traits::getCovarianceFaultCount — uniform fault counter accessor
- *
- * No #ifdef GNC_FILTER_* blocks appear here. If you find yourself adding one,
- * the correct place for that logic is a FilterTraits<T> specialisation.
+ * flight_controller.h based on the GNC_FILTER_* compile definition.
  */
 
 #include "flight_controller.h"
@@ -54,7 +44,7 @@ static constexpr float GRAVITY_MSS = 9.80665f;
 template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
 FlightControllerT<FilterPolicy>::FlightControllerT(float loopTime)
-    : filter_(Traits::makeConfig(kFilterTuning))
+    : filter_(kFilterConfig)
     , magRefVector_(FilterPolicy::Vector3::Zero())
     , loopDt(loopTime)
     , currentRollDeg(0.0f)
@@ -108,9 +98,9 @@ int FlightControllerT<FilterPolicy>::init()
     }
 
     typename FilterPolicy::Vector3 avgAccel;
-    avgAccel << sumAx / kInitSamples,
-                sumAy / kInitSamples,
-                sumAz / kInitSamples;
+    avgAccel << -(sumAx / kInitSamples) * GRAVITY_MSS,
+                -(sumAy / kInitSamples) * GRAVITY_MSS,
+                -(sumAz / kInitSamples) * GRAVITY_MSS;
 
     typename FilterPolicy::Vector3 avgMag;
     avgMag << sumMx / kInitSamples,

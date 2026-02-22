@@ -11,15 +11,15 @@
  * Prediction
  * ----------
  * The nominal quaternion is propagated with the exact closed-form integral:
- *   q_nom[k+1] = q_nom[k] * exp(0.5 * omega_corrected * dt)
+ * q_nom[k+1] = q_nom[k] * exp(0.5 * omega_corrected * dt)
  * where omega_corrected = omegaMeas - nominalBias.
  *
  * The error covariance is propagated via the linearised process Jacobian:
- *   P[k+1] = F * P[k] * F^T + Q
+ * P[k+1] = F * P[k] * F^T + Q
  *
  * The process Jacobian F for the error state kinematics is:
- *   F = [ I - [omega_corrected]x * dt,  -I * dt ]
- *       [ 0_{3x3},                       I      ]
+ * F = [ I - [omega_corrected]x * dt,  -I * dt ]
+ * [ 0_{3x3},                       I      ]
  * where [omega_corrected]x is the 3x3 skew-symmetric matrix of omega_corrected.
  * This comes from linearising d(delta_r)/dt = -omega x delta_r - delta_b
  * around the nominal trajectory.
@@ -28,8 +28,8 @@
  * ------------------
  * For a vector observation h(q) = R(q)^T * r_inertial (the inertial reference
  * vector rotated into the body frame), the measurement Jacobian is:
- *   H = [ [R(q_nom) * r_inertial]x,  0_{3x3} ]
- *         (3x3 skew of predicted meas, padded with zeros for bias cols)
+ * H = [ [R(q_nom) * r_inertial]x,  0_{3x3} ]
+ * (3x3 skew of predicted meas, padded with zeros for bias cols)
  *
  * This is the first-order expansion of h(q_nom * delta_q) around delta_q = 0.
  * The expected measurement is predicted_meas = q_nom.conjugate() * r_inertial.
@@ -41,27 +41,27 @@
  * ----------------------
  * Two forms are available, selected at compile time via MEKF_USE_JOSEPH_FORM:
  *
- *   Standard form (default, MEKF_USE_JOSEPH_FORM = 0):
- *     P+ = P- - K*S*K^T  followed by (P + P^T)/2 re-symmetrisation.
- *     Cost: ~324 FP multiplies per update on a 6-state / 3-meas system.
- *     Rationale: sufficient for well-conditioned MEMS operation at 500 Hz.
- *     repairCovariance() acts as a telemetry-visible safety net for the
- *     rare adversarial-input case; it is not needed in nominal flight.
+ * Standard form (default, MEKF_USE_JOSEPH_FORM = 0):
+ * P+ = P- - K*S*K^T  followed by (P + P^T)/2 re-symmetrisation.
+ * Cost: ~324 FP multiplies per update on a 6-state / 3-meas system.
+ * Rationale: sufficient for well-conditioned MEMS operation at 500 Hz.
+ * repairCovariance() acts as a telemetry-visible safety net for the
+ * rare adversarial-input case; it is not needed in nominal flight.
  *
- *   Joseph stabilised form (MEKF_USE_JOSEPH_FORM = 1):
- *     P+ = (I-KH)*P*(I-KH)^T + K*R*K^T
- *     Cost: ~2× the standard form (~800 FP multiplies per update).
- *     Rationale: stronger SPD guarantee in exact arithmetic. In float32
- *     the improvement is marginal — round-off still accumulates — but
- *     useful when characterising filter behaviour under stressed inputs.
- *     Does NOT eliminate the need for repairCovariance().
+ * Joseph stabilised form (MEKF_USE_JOSEPH_FORM = 1):
+ * P+ = (I-KH)*P*(I-KH)^T + K*R*K^T
+ * Cost: ~2× the standard form (~800 FP multiplies per update).
+ * Rationale: stronger SPD guarantee in exact arithmetic. In float32
+ * the improvement is marginal — round-off still accumulates — but
+ * useful when characterising filter behaviour under stressed inputs.
+ * Does NOT eliminate the need for repairCovariance().
  *
  * MEKF reset
  * ----------
  * After each update the attitude error delta_r is absorbed multiplicatively:
- *   q_nom[k+1] = q_nom[k] * rotVecToQuat(delta_r)
+ * q_nom[k+1] = q_nom[k] * rotVecToQuat(delta_r)
  * and the bias nominal is updated additively:
- *   nominalBias[k+1] = nominalBias[k] + delta_b
+ * nominalBias[k+1] = nominalBias[k] + delta_b
  * The error state is then zeroed. The bias sub-state (indices 3-5) is zeroed
  * as part of the reset because it represents deviation from the nominal bias,
  * which was just updated.
@@ -99,7 +99,7 @@ namespace gnc {
     // Construction
     // ============================================================================
 
-    AttitudeMekf::AttitudeMekf(const Config& config)
+    AttitudeMekf::AttitudeMekf(const FilterConfig& config)
         : nominalQuat(Eigen::Quaternionf::Identity())
         , nominalBias(Vector3::Zero())
         , errorState(ErrorVec::Zero())

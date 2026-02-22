@@ -8,14 +8,10 @@
  * gnc::AttitudeFilter concept (see attitude_filter_concept.hpp). The concrete
  * filter is selected at compile time by defining exactly one of:
  *
- *   GNC_FILTER_MEKF   — Linearised Multiplicative EKF (default; recommended
- *                        for production; ~3-5× faster than UKF on Cortex-M7)
- *   GNC_FILTER_UKF    — Unscented Kalman Filter (higher fidelity; useful for
- *                        development, characterisation, and regression testing)
- *
- * Pass the flag via the build system, e.g.:
- *   CMake:   target_compile_definitions(firmware PRIVATE GNC_FILTER_MEKF)
- *   Make:    CXXFLAGS += -DGNC_FILTER_MEKF
+ * GNC_FILTER_MEKF   — Linearised Multiplicative EKF (default; recommended
+ * for production; ~3-5× faster than UKF on Cortex-M7)
+ * GNC_FILTER_UKF    — Unscented Kalman Filter (higher fidelity; useful for
+ * development, characterisation, and regression testing)
  *
  * If neither flag is defined, GNC_FILTER_MEKF is used and a diagnostic is
  * emitted so the selection is always explicit in build logs.
@@ -27,18 +23,10 @@
  * exactly one concrete FlightController<Filter> version; the unused filter
  * class is not linked into the binary at all.
  *
- * FlightController itself never calls filter methods directly; it goes through
- * gnc::FilterTraits<FilterPolicy> (see filter_traits.hpp) for any call that
- * requires knowledge of the specific filter type (Config construction, getBias,
- * getCovarianceFaultCount). The calls that are uniform across all filters
- * (predict, updateAccel, updateMag, getQuaternion, getEulerAnglesDeg, align,
- * init) are called directly on filter_ because the concept guarantees them.
- *
  * Adding a third filter
  * ---------------------
  * 1. Write or obtain the filter class, satisfying gnc::AttitudeFilter.
- * 2. Add a FilterTraits<NewFilter> specialisation in filter_traits.hpp.
- * 3. Add one #elif branch here mapping GNC_FILTER_<NEW> to a type alias.
+ * 2. Add one #elif branch here mapping GNC_FILTER_<NEW> to a type alias.
  * FlightController.cpp requires no changes.
  */
 
@@ -83,9 +71,6 @@ static_assert(gnc::AttitudeFilter<ActiveFilter>,
     "ActiveFilter does not satisfy gnc::AttitudeFilter concept. "
     "Check attitude_filter_concept.hpp for required methods.");
 
-// Traits bring Config construction and divergent API shims.
-#include "filter_traits.hpp"
-
 // ============================================================================
 // Subsystem headers
 // ============================================================================
@@ -115,9 +100,9 @@ static_assert(gnc::AttitudeFilter<ActiveFilter>,
  * @brief Main flight controller, templated on an attitude filter policy.
  *
  * @tparam FilterPolicy  Any type satisfying gnc::AttitudeFilter. Select via
- *                       the GNC_FILTER_* compile definition. Do not pass a
- *                       type directly — use the ActiveFilter alias resolved
- *                       above so the selection is centrally controlled.
+ * the GNC_FILTER_* compile definition. Do not pass a
+ * type directly — use the ActiveFilter alias resolved
+ * above so the selection is centrally controlled.
  */
 template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
@@ -134,16 +119,11 @@ public:
     static constexpr uint32_t LOOP_DT_MS   = static_cast<uint32_t>(1000.0f / LOOP_RATE_HZ);
 
     using SensorData = SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData;
-    using Traits     = gnc::FilterTraits<FilterPolicy>;
 
     /**
      * @brief Tuning parameters for the active filter.
-     *
-     * Holds the canonical superset of all filter parameters. FilterTraits
-     * extracts the relevant subset when constructing the filter's Config.
-     * Fields unused by the active filter are harmlessly ignored.
      */
-    static constexpr gnc::FilterTuning kFilterTuning {
+    static constexpr gnc::FilterConfig kFilterConfig {
         .qGyro     = 0.1f,
         .qBias     = 0.001f,
         .rAccel    = 0.5f,
@@ -197,23 +177,19 @@ public:
      * @brief Return the number of hard covariance resets since boot.
      *
      * Non-zero values indicate the filter has recovered from numerical
-     * instability. Expose via telemetry for health monitoring. Value is
-     * sourced through FilterTraits to handle per-filter API differences.
+     * instability. Expose via telemetry for health monitoring.
      */
     uint32_t getFilterFaultCount() const
     {
-        return Traits::getCovarianceFaultCount(filter_);
+        return filter_.getCovarianceFaultCount();
     }
 
     /**
      * @brief Return the current gyro bias estimate [rad/s].
-     *
-     * Sourced through FilterTraits to handle the UKF (getState()[3:6]) vs
-     * MEKF (getBias()) API difference.
      */
     typename FilterPolicy::Vector3 getFilterBias() const
     {
-        return Traits::getBias(filter_);
+        return filter_.getBias();
     }
 
 private:
@@ -234,7 +210,6 @@ private:
 
     // -------------------------------------------------------------------------
     // Attitude filter — concrete type is resolved at compile time.
-    // Constructed from kFilterTuning via FilterTraits::makeConfig().
     // -------------------------------------------------------------------------
     FilterPolicy                    filter_;
     typename FilterPolicy::Vector3  magRefVector_;
