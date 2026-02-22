@@ -32,6 +32,9 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.preprocess.1295474630" name="Preprocess only (-E)" superClass="gnu.cpp.compiler.option.preprocessor.preprocess" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.1430531471" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU_MIMXRT1011DAE5A"/>
+									<listOptionValue builtIn="false" value="EIGEN_NO_DEBUG"/>
+									<listOptionValue builtIn="false" value="EIGEN_DONT_VECTORIZE"/>
+									<listOptionValue builtIn="false" value="EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT"/>
 									<listOptionValue builtIn="false" value="EIGEN_NO_MALLOC"/>
 									<listOptionValue builtIn="false" value="SDK_DEBUGCONSOLE=0"/>
 									<listOptionValue builtIn="false" value="XIP_BOOT_HEADER_ENABLE=1"/>
@@ -139,6 +142,9 @@
 							<tool id="com.crt.advproject.gcc.exe.debug.326147006" name="MCU C Compiler" superClass="com.crt.advproject.gcc.exe.debug">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.294810042" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__NEWLIB__"/>
+									<listOptionValue builtIn="false" value="EIGEN_NO_DEBUG"/>
+									<listOptionValue builtIn="false" value="EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT"/>
+									<listOptionValue builtIn="false" value="EIGEN_DONT_VECTORIZE"/>
 									<listOptionValue builtIn="false" value="EIGEN_NO_MALLOC"/>
 									<listOptionValue builtIn="false" value="SDK_DEBUGCONSOLE=0"/>
 									<listOptionValue builtIn="false" value="XIP_EXTERNAL_FLASH=1"/>
