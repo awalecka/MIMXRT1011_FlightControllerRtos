@@ -4,26 +4,26 @@
  *
  * Test organisation
  * -----------------
- *  Group 1  — Construction & Initialisation
- *  Group 2  — Prediction (kinematics, covariance growth, Jacobian coupling)
- *  Group 3  — Accelerometer update (correction, magnitude gate)
- *  Group 4  — Magnetometer update (correction, degenerate inputs)
- *  Group 5  — Fused sensor correction (accel + mag)
- *  Group 6  — Bias estimation (observability per axis)
- *  Group 7  — Covariance health (structure, symmetry, monotonicity)
- *  Group 8  — Quaternion integrity (unit norm, double-cover)
- *  Group 9  — align() (TRIAD method, magnetic reference)
- *  Group 10 — getEulerAnglesDeg() (identity, extremes, complex)
- *  Group 11 — Sign convention (NED roll / pitch / yaw)
- *  Group 12 — Full flight simulation (multi-phase truth tracking)
- *  Group 13 — Monte Carlo accuracy (RMS / max error under sensor noise)
- *  Group 14 — Diagnostics (getCovarianceFaultCount)
+ * Group 1  — Construction & Initialisation
+ * Group 2  — Prediction (kinematics, covariance growth, Jacobian coupling)
+ * Group 3  — Accelerometer update (correction, magnitude gate)
+ * Group 4  — Magnetometer update (correction, degenerate inputs)
+ * Group 5  — Fused sensor correction (accel + mag)
+ * Group 6  — Bias estimation (observability per axis)
+ * Group 7  — Covariance health (structure, symmetry, monotonicity)
+ * Group 8  — Quaternion integrity (unit norm, double-cover)
+ * Group 9  — align() (TRIAD method, magnetic reference)
+ * Group 10 — getEulerAnglesDeg() (identity, extremes, complex)
+ * Group 11 — Sign convention (NED roll / pitch / yaw)
+ * Group 12 — Full flight simulation (multi-phase truth tracking)
+ * Group 13 — Monte Carlo accuracy (RMS / max error under sensor noise)
+ * Group 14 — Diagnostics (getCovarianceFaultCount)
  *
  * Truth-model integration
  * -----------------------
  * All ground-truth quaternion propagation in this file uses the exact
  * closed-form:
- *   dq = [cos(|w|dt/2), wˆ * sin(|w|dt/2)]
+ * dq = [cos(|w|dt/2), wˆ * sin(|w|dt/2)]
  * to ensure the truth model does not share any approximation error with
  * the filter under test.  The small-angle else-branch is kept for
  * |w|*dt <= 1e-6 rad to avoid a divide-by-zero.
@@ -55,16 +55,17 @@ static constexpr float deg2rad(float d) { return d * static_cast<float>(M_PI) / 
  * @param dt   Time step [s].
  */
 static void integrateQuat(Eigen::Quaternionf& q,
-                          const Eigen::Vector3f& omega,
-                          float dt)
+    const Eigen::Vector3f& omega,
+    float dt)
 {
     const float theta = omega.norm() * dt;
     Eigen::Quaternionf dq;
     if (theta > 1e-6f) {
-        dq.w()   = std::cos(theta * 0.5f);
+        dq.w() = std::cos(theta * 0.5f);
         dq.vec() = (omega / omega.norm()) * std::sin(theta * 0.5f);
-    } else {
-        dq.w()   = 1.0f;
+    }
+    else {
+        dq.w() = 1.0f;
         dq.vec() = omega * (dt * 0.5f);
         dq.normalize();
     }
@@ -77,7 +78,7 @@ static void integrateQuat(Eigen::Quaternionf& q,
  * Accounts for the q / -q double cover.
  */
 static float quatErrorDeg(const Eigen::Quaternionf& a,
-                          const Eigen::Quaternionf& b)
+    const Eigen::Quaternionf& b)
 {
     float dot = std::abs(a.dot(b));
     dot = std::min(dot, 1.0f);
@@ -89,9 +90,9 @@ static float quatErrorDeg(const Eigen::Quaternionf& a,
  */
 static Eigen::Quaternionf eulerToQuat(float rollDeg, float pitchDeg, float yawDeg)
 {
-    return Eigen::AngleAxisf(deg2rad(yawDeg),  Eigen::Vector3f::UnitZ())
-         * Eigen::AngleAxisf(deg2rad(pitchDeg), Eigen::Vector3f::UnitY())
-         * Eigen::AngleAxisf(deg2rad(rollDeg),  Eigen::Vector3f::UnitX());
+    return Eigen::AngleAxisf(deg2rad(yawDeg), Eigen::Vector3f::UnitZ())
+        * Eigen::AngleAxisf(deg2rad(pitchDeg), Eigen::Vector3f::UnitY())
+        * Eigen::AngleAxisf(deg2rad(rollDeg), Eigen::Vector3f::UnitX());
 }
 
 // ============================================================================
@@ -100,26 +101,26 @@ static Eigen::Quaternionf eulerToQuat(float rollDeg, float pitchDeg, float yawDe
 
 class AttitudeMekfTest : public ::testing::Test {
 protected:
-    AttitudeMekf::Config m_cfg;
+    gnc::FilterConfig m_cfg;
 
     void SetUp() override
     {
         // Conservative tuning that works across all tests.
         // Individual tests may override specific fields.
-        m_cfg.qGyro     = 0.01f;    // [rad^2/s]
-        m_cfg.qBias     = 0.0001f;  // [rad^2/s^3]
-        m_cfg.rAccel    = 0.1f;     // [(m/s^2)^2]
-        m_cfg.rMag      = 0.1f;     // dimensionless (normalised inputs)
+        m_cfg.qGyro = 0.01f;    // [rad^2/s]
+        m_cfg.qBias = 0.0001f;  // [rad^2/s^3]
+        m_cfg.rAccel = 0.1f;     // [(m/s^2)^2]
+        m_cfg.rMag = 0.1f;     // dimensionless (normalised inputs)
         m_cfg.accelGate = 1.0f;     // [m/s^2] — reject if |a| deviates >1 m/s^2 from g
     }
 
     /** Run predict + updateAccel + updateMag for `steps` steps at `dt`. */
     void runFused(AttitudeMekf& f,
-                  const Eigen::Vector3f& omega,
-                  const Eigen::Vector3f& accel,
-                  const Eigen::Vector3f& magMeas,
-                  const Eigen::Vector3f& magRef,
-                  int steps, float dt = 0.01f)
+        const Eigen::Vector3f& omega,
+        const Eigen::Vector3f& accel,
+        const Eigen::Vector3f& magMeas,
+        const Eigen::Vector3f& magRef,
+        int steps, float dt = 0.01f)
     {
         for (int i = 0; i < steps; ++i) {
             f.predict(dt, omega);
@@ -201,7 +202,7 @@ TEST_F(AttitudeMekfTest, InitResetsCovarianceToDiagonal)
 
     // Off-diagonal blocks must be zero
     const float offDiagNorm = P.block<3, 3>(0, 3).norm()
-                            + P.block<3, 3>(3, 0).norm();
+        + P.block<3, 3>(3, 0).norm();
     EXPECT_NEAR(offDiagNorm, 0.0f, 1e-6f)
         << "Off-diagonal covariance blocks must be zero after init()";
 
@@ -313,22 +314,22 @@ TEST_F(AttitudeMekfTest, PredictCovarianceGrowsMonotonically)
 TEST_F(AttitudeMekfTest, PredictBiasBlockGrowsFasterThanAttitudeBlock)
 {
     // With qBias >> qGyro, the bias covariance block must dominate the growth.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.qGyro = 1e-6f;
     cfg.qBias = 0.1f;
 
     AttitudeMekf f(cfg);
     f.init(Eigen::Quaternionf::Identity(), AttitudeMekf::Vector3::Zero());
 
-    const float initAttTrace  = f.getCovariance().block<3,3>(0,0).trace();
-    const float initBiasTrace = f.getCovariance().block<3,3>(3,3).trace();
+    const float initAttTrace = f.getCovariance().block<3, 3>(0, 0).trace();
+    const float initBiasTrace = f.getCovariance().block<3, 3>(3, 3).trace();
 
     for (int i = 0; i < 50; ++i) {
         f.predict(0.01f, Eigen::Vector3f::Zero());
     }
 
-    const float dAtt  = f.getCovariance().block<3,3>(0,0).trace() - initAttTrace;
-    const float dBias = f.getCovariance().block<3,3>(3,3).trace() - initBiasTrace;
+    const float dAtt = f.getCovariance().block<3, 3>(0, 0).trace() - initAttTrace;
+    const float dBias = f.getCovariance().block<3, 3>(3, 3).trace() - initBiasTrace;
 
     EXPECT_GT(dBias, dAtt)
         << "Bias uncertainty must grow faster than attitude uncertainty when qBias >> qGyro";
@@ -380,8 +381,8 @@ TEST_F(AttitudeMekfTest, UpdateAccelCorrectsPitch)
 
     const float angle = deg2rad(45.0f);
     const Eigen::Vector3f accel(-std::sin(angle) * 9.81f,
-                                 0.0f,
-                                 std::cos(angle) * 9.81f);
+        0.0f,
+        std::cos(angle) * 9.81f);
 
     for (int i = 0; i < 600; ++i) {
         f.predict(0.01f, Eigen::Vector3f::Zero());
@@ -390,7 +391,7 @@ TEST_F(AttitudeMekfTest, UpdateAccelCorrectsPitch)
 
     const AttitudeMekf::Vector3 euler = f.getEulerAnglesDeg();
     EXPECT_NEAR(euler.y(), 45.0f, 1.0f) << "Pitch must converge to 45° from accel";
-    EXPECT_NEAR(euler.x(),  0.0f, 1.0f) << "Roll must remain near zero";
+    EXPECT_NEAR(euler.x(), 0.0f, 1.0f) << "Roll must remain near zero";
 }
 
 TEST_F(AttitudeMekfTest, UpdateAccelCorrectsRoll)
@@ -400,8 +401,8 @@ TEST_F(AttitudeMekfTest, UpdateAccelCorrectsRoll)
 
     const float angle = deg2rad(30.0f);
     const Eigen::Vector3f accel(0.0f,
-                                 std::sin(angle) * 9.81f,
-                                 std::cos(angle) * 9.81f);
+        std::sin(angle) * 9.81f,
+        std::cos(angle) * 9.81f);
 
     for (int i = 0; i < 600; ++i) {
         f.predict(0.01f, Eigen::Vector3f::Zero());
@@ -410,14 +411,14 @@ TEST_F(AttitudeMekfTest, UpdateAccelCorrectsRoll)
 
     const AttitudeMekf::Vector3 euler = f.getEulerAnglesDeg();
     EXPECT_NEAR(euler.x(), 30.0f, 1.0f) << "Roll must converge to 30° from accel";
-    EXPECT_NEAR(euler.y(),  0.0f, 1.0f) << "Pitch must remain near zero";
+    EXPECT_NEAR(euler.y(), 0.0f, 1.0f) << "Pitch must remain near zero";
 }
 
 TEST_F(AttitudeMekfTest, AccelGateRejectsLinearAcceleration)
 {
     // When the vehicle is accelerating hard (||a|| >> g) the update
     // must be gated out. The attitude should not change from identity.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.accelGate = 0.5f; // tight gate
 
     AttitudeMekf f(cfg);
@@ -439,7 +440,7 @@ TEST_F(AttitudeMekfTest, AccelGateRejectsLinearAcceleration)
 TEST_F(AttitudeMekfTest, AccelGateAcceptsNominalGravity)
 {
     // Perfect 1g reading must pass the gate and correct attitude.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.accelGate = 0.5f;
 
     AttitudeMekf f(cfg);
@@ -459,7 +460,7 @@ TEST_F(AttitudeMekfTest, AccelGateAcceptsNominalGravity)
 TEST_F(AttitudeMekfTest, AccelGateDisabledAlwaysAccepts)
 {
     // accelGate == 0 must disable the gate entirely.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.accelGate = 0.0f; // disabled
 
     AttitudeMekf f(cfg);
@@ -468,7 +469,7 @@ TEST_F(AttitudeMekfTest, AccelGateDisabledAlwaysAccepts)
     // With gate disabled the filter must attempt to use the measurement
     // and converge toward the indicated direction.
     const Eigen::Vector3f accel(0.0f, 0.0f, 19.62f); // 2g
-    const float P0 = f.getCovariance().block<3,3>(0,0).trace();
+    const float P0 = f.getCovariance().block<3, 3>(0, 0).trace();
 
     for (int i = 0; i < 10; ++i) {
         f.predict(0.01f, Eigen::Vector3f::Zero());
@@ -476,7 +477,7 @@ TEST_F(AttitudeMekfTest, AccelGateDisabledAlwaysAccepts)
     }
 
     // Covariance attitude block must have decreased (update was applied)
-    const float P1 = f.getCovariance().block<3,3>(0,0).trace();
+    const float P1 = f.getCovariance().block<3, 3>(0, 0).trace();
     EXPECT_LT(P1, P0)
         << "Attitude covariance must decrease when gate is disabled (update applied)";
 }
@@ -491,7 +492,7 @@ TEST_F(AttitudeMekfTest, UpdateMagCorrectsYaw)
     // Filter starts at identity (facing North in NED).
     // Magnetometer encodes true heading of +90° (facing East).
     // After convergence the filter must report +90° yaw.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.rMag = 0.001f; // high trust for faster convergence
 
     AttitudeMekf f(cfg);
@@ -568,7 +569,7 @@ TEST_F(AttitudeMekfTest, UpdateMagNormalisesInputInternally)
 {
     // Passing a 10× scaled measurement vs a unit measurement must
     // produce the same attitude result because updateMag() normalises.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.rMag = 0.001f;
 
     AttitudeMekf fUnit(cfg);
@@ -600,9 +601,9 @@ TEST_F(AttitudeMekfTest, FusedUpdateConvergesFromLargeError)
 {
     // Start at identity; truth is pitch=45°, yaw=90°.
     // With combined accel + mag updates the filter must converge within 5000 steps.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.rAccel = 0.5f;
-    cfg.rMag   = 0.5f;
+    cfg.rMag = 0.5f;
 
     AttitudeMekf f(cfg);
 
@@ -610,7 +611,7 @@ TEST_F(AttitudeMekfTest, FusedUpdateConvergesFromLargeError)
 
     const Eigen::Vector3f g_ned(0.0f, 0.0f, 9.81f);
     const Eigen::Vector3f mag_ned(1.0f, 0.0f, 0.0f);
-    const Eigen::Vector3f accel  = qTrue.conjugate() * g_ned;
+    const Eigen::Vector3f accel = qTrue.conjugate() * g_ned;
     const Eigen::Vector3f magMeas = qTrue.conjugate() * mag_ned;
 
     runFused(f, Eigen::Vector3f::Zero(), accel, magMeas, mag_ned, 5000);
@@ -652,7 +653,7 @@ TEST_F(AttitudeMekfTest, FusedUpdateReducesTotalCovariance)
 
     f.updateAccel(Eigen::Vector3f(0.0f, 0.0f, 9.81f));
     f.updateMag(Eigen::Vector3f(1.0f, 0.0f, 0.0f),
-                Eigen::Vector3f(1.0f, 0.0f, 0.0f));
+        Eigen::Vector3f(1.0f, 0.0f, 0.0f));
 
     const float pAfterUpdate = f.getCovariance().trace();
 
@@ -744,7 +745,7 @@ TEST_F(AttitudeMekfTest, BiasEstimationZAxisNotObservableAccelOnly)
     // tolerance since yaw drifts slowly and accel may provide minimal signal.
     EXPECT_LT(std::abs(f.getBias().z()), 0.05f)
         << "Z-axis bias is unobservable from accelerometer alone; "
-           "estimate must not spuriously converge";
+        "estimate must not spuriously converge";
 }
 
 TEST_F(AttitudeMekfTest, BiasContinuesAccumulatingAcrossUpdates)
@@ -790,7 +791,7 @@ TEST_F(AttitudeMekfTest, CovarianceIsSymmetricAfterManyUpdates)
         f.predict(0.01f, Eigen::Vector3f(0.2f, 0.1f, -0.15f));
         f.updateAccel(Eigen::Vector3f(0.0f, 0.0f, 9.81f));
         f.updateMag(Eigen::Vector3f(1.0f, 0.0f, 0.0f),
-                    Eigen::Vector3f(1.0f, 0.0f, 0.0f));
+            Eigen::Vector3f(1.0f, 0.0f, 0.0f));
     }
 
     const AttitudeMekf::ErrorMat& P = f.getCovariance();
@@ -821,11 +822,11 @@ TEST_F(AttitudeMekfTest, CovarianceBiasBlockGrowsDuringPredict)
     // Bias block trace must grow on every predict step (random-walk noise).
     AttitudeMekf f(m_cfg);
 
-    float prevBiasTrace = f.getCovariance().block<3,3>(3,3).trace();
+    float prevBiasTrace = f.getCovariance().block<3, 3>(3, 3).trace();
 
     for (int i = 0; i < 50; ++i) {
         f.predict(0.01f, Eigen::Vector3f::Zero());
-        const float biasTrace = f.getCovariance().block<3,3>(3,3).trace();
+        const float biasTrace = f.getCovariance().block<3, 3>(3, 3).trace();
         EXPECT_GT(biasTrace, prevBiasTrace)
             << "Bias covariance block must grow at step " << i;
         prevBiasTrace = biasTrace;
@@ -838,9 +839,9 @@ TEST_F(AttitudeMekfTest, CovarianceAttitudeBlockShrinksDuringUpdate)
     AttitudeMekf f(m_cfg);
     f.predict(0.01f, Eigen::Vector3f::Zero());
 
-    const float traceBeforeUpdate = f.getCovariance().block<3,3>(0,0).trace();
+    const float traceBeforeUpdate = f.getCovariance().block<3, 3>(0, 0).trace();
     f.updateAccel(Eigen::Vector3f(0.0f, 0.0f, 9.81f));
-    const float traceAfterUpdate  = f.getCovariance().block<3,3>(0,0).trace();
+    const float traceAfterUpdate = f.getCovariance().block<3, 3>(0, 0).trace();
 
     EXPECT_LT(traceAfterUpdate, traceBeforeUpdate)
         << "Attitude covariance block must shrink after valid accel update";
@@ -862,7 +863,7 @@ TEST_F(AttitudeMekfTest, CovarianceFaultCountZeroDuringNormalOperation)
         f.predict(0.01f, Eigen::Vector3f(0.3f, -0.2f, 0.1f));
         f.updateAccel(Eigen::Vector3f(0.0f, 0.0f, 9.81f));
         f.updateMag(Eigen::Vector3f(1.0f, 0.0f, 0.0f),
-                    Eigen::Vector3f(1.0f, 0.0f, 0.0f));
+            Eigen::Vector3f(1.0f, 0.0f, 0.0f));
     }
 
     EXPECT_EQ(f.getCovarianceFaultCount(), 0u)
@@ -883,7 +884,7 @@ TEST_F(AttitudeMekfTest, QuaternionRemainsUnitNormAfterManySteps)
         f.predict(0.01f, Eigen::Vector3f(0.5f, -0.3f, 0.7f));
         f.updateAccel(Eigen::Vector3f(0.0f, 0.0f, 9.81f));
         f.updateMag(Eigen::Vector3f(1.0f, 0.0f, 0.0f),
-                    Eigen::Vector3f(1.0f, 0.0f, 0.0f));
+            Eigen::Vector3f(1.0f, 0.0f, 0.0f));
     }
 
     EXPECT_NEAR(f.getQuaternion().norm(), 1.0f, 1e-4f)
@@ -965,13 +966,13 @@ TEST_F(AttitudeMekfTest, AlignRolled90Right)
 
     const AttitudeMekf::Vector3 euler = f.getEulerAnglesDeg();
     EXPECT_NEAR(euler.x(), 90.0f, 1.5f) << "Roll must be 90° for right-side-down";
-    EXPECT_NEAR(euler.y(),  0.0f, 1.5f) << "Pitch must be 0";
-    EXPECT_NEAR(euler.z(),  0.0f, 1.5f) << "Yaw must be 0 (still facing North)";
+    EXPECT_NEAR(euler.y(), 0.0f, 1.5f) << "Pitch must be 0";
+    EXPECT_NEAR(euler.z(), 0.0f, 1.5f) << "Yaw must be 0 (still facing North)";
 
     // Inertial reference must recover the true dip angle
     const AttitudeMekf::Vector3 expectedRef = Eigen::Vector3f(0.4f, 0.0f, 0.9f).normalized();
     EXPECT_NEAR(magRef.x(), expectedRef.x(), 0.05f);
-    EXPECT_NEAR(magRef.y(), 0.0f,             0.05f);
+    EXPECT_NEAR(magRef.y(), 0.0f, 0.05f);
     EXPECT_NEAR(magRef.z(), expectedRef.z(), 0.05f);
 }
 
@@ -994,7 +995,7 @@ TEST_F(AttitudeMekfTest, AlignPitched90Up)
     // Magnetic reference must still be correct
     const AttitudeMekf::Vector3 expectedRef = Eigen::Vector3f(0.4f, 0.0f, 0.9f).normalized();
     EXPECT_NEAR(magRef.x(), expectedRef.x(), 0.05f);
-    EXPECT_NEAR(magRef.y(), 0.0f,             0.05f);
+    EXPECT_NEAR(magRef.y(), 0.0f, 0.05f);
     EXPECT_NEAR(magRef.z(), expectedRef.z(), 0.05f);
 }
 
@@ -1056,8 +1057,8 @@ TEST_F(AttitudeMekfTest, EulerAngles90DegRoll)
 
     const AttitudeMekf::Vector3 euler = f.getEulerAnglesDeg();
     EXPECT_NEAR(euler.x(), 90.0f, 0.1f);
-    EXPECT_NEAR(euler.y(),  0.0f, 0.1f);
-    EXPECT_NEAR(euler.z(),  0.0f, 0.1f);
+    EXPECT_NEAR(euler.y(), 0.0f, 0.1f);
+    EXPECT_NEAR(euler.z(), 0.0f, 0.1f);
 }
 
 TEST_F(AttitudeMekfTest, EulerAnglesNegativePitch)
@@ -1066,9 +1067,9 @@ TEST_F(AttitudeMekfTest, EulerAnglesNegativePitch)
     f.init(eulerToQuat(0.0f, -45.0f, 0.0f), AttitudeMekf::Vector3::Zero());
 
     const AttitudeMekf::Vector3 euler = f.getEulerAnglesDeg();
-    EXPECT_NEAR(euler.x(),   0.0f, 0.1f);
+    EXPECT_NEAR(euler.x(), 0.0f, 0.1f);
     EXPECT_NEAR(euler.y(), -45.0f, 0.1f);
-    EXPECT_NEAR(euler.z(),   0.0f, 0.1f);
+    EXPECT_NEAR(euler.z(), 0.0f, 0.1f);
 }
 
 TEST_F(AttitudeMekfTest, EulerAnglesComplexOrientation)
@@ -1100,8 +1101,8 @@ TEST_F(AttitudeMekfTest, EulerAnglesNegativeYaw)
     f.init(eulerToQuat(0.0f, 0.0f, -60.0f), AttitudeMekf::Vector3::Zero());
 
     const AttitudeMekf::Vector3 euler = f.getEulerAnglesDeg();
-    EXPECT_NEAR(euler.x(),   0.0f, 0.1f);
-    EXPECT_NEAR(euler.y(),   0.0f, 0.1f);
+    EXPECT_NEAR(euler.x(), 0.0f, 0.1f);
+    EXPECT_NEAR(euler.y(), 0.0f, 0.1f);
     EXPECT_NEAR(euler.z(), -60.0f, 0.1f);
 }
 
@@ -1157,7 +1158,7 @@ TEST_F(AttitudeMekfTest, FlightSimulation_FourPhase)
 {
     // Four-phase flight: hover → pitch up → coordinated yaw turn → return level.
     // The MEKF must track the exact truth model to within 1.5° at each checkpoint.
-    AttitudeMekf::Config cfg = m_cfg;
+    gnc::FilterConfig cfg = m_cfg;
     cfg.rMag = 0.01f; // higher mag trust for cleaner tracking in noiseless sim
 
     AttitudeMekf f(cfg);
@@ -1168,17 +1169,17 @@ TEST_F(AttitudeMekfTest, FlightSimulation_FourPhase)
     const float dt = 0.01f;
 
     auto runSegment = [&](const Eigen::Vector3f& rates, float durationSec)
-    {
-        const int steps = static_cast<int>(durationSec / dt);
-        for (int i = 0; i < steps; ++i) {
-            integrateQuat(qTrue, rates, dt);
-            const Eigen::Vector3f accel = qTrue.conjugate() * g_ned;
-            const Eigen::Vector3f magMeas = qTrue.conjugate() * mag_ned;
-            f.predict(dt, rates);
-            f.updateAccel(accel);
-            f.updateMag(magMeas, mag_ned);
-        }
-    };
+        {
+            const int steps = static_cast<int>(durationSec / dt);
+            for (int i = 0; i < steps; ++i) {
+                integrateQuat(qTrue, rates, dt);
+                const Eigen::Vector3f accel = qTrue.conjugate() * g_ned;
+                const Eigen::Vector3f magMeas = qTrue.conjugate() * mag_ned;
+                f.predict(dt, rates);
+                f.updateAccel(accel);
+                f.updateMag(magMeas, mag_ned);
+            }
+        };
 
     // Phase 1: Stationary (1 s)
     runSegment(Eigen::Vector3f::Zero(), 1.0f);
@@ -1233,29 +1234,29 @@ TEST_F(AttitudeMekfTest, MonteCarloAccuracyUnderSensorNoise)
 {
     // Sinusoidal coning motion with realistic MEMS noise levels.
     // Target: RMS error < 0.5° and peak error < 1.5° after convergence.
-    AttitudeMekf::Config cfg = m_cfg;
-    cfg.qGyro  = 0.001f;
+    gnc::FilterConfig cfg = m_cfg;
+    cfg.qGyro = 0.001f;
     cfg.rAccel = 0.1f;
-    cfg.rMag   = 0.1f;
+    cfg.rMag = 0.1f;
 
     AttitudeMekf f(cfg);
 
     std::default_random_engine rng(42u); // Fixed seed for reproducibility
-    std::normal_distribution<float> gyroNoise(0.0f,  0.01f); // ~0.5°/s
+    std::normal_distribution<float> gyroNoise(0.0f, 0.01f); // ~0.5°/s
     std::normal_distribution<float> accelNoise(0.0f, 0.10f); // ~0.1 m/s²
-    std::normal_distribution<float> magNoise(0.0f,   0.02f);
+    std::normal_distribution<float> magNoise(0.0f, 0.02f);
 
     Eigen::Quaternionf qTrue = Eigen::Quaternionf::Identity();
     const Eigen::Vector3f g_ned(0.0f, 0.0f, 9.81f);
     const Eigen::Vector3f mag_ned(1.0f, 0.0f, 0.0f);
 
-    const float dt       = 0.01f;
+    const float dt = 0.01f;
     const int totalSteps = 10000;
-    const float freq     = 1.0f;
-    const float amp      = 0.5f;
+    const float freq = 1.0f;
+    const float amp = 0.5f;
 
     float maxErrDeg = 0.0f;
-    float sumSqErr  = 0.0f;
+    float sumSqErr = 0.0f;
     int   evaluated = 0;
 
     for (int i = 0; i < totalSteps; ++i) {
@@ -1295,9 +1296,9 @@ TEST_F(AttitudeMekfTest, MonteCarloAccuracyUnderSensorNoise)
     const float rmsErr = std::sqrt(sumSqErr / static_cast<float>(evaluated));
 
     std::cout << "[MonteCarloAccuracy] RMS: " << rmsErr
-              << "°  Peak: " << maxErrDeg << "°\n";
+        << "°  Peak: " << maxErrDeg << "°\n";
 
-    EXPECT_LT(rmsErr,    0.5f) << "RMS error must be < 0.5° under MEMS noise";
+    EXPECT_LT(rmsErr, 0.5f) << "RMS error must be < 0.5° under MEMS noise";
     EXPECT_LT(maxErrDeg, 1.5f) << "Peak error must be < 1.5° under MEMS noise";
 }
 

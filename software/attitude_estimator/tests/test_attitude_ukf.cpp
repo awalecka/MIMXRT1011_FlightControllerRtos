@@ -2,6 +2,7 @@
  * @file test_attitude_ukf.cpp
  * @brief Unit tests for AttitudeUkf class using GoogleTest.
  *
+ * Implements a 6-state UKF error state.
  * Validates initialization, kinematic propagation, sensor fusion (Accel/Mag),
  * bias estimation, and full flight dynamics.
  */
@@ -24,7 +25,7 @@ using namespace gnc;
 // ----------------------------------------------------------------------------
 class AttitudeUkfTest : public ::testing::Test {
 protected:
-    AttitudeUkf::Config m_default_config;
+    gnc::FilterConfig m_default_config;
 
     void SetUp() override {
         // Robust Tuning for Float Stability
@@ -142,7 +143,7 @@ TEST_F(AttitudeUkfTest, UpdateMagCorrectsYaw) {
     // 1. Setup a "Strong Update" config
     // We lower rMag to make the filter trust the magnetometer more.
     // This overcomes the large initial error (90 degrees) faster.
-    AttitudeUkf::Config quickConvergeConfig = m_default_config;
+    gnc::FilterConfig quickConvergeConfig = m_default_config;
     quickConvergeConfig.rMag = 0.001f; // High trust in measurement
 
     AttitudeUkf ukf(quickConvergeConfig);
@@ -176,7 +177,7 @@ TEST_F(AttitudeUkfTest, UpdateMagCorrectsYaw) {
 
 TEST_F(AttitudeUkfTest, UpdateFusedCorrectsCombinedOrientation) {
     // 1. Setup - Stronger trust for faster convergence in test
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     simConfig.rAccel = 0.5f;
     simConfig.rMag = 0.5f;
 
@@ -266,7 +267,7 @@ TEST_F(AttitudeUkfTest, CovarianceSanityCheck) {
     // 1. Setup
     // Use alpha=1.0 to prevent negative weights (numerical stability)
     // Increase Bias Process Noise so the growth is obvious
-    AttitudeUkf::Config config = m_default_config;
+    gnc::FilterConfig config = m_default_config;
     config.alpha = 1.0f;
     config.qBias = 0.1f;
 
@@ -310,7 +311,7 @@ TEST_F(AttitudeUkfTest, CovarianceSanityCheck) {
 // ----------------------------------------------------------------------------
 TEST_F(AttitudeUkfTest, CompleteFlightSimulation) {
     // 1. Setup - Use high mag trust for cleaner simulation tracking
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     simConfig.rMag = 0.01f;
 
     AttitudeUkf ukf(simConfig);
@@ -406,7 +407,7 @@ TEST_F(AttitudeUkfTest, CompleteFlightSimulation) {
 
 TEST_F(AttitudeUkfTest, GetEulerAngles_Identity) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // Identity Quaternion -> 0, 0, 0
@@ -423,7 +424,7 @@ TEST_F(AttitudeUkfTest, GetEulerAngles_Identity) {
 
 TEST_F(AttitudeUkfTest, GetEulerAngles_90DegRoll) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // 90 deg Roll
@@ -440,7 +441,7 @@ TEST_F(AttitudeUkfTest, GetEulerAngles_90DegRoll) {
 
 TEST_F(AttitudeUkfTest, GetEulerAngles_NegativePitch) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // -45 deg Pitch
@@ -457,7 +458,7 @@ TEST_F(AttitudeUkfTest, GetEulerAngles_NegativePitch) {
 
 TEST_F(AttitudeUkfTest, GetEulerAngles_ComplexOrientation) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // R=10, P=20, Y=30
@@ -478,7 +479,7 @@ TEST_F(AttitudeUkfTest, GetEulerAngles_ComplexOrientation) {
 
 TEST_F(AttitudeUkfTest, Align_LevelAndNorth) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // Case: Vehicle is perfectly level and facing North.
@@ -509,7 +510,7 @@ TEST_F(AttitudeUkfTest, Align_LevelAndNorth) {
 
 TEST_F(AttitudeUkfTest, Align_Rolled90DegreesRight) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // Case: Vehicle is rolled 90 degrees to the Right.
@@ -546,7 +547,7 @@ TEST_F(AttitudeUkfTest, Align_Rolled90DegreesRight) {
 
 TEST_F(AttitudeUkfTest, Align_Pitched90DegreesUp) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // Case: Vehicle is pitched 90 degrees Up (Nose pointing to Sky).
@@ -582,7 +583,7 @@ TEST_F(AttitudeUkfTest, Align_Pitched90DegreesUp) {
 
 TEST_F(AttitudeUkfTest, SignConvention_NED) {
     // Setup
-    AttitudeUkf::Config simConfig = m_default_config;
+    gnc::FilterConfig simConfig = m_default_config;
     AttitudeUkf ukf(simConfig);
 
     // 1. Verify Positive Roll (Right Wing Down)
@@ -616,7 +617,7 @@ TEST_F(AttitudeUkfTest, SignConvention_NED) {
 
 TEST_F(AttitudeUkfTest, AccuracyWithSensorNoise) {
     // 1. Setup with standard tuning
-    AttitudeUkf::Config config = m_default_config;
+    gnc::FilterConfig config = m_default_config;
     // Typical low-cost MEMS noise parameters
     config.qGyro = 0.001f;
     config.rAccel = 0.1f;
@@ -732,11 +733,11 @@ TEST_F(AttitudeUkfTest, AccuracyWithSensorNoise) {
 
 TEST_F(AttitudeUkfTest, CholeskyRankDeficiencyTrigger) {
     // This test artificially accelerates the rank-deficiency issue inherently
-    // present in a 7D covariance matrix for a 6DOF space (4D quaternion).
+    // present in full state UKF architectures.
     // It does this by continuously applying pure prediction (no measurement
     // corrections to anchor the covariance) under high dynamics and noise.
 
-    AttitudeUkf::Config config = m_default_config;
+    gnc::FilterConfig config = m_default_config;
     config.qGyro = 0.5f; // High process noise to blow up the covariance quickly
 
     AttitudeUkf ukf(config);

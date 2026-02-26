@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="088a3994-3603-4cc7-944c-dbf7dd088c2b" name="Changes" comment="" />
+    <list default="true" id="088a3994-3603-4cc7-944c-dbf7dd088c2b" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_mekf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_mekf.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_ukf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_ukf.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
