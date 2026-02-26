@@ -58,6 +58,7 @@ endfunction()
 # Enable CTest runner
 enable_testing()
 
-add_subdirectory(pid)
+add_subdirectory(pid)                  # Added first so 'flight_pid' is available
+add_subdirectory(attitude_controller)  # Can now safely link against 'flight_pid'
 add_subdirectory(nmea)
 add_subdirectory(attitude_estimator)

@@ -1,12 +1,15 @@
 # unit_testing/pid/CMakeLists.txt
 
+# 1. Compile the PID logic into a reusable static library
+add_library(flight_pid STATIC src/pid/pid_controller.cpp)
+
+# 2. Expose the EXACT folder containing pid_controller.h to anyone who links this library
+target_include_directories(flight_pid PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/pid) # <-- Added /pid here
+
+# 3. Create the standalone PID unit test
 add_flight_test(test_pid_controller
     SOURCES 
-        src/pid/pid_controller.cpp
         src/tests/test_pid_controller.cpp
-    INCLUDES
-        # Point this to wherever the root of your "controllers/pid_controller.h" lives.
-        # Assuming the file includes it like `#include "controllers/pid_controller.h"`,
-        # the include path should be the directory containing the 'controllers' folder.
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/pid 
+    LIBS 
+        flight_pid 
 )
