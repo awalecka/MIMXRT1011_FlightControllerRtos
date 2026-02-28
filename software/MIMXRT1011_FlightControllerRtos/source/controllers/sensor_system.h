@@ -27,9 +27,9 @@ typedef enum {
  * The user defines this based on the physical orientation of the sensor.
  */
 typedef struct {
-	axis_source_t map_x; // Defines the source for the output X-axis.
-	axis_source_t map_y; // Defines the source for the output Y-axis.
-	axis_source_t map_z; // Defines the source for the output Z-axis.
+    axis_source_t map_x; // Defines the source for the output X-axis.
+    axis_source_t map_y; // Defines the source for the output Y-axis.
+    axis_source_t map_z; // Defines the source for the output Z-axis.
 } axis_mapping_t;
 
 
@@ -40,11 +40,14 @@ typedef struct {
 template <SixAxisSensor AccelPolicy, MagnetometerSensor MagPolicy>
 class SensorSystem {
 public:
-    struct RawData {
+    struct ImuData {
         float gyroXDps, gyroYDps, gyroZDps;
         float accelXG, accelYG, accelZG;
-        float magXGauss, magYGauss, magZGauss;
         float airspeedMs;
+    };
+
+    struct MagData {
+        float magXGauss, magYGauss, magZGauss;
     };
 
     SensorSystem() : gyroBiasX(0.0f), gyroBiasY(0.0f), gyroBiasZ(0.0f),
@@ -55,10 +58,10 @@ public:
         vehicleMapping.map_z = AXIS_Z_NEGATIVE;
 
         // Assuming LIS3MDL is on same plane. If IMU Z is flipped (Up->Down),
-		// Mag Z likely needs flipping too. Adjust these to match your board!
-		magMapping.map_x = AXIS_X_POSITIVE;
-		magMapping.map_y = AXIS_Y_NEGATIVE;
-		magMapping.map_z = AXIS_Z_NEGATIVE; // Align Mag Z with Body Z (Down)
+        // Mag Z likely needs flipping too. Adjust these to match your board!
+        magMapping.map_x = AXIS_X_POSITIVE;
+        magMapping.map_y = AXIS_Y_NEGATIVE;
+        magMapping.map_z = AXIS_Z_NEGATIVE; // Align Mag Z with Body Z (Down)
     }
 
     int init() {
@@ -90,15 +93,14 @@ public:
     }
 
     /**
-     * @brief Reads sensor data and applies CURRENT calibration.
+     * @brief Reads high-rate IMU data and applies CURRENT calibration.
      */
-    int readData(RawData& rawData) {
-        Axis3f rawAcc, rawGyro, rawMag;
-        Axis3f mapAcc, mapGyro, mapMag;
+    int readImu(ImuData& rawData) {
+        Axis3f rawAcc, rawGyro;
+        Axis3f mapAcc, mapGyro;
 
         if (accelDriver.readAccel(rawAcc) != 0 ||
-            accelDriver.readGyro(rawGyro) != 0 ||
-            magDriver.readMag(rawMag) != 0) {
+            accelDriver.readGyro(rawGyro) != 0) {
             return -1;
         }
 
@@ -113,19 +115,31 @@ public:
         rawData.accelZG = mapAcc.z;
         rawData.airspeedMs = 0.0f;
 
+        return 0;
+    }
+
+    /**
+     * @brief Reads low-rate Magnetometer data and applies CURRENT calibration.
+     */
+    int readMag(MagData& rawData) {
+        Axis3f rawMag, mapMag;
+
+        if (magDriver.readMag(rawMag) != 0) {
+            return -1;
+        }
+
         // Apply Magnetometer Calibration
         using RlsMagnetometerCalibratorF = RlsMagnetometerCalibration<float>;
         RlsMagnetometerCalibratorF::Vector3 rawMagVec(rawMag.x, rawMag.y, rawMag.z);
         RlsMagnetometerCalibratorF::Vector3 calMagVec = magCalibrator.getCalibratedData(rawMagVec);
 
         // Remap Magnetometer (Sensor Frame -> Body Frame)
-		// We convert the Eigen vector back to Axis3f for remapping
-		Axis3f calMagAxis = { calMagVec.x(), calMagVec.y(), calMagVec.z() };
-		remapAxis(calMagAxis, mapMag);
+        Axis3f calMagAxis = { calMagVec.x(), calMagVec.y(), calMagVec.z() };
+        remapAxis(calMagAxis, mapMag);
 
-		rawData.magXGauss = mapMag.x;
-		rawData.magYGauss = mapMag.y;
-		rawData.magZGauss = mapMag.z;
+        rawData.magXGauss = mapMag.x;
+        rawData.magYGauss = mapMag.y;
+        rawData.magZGauss = mapMag.z;
 
         return 0;
     }
@@ -133,7 +147,7 @@ public:
     /**
      * @brief Reads raw mag data for calibration purposes.
      */
-    int feedMagCalibration(RawData& rawData) {
+    int feedMagCalibration(MagData& rawData) {
         Axis3f rawMag;
         if (magDriver.readMag(rawMag) != 0) return -1;
 

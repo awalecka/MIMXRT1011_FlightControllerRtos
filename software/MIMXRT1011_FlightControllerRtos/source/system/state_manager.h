@@ -3,16 +3,20 @@
 
 /**
  * @brief Task that handles state machine controller task.
- * 
- * @param pvParameters Pointer to task parameters (unused).
+ * * @param pvParameters Pointer to task parameters (unused).
  */
 void stateManagerTask(void *pvParameters);
 
 /**
- * @brief Task that handles background sensor reading.
- * 
- * @param pvParameters Pointer to task parameters (unused).
+ * @brief Task that handles background IMU reading.
+ * * @param pvParameters Pointer to task parameters (unused).
  */
-void sensorTask(void *pvParameters);
+void imuTask(void *pvParameters);
+
+/**
+ * @brief Task that handles background Magnetometer reading.
+ * * @param pvParameters Pointer to task parameters (unused).
+ */
+void magTask(void *pvParameters);
 
 #endif // STATE_MANAGER_TASK_H

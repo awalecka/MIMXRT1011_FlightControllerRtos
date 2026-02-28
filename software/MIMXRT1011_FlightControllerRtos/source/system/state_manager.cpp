@@ -12,13 +12,23 @@
 
 static FlightState_t checkGestures(const Receiver::StickInput& s);
 
-void sensorTask(void *pvParameters) {
-    FlightController::SensorData data;
+void imuTask(void *pvParameters) {
+    FlightController::ImuData data;
     while (true) {
-        if (g_flightController.readSensors(data) == 0) {
-            xQueueOverwrite(g_sensor_data_queue, &data);
+        if (g_flightController.readImu(data) == 0) {
+            xQueueOverwrite(g_imu_data_queue, &data);
         }
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+void magTask(void *pvParameters) {
+    FlightController::MagData data;
+    while (true) {
+        if (g_flightController.readMag(data) == 0) {
+            xQueueOverwrite(g_mag_data_queue, &data);
+        }
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
@@ -61,7 +71,9 @@ static FlightState_t runIdleState(TickType_t& lastWakeTime) {
     vTaskDelayUntil(&lastWakeTime, pdMS_TO_TICKS(FlightController::LOOP_DT_MS));
 
     // Run Controller (Keeps AHRS updated, sensors read, telemetry sending)
+    USER_TIMING_ON();
     g_flightController.update();
+    USER_TIMING_OFF();
 
     // Check Gestures
     Receiver::StickInput sticks;
@@ -186,11 +198,10 @@ static bool s_gestureActive = false;
 
 /**
  * @brief Checks stick inputs for arming or calibration gestures.
- *        Stick Patterns (Mode 2):
- *         ARM: Throttle Low + Yaw Right
- *         CALIBRATE: Throttle Low + Yaw Left + Pitch Up
- * 
- * @param s Stick input data to evaluate.
+ * Stick Patterns (Mode 2):
+ * ARM: Throttle Low + Yaw Right
+ * CALIBRATE: Throttle Low + Yaw Left + Pitch Up
+ * * @param s Stick input data to evaluate.
  * @return The requested flight state or STATE_IDLE if no complete gesture is detected.
  */
 static FlightState_t checkGestures(const Receiver::StickInput& s) {

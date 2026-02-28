@@ -21,10 +21,10 @@
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="com.crt.advproject.platform.exe.debug.570385756" name="ARM-based MCU (Debug)" superClass="com.crt.advproject.platform.exe.debug"/>
 							<builder buildPath="${workspace_loc:/MIMXRT1011_FlightControllerRtos}/Debug" id="com.crt.advproject.builder.exe.debug.1252022995" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.debug"/>
 							<tool id="com.crt.advproject.cpp.exe.debug.1756667119" name="MCU C++ Compiler" superClass="com.crt.advproject.cpp.exe.debug">
-								<option id="com.crt.advproject.cpp.hdrlib.1829045607" name="Library headers" superClass="com.crt.advproject.cpp.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.cpp.hdrlib.newlib" valueType="enumerated"/>
+								<option id="com.crt.advproject.cpp.hdrlib.1829045607" name="Library headers" superClass="com.crt.advproject.cpp.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.cpp.hdrlib.none" valueType="enumerated"/>
 								<option id="com.crt.advproject.cpp.fpu.1205955695" name="Floating point" superClass="com.crt.advproject.cpp.fpu" useByScannerDiscovery="true" value="com.crt.advproject.cpp.fpu.fpv5sp.hard" valueType="enumerated"/>
 								<option id="com.crt.advproject.cpp.thumb.1360496335" name="Thumb mode" superClass="com.crt.advproject.cpp.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.cpp.specs.1941753932" name="Specs" superClass="com.crt.advproject.cpp.specs" useByScannerDiscovery="false" value="com.crt.advproject.cpp.specs.newlib" valueType="enumerated"/>
+								<option id="com.crt.advproject.cpp.specs.1941753932" name="Specs" superClass="com.crt.advproject.cpp.specs" useByScannerDiscovery="false" value="com.crt.advproject.cpp.specs.none" valueType="enumerated"/>
 								<option id="com.crt.advproject.cpp.arch.996801396" name="Architecture" superClass="com.crt.advproject.cpp.arch" useByScannerDiscovery="true" value="com.crt.advproject.cpp.target.cm7" valueType="enumerated"/>
 								<option id="com.crt.advproject.cpp.misc.dialect.1978189238" name="Language standard" superClass="com.crt.advproject.cpp.misc.dialect" useByScannerDiscovery="true" value="com.crt.advproject.misc.dialect.gnupp23" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.dialect.flags.1711814753" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true"/>
@@ -43,10 +43,10 @@
 									<listOptionValue builtIn="false" value="__MCUXPRESSO"/>
 									<listOptionValue builtIn="false" value="__USE_CMSIS"/>
 									<listOptionValue builtIn="false" value="DEBUG"/>
-									<listOptionValue builtIn="false" value="__NEWLIB__"/>
 									<listOptionValue builtIn="false" value="SERIAL_PORT_TYPE_SWO=1"/>
 									<listOptionValue builtIn="false" value="DISABLEFLOAT16"/>
 									<listOptionValue builtIn="false" value="SDK_OS_FREE_RTOS"/>
+									<listOptionValue builtIn="false" value=""/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.undef.21239968" name="Undefined symbols (-U)" superClass="gnu.cpp.compiler.option.preprocessor.undef" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1007193959" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
@@ -141,7 +141,6 @@
 							</tool>
 							<tool id="com.crt.advproject.gcc.exe.debug.326147006" name="MCU C Compiler" superClass="com.crt.advproject.gcc.exe.debug">
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.294810042" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__NEWLIB__"/>
 									<listOptionValue builtIn="false" value="EIGEN_NO_DEBUG"/>
 									<listOptionValue builtIn="false" value="EIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT"/>
 									<listOptionValue builtIn="false" value="EIGEN_DONT_VECTORIZE"/>
@@ -157,10 +156,11 @@
 									<listOptionValue builtIn="false" value="SERIAL_PORT_TYPE_SWO=1"/>
 									<listOptionValue builtIn="false" value="DISABLEFLOAT16"/>
 									<listOptionValue builtIn="false" value="SDK_OS_FREE_RTOS"/>
+									<listOptionValue builtIn="false" value=""/>
 								</option>
 								<option id="com.crt.advproject.gcc.thumb.430022995" name="Thumb mode" superClass="com.crt.advproject.gcc.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.gcc.hdrlib.1376181325" name="Library headers" superClass="com.crt.advproject.gcc.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.gcc.hdrlib.newlib" valueType="enumerated"/>
-								<option id="com.crt.advproject.gcc.specs.1362612843" name="Specs" superClass="com.crt.advproject.gcc.specs" useByScannerDiscovery="false" value="com.crt.advproject.gcc.specs.newlib" valueType="enumerated"/>
+								<option id="com.crt.advproject.gcc.hdrlib.1376181325" name="Library headers" superClass="com.crt.advproject.gcc.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.gcc.hdrlib.none" valueType="enumerated"/>
+								<option id="com.crt.advproject.gcc.specs.1362612843" name="Specs" superClass="com.crt.advproject.gcc.specs" useByScannerDiscovery="false" value="com.crt.advproject.gcc.specs.none" valueType="enumerated"/>
 								<option id="com.crt.advproject.gcc.arch.1258565589" name="Architecture" superClass="com.crt.advproject.gcc.arch" useByScannerDiscovery="true" value="com.crt.advproject.gcc.target.cm7" valueType="enumerated"/>
 								<option id="com.crt.advproject.c.misc.dialect.828366347" name="Language standard" superClass="com.crt.advproject.c.misc.dialect" useByScannerDiscovery="true" value="com.crt.advproject.misc.dialect.gnu17" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.dialect.flags.1640747092" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true"/>
@@ -255,10 +255,10 @@
 							</tool>
 							<tool id="com.crt.advproject.gas.exe.debug.1889275447" name="MCU Assembler" superClass="com.crt.advproject.gas.exe.debug">
 								<option id="com.crt.advproject.gas.thumb.1744268572" name="Thumb mode" superClass="com.crt.advproject.gas.thumb" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.gas.hdrlib.36011659" name="Library headers" superClass="com.crt.advproject.gas.hdrlib" value="com.crt.advproject.gas.hdrlib.newlib" valueType="enumerated"/>
-								<option id="com.crt.advproject.gas.specs.982498514" name="Specs" superClass="com.crt.advproject.gas.specs" value="com.crt.advproject.gas.specs.newlib" valueType="enumerated"/>
+								<option id="com.crt.advproject.gas.hdrlib.36011659" name="Library headers" superClass="com.crt.advproject.gas.hdrlib" value="com.crt.advproject.gas.hdrlib.none" valueType="enumerated"/>
+								<option id="com.crt.advproject.gas.specs.982498514" name="Specs" superClass="com.crt.advproject.gas.specs" value="com.crt.advproject.gas.specs.none" valueType="enumerated"/>
 								<option id="com.crt.advproject.gas.arch.919295027" name="Architecture" superClass="com.crt.advproject.gas.arch" value="com.crt.advproject.gas.target.cm7" valueType="enumerated"/>
-								<option id="gnu.both.asm.option.flags.crt.1043390782" name="Assembler flags" superClass="gnu.both.asm.option.flags.crt" value="-c -x assembler-with-cpp -D__NEWLIB__" valueType="string"/>
+								<option id="gnu.both.asm.option.flags.crt.1043390782" name="Assembler flags" superClass="gnu.both.asm.option.flags.crt" value="-c -x assembler-with-cpp" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.both.asm.option.include.paths.1029887795" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/drivers}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/utilities/str}&quot;"/>

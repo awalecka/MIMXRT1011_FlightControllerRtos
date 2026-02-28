@@ -25,8 +25,8 @@
  *
  * Adding a third filter
  * ---------------------
- * 1. Write or obtain the filter class, satisfying gnc::AttitudeFilter.
- * 2. Add one #elif branch here mapping GNC_FILTER_<NEW> to a type alias.
+ * Write or obtain the filter class, satisfying gnc::AttitudeFilter.
+ * Add one #elif branch here mapping GNC_FILTER_<NEW> to a type alias.
  * FlightController.cpp requires no changes.
  */
 
@@ -36,6 +36,7 @@
 #include <FreeRTOS.h>
 #include <task.h>
 #include <queue.h>
+#include <optional>
 
 #include "common_types.h"
 
@@ -118,7 +119,8 @@ public:
     static constexpr float    LOOP_DT_S    = 1.0f / LOOP_RATE_HZ;
     static constexpr uint32_t LOOP_DT_MS   = static_cast<uint32_t>(1000.0f / LOOP_RATE_HZ);
 
-    using SensorData = SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData;
+    using ImuData = SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::ImuData;
+    using MagData = SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::MagData;
 
     /**
      * @brief Tuning parameters for the active filter.
@@ -170,8 +172,11 @@ public:
     /** @brief Retrieve the normalised stick input. */
     void getStickInput(Receiver::StickInput& input);
 
-    /** @brief Read the latest sensor data into the provided structure. */
-    int readSensors(SensorData& data);
+    /** @brief Read the latest IMU data into the provided structure. */
+    int readImu(ImuData& data);
+
+    /** @brief Read the latest Magnetometer data into the provided structure. */
+    int readMag(MagData& data);
 
     /**
      * @brief Return the number of hard covariance resets since boot.
@@ -195,9 +200,10 @@ public:
 private:
     /**
      * @brief Run one predict + update cycle of the attitude filter.
-     * @param rawData Raw sensor data from the SensorSystem.
+     * @param imuData High-rate IMU data.
+     * @param magData Optional low-rate magnetometer data.
      */
-    void estimateAttitude(const SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData);
+    void estimateAttitude(const ImuData& imuData, const std::optional<MagData>& magData);
 
     // -------------------------------------------------------------------------
     // Subsystems
@@ -225,7 +231,6 @@ private:
     uint32_t    lastSensorTimestamp;
     int         staleDataCounter;
     uint32_t    lastUpdateTick;
-    QueueHandle_t sensorQueue;
 
     firmware::sensors::GpsData m_latestGps;
 };
@@ -259,7 +264,8 @@ extern TaskHandle_t g_heartbeat_task_handle;
 extern QueueHandle_t g_controls_data_queue;
 extern QueueHandle_t g_command_data_queue;
 extern QueueHandle_t g_state_change_request_queue;
-extern QueueHandle_t g_sensor_data_queue;
+extern QueueHandle_t g_imu_data_queue;
+extern QueueHandle_t g_mag_data_queue;
 
 extern volatile TickType_t    g_heartbeat_frequency;
 extern volatile FlightState_t g_flight_state;

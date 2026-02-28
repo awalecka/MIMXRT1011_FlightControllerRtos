@@ -80,20 +80,22 @@ int FlightControllerT<FilterPolicy>::init()
     // -------------------------------------------------------------------------
     // Static alignment — collect averages from stationary sensors and run TRIAD
     // -------------------------------------------------------------------------
-    SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData raw;
+    ImuData imuRaw;
+    MagData magRaw;
 
     float sumAx = 0.0f, sumAy = 0.0f, sumAz = 0.0f;
     float sumMx = 0.0f, sumMy = 0.0f, sumMz = 0.0f;
     constexpr int kInitSamples = 50;
 
     for (int i = 0; i < kInitSamples; ++i) {
-        while (sensorSystem.readData(raw) != 0) {}
-        sumAx += raw.accelXG;
-        sumAy += raw.accelYG;
-        sumAz += raw.accelZG;
-        sumMx += raw.magXGauss;
-        sumMy += raw.magYGauss;
-        sumMz += raw.magZGauss;
+        while (sensorSystem.readImu(imuRaw) != 0) {}
+        while (sensorSystem.readMag(magRaw) != 0) {}
+        sumAx += imuRaw.accelXG;
+        sumAy += imuRaw.accelYG;
+        sumAz += imuRaw.accelZG;
+        sumMx += magRaw.magXGauss;
+        sumMy += magRaw.magYGauss;
+        sumMz += magRaw.magZGauss;
         for (volatile int k = 0; k < 10000; ++k) {}
     }
 
@@ -126,14 +128,25 @@ void FlightControllerT<FilterPolicy>::calibrateSensors()
 }
 
 // ----------------------------------------------------------------------------
-// readSensors
+// readImu
 // ----------------------------------------------------------------------------
 
 template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
-int FlightControllerT<FilterPolicy>::readSensors(SensorData& data)
+int FlightControllerT<FilterPolicy>::readImu(ImuData& data)
 {
-    return sensorSystem.readData(data);
+    return sensorSystem.readImu(data);
+}
+
+// ----------------------------------------------------------------------------
+// readMag
+// ----------------------------------------------------------------------------
+
+template <typename FilterPolicy>
+    requires gnc::AttitudeFilter<FilterPolicy>
+int FlightControllerT<FilterPolicy>::readMag(MagData& data)
+{
+    return sensorSystem.readMag(data);
 }
 
 // ----------------------------------------------------------------------------
@@ -177,7 +190,7 @@ template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
 bool FlightControllerT<FilterPolicy>::calibrateMagnetometerStep()
 {
-    SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData rawData;
+    MagData rawData;
     if (sensorSystem.feedMagCalibration(rawData) != 0) {
         return false;
     }
@@ -220,54 +233,68 @@ void FlightControllerT<FilterPolicy>::update()
         m_latestGps = newGpsData;
     }
 
-    SensorData rawSensorData;
-    const bool hasNewSensorData =
-        (xQueuePeek(g_sensor_data_queue, &rawSensorData, 0) == pdTRUE);
+    ImuData imuData;
+    MagData magData;
 
-    if (currentControlMode == ControlMode::PASS_THROUGH) {
+    const bool hasNewImu = (xQueueReceive(g_imu_data_queue, &imuData, 0) == pdTRUE);
+    const bool hasNewMag = (xQueueReceive(g_mag_data_queue, &magData, 0) == pdTRUE);
+
+    std::optional<MagData> optMagData = std::nullopt;
+    if (hasNewMag) {
+        optMagData = magData;
+    }
+
+    ActuatorOutput surfaceCommands = {0.0f, 0.0f, 0.0f};
+    float throttleOutput = 0.0f;
+
+    if (hasNewImu) {
+        // Dynamic dt: measure the actual tick delta rather than assuming
+        // the nominal loop rate was met exactly.
+        const uint32_t now = xTaskGetTickCount();
+        if (lastUpdateTick > 0u) {
+            const float dt = static_cast<float>(now - lastUpdateTick)
+                           * (1.0f / static_cast<float>(configTICK_RATE_HZ));
+            if (dt > 0.001f && dt < 0.1f) {
+                loopDt = dt;
+            }
+        }
+        lastUpdateTick = now;
+
+        estimateAttitude(imuData, optMagData);
+
+        Receiver::Setpoint setpoint;
+        receiver.getSetpoint(setpoint);
+        attitudeController.setSetpoints(setpoint.rollDeg, setpoint.pitchDeg);
+
+        const FullSensorData controllerInput = {
+            .rollDeg       = currentRollDeg,
+            .pitchDeg      = currentPitchDeg,
+            .yawDeg        = currentYawDeg,
+            .rollRateDps   = imuData.gyroXDps,
+            .pitchRateDps  = imuData.gyroYDps,
+            .yawRateDps    = imuData.gyroZDps,
+            .trueAirspeedMs = imuData.airspeedMs
+        };
+
+        surfaceCommands = attitudeController.update(controllerInput, loopDt);
+        throttleOutput  = setpoint.throttle;
+    }
+
+    if (g_flight_state == STATE_IDLE) {
+        actuators.setRawOutputs(
+            Actuators::CENTER_PULSE_US,
+            Actuators::CENTER_PULSE_US,
+            Actuators::CENTER_PULSE_US,
+            Actuators::THROTTLE_MIN_PULSE_US
+        );
+    } else if (currentControlMode == ControlMode::PASS_THROUGH) {
         actuators.setRawOutputs(
             receiver.getChannel(RC_CH_ROLL),
             receiver.getChannel(RC_CH_PITCH),
             receiver.getChannel(RC_CH_YAW),
             receiver.getChannel(RC_CH_THROTTLE)
         );
-    } else {
-        ActuatorOutput surfaceCommands = {0.0f, 0.0f, 0.0f};
-        float throttleOutput = 0.0f;
-
-        if (hasNewSensorData) {
-            // Dynamic dt: measure the actual tick delta rather than assuming
-            // the nominal loop rate was met exactly.
-            const uint32_t now = xTaskGetTickCount();
-            if (lastUpdateTick > 0u) {
-                const float dt = static_cast<float>(now - lastUpdateTick)
-                               * (1.0f / static_cast<float>(configTICK_RATE_HZ));
-                if (dt > 0.001f && dt < 0.1f) {
-                    loopDt = dt;
-                }
-            }
-            lastUpdateTick = now;
-
-            estimateAttitude(rawSensorData);
-
-            Receiver::Setpoint setpoint;
-            receiver.getSetpoint(setpoint);
-            attitudeController.setSetpoints(setpoint.rollDeg, setpoint.pitchDeg);
-
-            const FullSensorData controllerInput = {
-                .rollDeg       = currentRollDeg,
-                .pitchDeg      = currentPitchDeg,
-                .yawDeg        = currentYawDeg,
-                .rollRateDps   = rawSensorData.gyroXDps,
-                .pitchRateDps  = rawSensorData.gyroYDps,
-                .yawRateDps    = rawSensorData.gyroZDps,
-                .trueAirspeedMs = rawSensorData.airspeedMs
-            };
-
-            surfaceCommands = attitudeController.update(controllerInput, loopDt);
-            throttleOutput  = setpoint.throttle;
-        }
-
+    } else if (hasNewImu) {
         actuators.setOutputs(
             surfaceCommands.aileron,
             surfaceCommands.elevator,
@@ -276,7 +303,7 @@ void FlightControllerT<FilterPolicy>::update()
         );
     }
 
-    if (hasNewSensorData) {
+    if (hasNewImu) {
         FullSensorData teleData;
         teleData.rollDeg  = currentRollDeg;
         teleData.pitchDeg = currentPitchDeg;
@@ -292,15 +319,15 @@ void FlightControllerT<FilterPolicy>::update()
 template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
 void FlightControllerT<FilterPolicy>::estimateAttitude(
-    const SensorSystem<Lsm6dsoxAdapter, Lis3mdlAdapter>::RawData& rawData)
+    const ImuData& imuData, const std::optional<MagData>& magData)
 {
     // -------------------------------------------------------------------------
     // Prediction — gyroscope (convert deg/s → rad/s)
     // -------------------------------------------------------------------------
     typename FilterPolicy::Vector3 omega;
-    omega << rawData.gyroXDps * DEG_TO_RAD,
-             rawData.gyroYDps * DEG_TO_RAD,
-             rawData.gyroZDps * DEG_TO_RAD;
+    omega << imuData.gyroXDps * DEG_TO_RAD,
+             imuData.gyroYDps * DEG_TO_RAD,
+             imuData.gyroZDps * DEG_TO_RAD;
     filter_.predict(loopDt, omega);
 
     // -------------------------------------------------------------------------
@@ -311,9 +338,9 @@ void FlightControllerT<FilterPolicy>::estimateAttitude(
     // vector that the MEKF/UKF model expects (gravity is +Z in NED inertial).
     // -------------------------------------------------------------------------
     typename FilterPolicy::Vector3 accel;
-    accel << -rawData.accelXG * GRAVITY_MSS,
-             -rawData.accelYG * GRAVITY_MSS,
-             -rawData.accelZG * GRAVITY_MSS;
+    accel << -imuData.accelXG * GRAVITY_MSS,
+             -imuData.accelYG * GRAVITY_MSS,
+             -imuData.accelZG * GRAVITY_MSS;
     filter_.updateAccel(accel);
 
     // -------------------------------------------------------------------------
@@ -323,14 +350,16 @@ void FlightControllerT<FilterPolicy>::estimateAttitude(
     // The MEKF normalises internally; the UKF expects a normalised input.
     // We normalise here to satisfy both.
     // -------------------------------------------------------------------------
-    typename FilterPolicy::Vector3 mag;
-    mag << rawData.magXGauss,
-           rawData.magYGauss,
-           rawData.magZGauss;
+    if (magData.has_value()) {
+        typename FilterPolicy::Vector3 mag;
+        mag << magData->magXGauss,
+               magData->magYGauss,
+               magData->magZGauss;
 
-    if (mag.norm() > 1e-6f) {
-        mag.normalize();
-        filter_.updateMag(mag, magRefVector_);
+        if (mag.norm() > 1e-6f) {
+            mag.normalize();
+            filter_.updateMag(mag, magRefVector_);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -353,3 +382,4 @@ void FlightControllerT<FilterPolicy>::estimateAttitude(
 // ============================================================================
 
 template class FlightControllerT<ActiveFilter>;
+
