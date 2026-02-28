@@ -22,6 +22,7 @@
 template<typename T>
 class RlsMagnetometerCalibration {
 public:
+    // Eigen type definitions based on the template type T
     using Vector3 = Eigen::Matrix<T, 3, 1>;
     using Matrix3 = Eigen::Matrix<T, 3, 3>;
     using Vector9 = Eigen::Matrix<T, 9, 1>;
@@ -32,7 +33,10 @@ public:
      * @brief Construct a new Rls Magnetometer Calibration object.
      *
      * @param forgettingFactor Controls the rate of adaptation (lambda).
+     * Values closer to 1.0 (e.g., 0.98-0.999) provide more stability and
+     * noise rejection but slower convergence. Lower values track changes faster.
      * @param initialCovariance Initial value for the P matrix (inverse correlation matrix).
+     * High values indicate high uncertainty in the initial state.
      * @param smoothing Smoothing factor for the estimated field strength B.
      */
     RlsMagnetometerCalibration(T forgettingFactor = T(0.98), T initialCovariance = T(1000.0), T smoothing = T(0.01));
@@ -40,12 +44,22 @@ public:
     /**
      * @brief Updates the calibration model with a new magnetometer measurement.
      *
+     * Performs a single step of the RLS algorithm:
+     * Constructs the measurement vector H based on the quadric surface equation.
+     * Calculates the prediction error against the current model.
+     * Updates the gain vector K and the parameter vector theta.
+     * Updates the covariance matrix P for the next step.
+     * Re-calculates the physical hard/soft iron parameters from the updated theta.
+     *
      * @param rawMagData Raw (uncalibrated) magnetometer reading [x, y, z].
      */
     void update(const Vector3& rawMagData);
 
     /**
      * @brief Sets the initial calibration parameters.
+     *
+     * Useful for initializing the filter with a known good calibration
+     * stored in non-volatile memory to speed up convergence at startup.
      *
      * @param softIronCorrection The 3x3 Soft Iron correction matrix.
      * @param hardIronOffset The Hard Iron offset vector.
@@ -55,6 +69,9 @@ public:
     /**
      * @brief Gets the current estimated Hard Iron offset.
      *
+     * Hard Iron distortion is caused by permanent magnets or magnetized iron
+     * fixed relative to the sensor, acting as an additive offset.
+     *
      * @return Vector3 The offset vector [x, y, z].
      */
     Vector3 getHardIronOffset() const;
@@ -62,12 +79,17 @@ public:
     /**
      * @brief Gets the current estimated Soft Iron correction matrix.
      *
+     * Soft Iron distortion is caused by magnetically soft materials that
+     * distort the magnetic field, resulting in scaling and skewing of the measurement sphere.
+     *
      * @return Matrix3 The 3x3 correction matrix.
      */
     Matrix3 getSoftIronCorrection() const;
 
     /**
      * @brief Applies the current calibration to a raw measurement.
+     *
+     * Formula: Calibrated = SoftIronMatrix * (Raw - HardIronOffset)
      *
      * @param rawMagData Raw magnetometer reading.
      * @return Vector3 Calibrated magnetometer reading.
@@ -94,18 +116,25 @@ public:
     static void generateEllipsoidalSamples(TContainer& samples, const Matrix3& softIron, const Vector3& hardIron, T noiseStdDev);
 
 private:
-    T lambda;
-    Vector9 theta;
-    Matrix9 P;
+    // RLS filter parameters
+    T lambda;      ///< Forgetting factor (0 < lambda <= 1)
+    Vector9 theta; ///< Parameter vector representing the quadric surface coefficients
+    Matrix9 P;     ///< Inverse correlation matrix
 
+    // Field strength estimation
     T fieldStrengthSmoothing;
     T estimatedFieldStrengthSquared;
 
+    // Stored calibration parameters (derived from theta)
     Vector3 hardIronOffset_;
     Matrix3 softIronCorrection_;
 
     /**
      * @brief Extracts physical calibration parameters from the RLS state vector theta.
+     *
+     * Solves the linear algebra problem to convert the algebraic parameters of the
+     * fitted ellipsoid (theta) into geometric parameters (center and shape matrix).
+     * Performs eigen-decomposition to ensure the resulting soft iron matrix is valid.
      */
     void updateCalibrationParameters();
 };
@@ -123,6 +152,7 @@ RlsMagnetometerCalibration<T>::RlsMagnetometerCalibration(T forgettingFactor, T 
     theta(1) = T(1.0); // W22
     theta(8) = -estimatedFieldStrengthSquared; // D
 
+    // Initialize P matrix with large values to indicate high initial uncertainty
     P = Matrix9::Identity() * initialCovariance;
 
     hardIronOffset_.setZero();
@@ -278,6 +308,7 @@ void RlsMagnetometerCalibration<T>::generateEllipsoidalSamples(TContainer& sampl
     std::normal_distribution<T> distNoise(T(0.0), safeStdDev);
 
     for (size_t i = 0; i < samples.size(); ++i) {
+        // Generate random points on a unit sphere using spherical coordinates
         T u = distUnitSphere(rng);
         T v = distUnitSphere(rng);
         T thetaAzimuth = T(2.0 * static_cast<float>(std::numbers::pi_v<double>)) * u;
@@ -288,8 +319,10 @@ void RlsMagnetometerCalibration<T>::generateEllipsoidalSamples(TContainer& sampl
         T zUnit = cos(phiPolar);
         Vector3 unitSpherePoint(xUnit, yUnit, zUnit);
 
+        // Apply distortions to simulate raw sensor data
         Vector3 distortedMag = softIron * unitSpherePoint + hardIron;
 
+        // Add Gaussian noise if requested
         if (noiseStdDev > 0.0) {
             distortedMag.x() += distNoise(rng);
             distortedMag.y() += distNoise(rng);
@@ -299,6 +332,7 @@ void RlsMagnetometerCalibration<T>::generateEllipsoidalSamples(TContainer& sampl
     }
 }
 
+// Instantiate common template specializations
 using RlsMagnetometerCalibratorF = RlsMagnetometerCalibration<float>;
 using RlsMagnetometerCalibratorD = RlsMagnetometerCalibration<double>;
 
