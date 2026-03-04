@@ -106,12 +106,6 @@ extern "C" {
 #define LPUART1_GPS_PERIPHERAL LPUART1
 /* Definition of the clock source frequency */
 #define LPUART1_GPS_CLOCK_SOURCE 80000000UL
-/* LPUART1_GPS interrupt vector ID (number). */
-#define LPUART1_GPS_SERIAL_RX_TX_IRQN LPUART1_IRQn
-/* LPUART1_GPS interrupt vector priority. */
-#define LPUART1_GPS_SERIAL_RX_TX_IRQ_PRIORITY 4
-/* LPUART1_GPS interrupt handler identifier. */
-#define LPUART1_GPS_SERIAL_RX_TX_IRQHANDLER LPUART1_IRQHandler
 /* Definition of peripheral ID */
 #define LPUART4_IBUS_PERIPHERAL LPUART4
 /* Definition of the clock source frequency */

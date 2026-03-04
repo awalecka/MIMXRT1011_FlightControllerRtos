@@ -1,6 +1,6 @@
 /**
  * @file gps_handler.h
- * @brief Header for the GPS UART parsing task.
+ * @brief Header for the GPS UART parsing task using DMA.
  */
 
 #ifndef GPS_HANDLER_H
@@ -13,15 +13,14 @@ extern "C" {
 #endif
 
 /**
- * @brief Callback function to be registered with the board's UART1 RX ISR.
- *        Called every time a new byte is received from the GPS.
- * @param byte the received character.
+ * @brief Idle line callback from the GPS LPUART ISR.
+ * Triggers processing in the GPS handler task.
  */
-void gps_rx_callback(uint8_t byte);
+void gps_idle_interrupt_callback(void);
 
 /**
  * @brief FreeRTOS task that processes the incoming NMEA stream
- *        and updates the global GPS data queue.
+ * from the DMA buffer and updates the global GPS data queue.
  * @param pvParameters Task parameters (unused).
  */
 void gpsTask(void *pvParameters);

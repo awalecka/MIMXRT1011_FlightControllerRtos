@@ -68,11 +68,6 @@ static StaticQueue_t xMagQueueControlBlock;
 static uint8_t ucMagQueueStorageArea[MAG_QUEUE_LENGTH * MAG_QUEUE_ITEM_SIZE];
 
 // GPS Queues
-#define GPS_RX_QUEUE_LENGTH 128
-#define GPS_RX_QUEUE_ITEM_SIZE sizeof(uint8_t)
-static StaticQueue_t xGpsRxQueueControlBlock;
-static uint8_t ucGpsRxQueueStorageArea[GPS_RX_QUEUE_LENGTH * GPS_RX_QUEUE_ITEM_SIZE];
-
 #define GPS_DATA_QUEUE_LENGTH 1
 #define GPS_DATA_QUEUE_ITEM_SIZE sizeof(firmware::sensors::GpsData)
 static StaticQueue_t xGpsDataQueueControlBlock;

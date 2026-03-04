@@ -118,7 +118,6 @@ instance:
     - interrupt_table:
       - 0: []
       - 1: []
-      - 2: []
     - interrupts:
       - 0:
         - channelId: 'int_0'
@@ -687,7 +686,7 @@ static void LPUART3_TELE_init(void) {
 instance:
 - name: 'LPUART1_GPS'
 - type: 'lpuart'
-- mode: 'interrupts'
+- mode: 'polling'
 - custom_name_enabled: 'true'
 - type_id: 'lpuart_2.8.1'
 - functional_group: 'BOARD_InitPeripherals'
@@ -716,16 +715,6 @@ instance:
       - rxIdleConfig: 'kLPUART_IdleCharacter1'
       - enableTx: 'false'
       - enableRx: 'true'
-  - interruptsCfg:
-    - interrupts: 'kLPUART_RxDataRegFullInterruptEnable'
-    - interrupt_vectors:
-      - enable_rx_tx_irq: 'true'
-      - interrupt_rx_tx:
-        - IRQn: 'LPUART1_IRQn'
-        - enable_interrrupt: 'enabled'
-        - enable_priority: 'true'
-        - priority: '4'
-        - enable_custom_name: 'false'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 const lpuart_config_t LPUART1_GPS_config = {
@@ -748,11 +737,6 @@ const lpuart_config_t LPUART1_GPS_config = {
 
 static void LPUART1_GPS_init(void) {
   LPUART_Init(LPUART1_GPS_PERIPHERAL, &LPUART1_GPS_config, LPUART1_GPS_CLOCK_SOURCE);
-  LPUART_EnableInterrupts(LPUART1_GPS_PERIPHERAL, kLPUART_RxDataRegFullInterruptEnable);
-  /* Interrupt vector LPUART1_IRQn priority settings in the NVIC. */
-  NVIC_SetPriority(LPUART1_GPS_SERIAL_RX_TX_IRQN, LPUART1_GPS_SERIAL_RX_TX_IRQ_PRIORITY);
-  /* Enable interrupt LPUART1_GPS_SERIAL_RX_TX_IRQN request in the NVIC */
-  EnableIRQ(LPUART1_GPS_SERIAL_RX_TX_IRQN);
 }
 
 /***********************************************************************************************************************

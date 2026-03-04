@@ -35,7 +35,7 @@
     GPIO_PinWrite(BOARD_USER_LED_GPIO, BOARD_USER_LED_GPIO_PIN, \
                   0x1 ^ GPIO_PinRead(BOARD_USER_LED_GPIO, BOARD_USER_LED_GPIO_PIN)) /*!< Toggle target USER_LED */
 
-/*! @brief The USER_LED used for board */
+/*! @brief The USER_TIMING_GPIO used for board */
 #define TIMING_GPIO_ON  (0U)
 #define TIMING_GPIO_OFF (1U)
 #ifndef BOARD_USER_TIMING_GPIO
@@ -61,6 +61,15 @@
 #define IBUS_DMA_CHANNEL        0U
 #define IBUS_DMA_SOURCE         kDmaRequestMuxLPUART4Rx
 
+// GPS Configuration Constants
+#define GPS_DMA_BUFFER_SIZE     256U
+#define GPS_LPUART_INSTANCE     LPUART1
+#define GPS_LPUART_IRQn         LPUART1_IRQn
+#define GPS_DMA_BASE            DMA0
+#define GPS_DMAMUX_BASE         DMAMUX
+#define GPS_DMA_CHANNEL         1U
+#define GPS_DMA_SOURCE          kDmaRequestMuxLPUART1Rx
+
 /*! @brief The flash size */
 #define BOARD_FLASH_SIZE (0x800000U)
 
@@ -73,13 +82,15 @@ extern "C" {
  ******************************************************************************/
 void BOARD_ConfigMPU(void);
 
-typedef void (*ibus_rx_idle_callback_t)(void);
-void BOARD_InitIBUS(ibus_rx_idle_callback_t callback);
+typedef void (*uart_idle_cb_t)(void);
 
-typedef void (*uart_rx_callback_t)(uint8_t data);
-void BOARD_InitGPS(uart_rx_callback_t callback);
+/**
+ * @brief Initializes a UART peripheral with eDMA for circular reception and enables the Idle Line Interrupt.
+ */
+void boardInitUartDma(LPUART_Type *base, uint32_t baudRate, uint8_t *rxBuffer, size_t rxBufferSize, uart_idle_cb_t idleCallback, DMA_Type *dmaBase, uint32_t dmaChannel, DMAMUX_Type *dmamuxBase, uint32_t dmaSource, IRQn_Type irqn);
 
-extern uint8_t g_dmaRxBuffer[IBUS_DMA_BUFFER_SIZE];
+extern uint8_t g_ibusDmaRxBuffer[IBUS_DMA_BUFFER_SIZE];
+extern uint8_t g_gpsDmaRxBuffer[GPS_DMA_BUFFER_SIZE];
 
 #if defined(__cplusplus)
 }

@@ -14,7 +14,7 @@
  */
 static constexpr float degToRad(float deg)
 {
-    return deg * static_cast<float>(std::numbers::pi_v<double>) / 180.0f;
+    return deg * std::numbers::pi_v<float> / 180.0f;
 }
 
 /* --------------------------------------------------------------------------

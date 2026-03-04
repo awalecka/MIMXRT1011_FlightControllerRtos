@@ -24,11 +24,15 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-    // Initialize custom hardware for IBUS via BSP
-    BOARD_InitIBUS(ibus_idle_interrupt_callback);
-    
-    // Initialize GPS UART via BSP
-    BOARD_InitGPS(gps_rx_callback);
+    // Initialize custom hardware for IBUS via generic DMA UART setup
+	boardInitUartDma(IBUS_LPUART_INSTANCE, 115200, g_ibusDmaRxBuffer, IBUS_DMA_BUFFER_SIZE,
+					 ibus_idle_interrupt_callback, IBUS_DMA_BASE, IBUS_DMA_CHANNEL,
+					 IBUS_DMAMUX_BASE, IBUS_DMA_SOURCE, IBUS_LPUART_IRQn);
+
+	// Initialize GPS UART via generic DMA UART setup
+	boardInitUartDma(GPS_LPUART_INSTANCE, 9600, g_gpsDmaRxBuffer, GPS_DMA_BUFFER_SIZE,
+			         gps_idle_interrupt_callback, GPS_DMA_BASE, GPS_DMA_CHANNEL,
+					 GPS_DMAMUX_BASE, GPS_DMA_SOURCE, GPS_LPUART_IRQn);
 
     // Create Queues
     g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
@@ -36,12 +40,11 @@ int main(void) {
     g_state_change_request_queue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, STATE_CHANGE_QUEUE_ITEM_SIZE, ucStateChangeQueueStorageArea, &xStateChangeQueueControlBlock);
     g_imu_data_queue = xQueueCreateStatic(IMU_QUEUE_LENGTH, IMU_QUEUE_ITEM_SIZE, ucImuQueueStorageArea, &xImuQueueControlBlock);
     g_mag_data_queue = xQueueCreateStatic(MAG_QUEUE_LENGTH, MAG_QUEUE_ITEM_SIZE, ucMagQueueStorageArea, &xMagQueueControlBlock);
-    g_gps_rx_queue = xQueueCreateStatic(GPS_RX_QUEUE_LENGTH, GPS_RX_QUEUE_ITEM_SIZE, ucGpsRxQueueStorageArea, &xGpsRxQueueControlBlock);
     g_gps_data_queue = xQueueCreateStatic(GPS_DATA_QUEUE_LENGTH, GPS_DATA_QUEUE_ITEM_SIZE, ucGpsDataQueueStorageArea, &xGpsDataQueueControlBlock);
 
-    if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL || g_imu_data_queue == NULL || g_mag_data_queue == NULL || g_gps_rx_queue == NULL || g_gps_data_queue == NULL) {
-        while(1);
-    }
+	if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL || g_imu_data_queue == NULL || g_mag_data_queue == NULL || g_gps_data_queue == NULL) {
+		while(1);
+	}
 
     // Create the State Manager Task
     g_state_manager_task_handle = xTaskCreateStatic(stateManagerTask, "StateMgrTask", STATE_MGR_STACK_SIZE, NULL, STATE_MANAGER_TASK_PRIORITY, xStateMgrStack, &xStateMgrTaskControlBlock);

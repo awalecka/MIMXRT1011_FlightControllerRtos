@@ -7,6 +7,7 @@
 #include "flight_controller.h"
 #include "fsl_lpuart.h"
 #include "board.h"
+#include "fsl_cache.h"
 
 using namespace firmware::drivers;
 using namespace firmware::protocols::ibus;
@@ -40,15 +41,17 @@ void commandHandlerTask(void* pvParameters) {
 }
 
 static void processReceivedData(void) {
-    // Robust Index Calculation (AV Rule 96 Compliance):
-    // Strictly avoid pointer arithmetic (ptrA - ptrB) to calculate the index.
+
+    DCACHE_InvalidateByRange(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_ibusDmaRxBuffer)), IBUS_DMA_BUFFER_SIZE);
+
+	// Strictly avoid pointer arithmetic (ptrA - ptrB) to calculate the index.
     // Instead, cast addresses to `uintptr_t` and perform integer arithmetic.
 
     // DADDR is a uint32_t register value, so we use static_cast (integer to integer)
     uintptr_t dmaAddr = static_cast<uintptr_t>(IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR);
 
-    // g_dmaRxBuffer is a pointer, so we use reinterpret_cast (pointer to integer)
-    uintptr_t baseAddr = reinterpret_cast<uintptr_t>(g_dmaRxBuffer);
+    // g_ibusDmaRxBuffer is a pointer, so we use reinterpret_cast (pointer to integer)
+    uintptr_t baseAddr = reinterpret_cast<uintptr_t>(g_ibusDmaRxBuffer);
 
     // Calculate index based on integer offset
     size_t writeIndex = (static_cast<size_t>(dmaAddr - baseAddr)) % IBUS_DMA_BUFFER_SIZE;
@@ -56,7 +59,7 @@ static void processReceivedData(void) {
     while (s_readIndex != writeIndex) {
 
         // Array Access via Subscript (Compliant with AV Rule 96)
-        uint8_t byte = g_dmaRxBuffer[s_readIndex];
+        uint8_t byte = g_ibusDmaRxBuffer[s_readIndex];
 
         // --- Protocol State Machine ---
         static uint8_t s_assemblyBuffer[PACKET_LENGTH];

@@ -657,7 +657,6 @@
                         <array name="interrupt_table">
                            <struct name="0"/>
                            <struct name="1"/>
-                           <struct name="2"/>
                         </array>
                         <array name="interrupts">
                            <struct name="0">
@@ -1093,7 +1092,7 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="LPUART1_GPS" uuid="ae7f6066-edbb-4a33-8103-14553b3d83f5" type="lpuart" type_id="lpuart_2.8.1" mode="interrupts" peripheral="LPUART1" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
+                  <instance name="LPUART1_GPS" uuid="ae7f6066-edbb-4a33-8103-14553b3d83f5" type="lpuart" type_id="lpuart_2.8.1" mode="polling" peripheral="LPUART1" enabled="true" comment="" custom_name_enabled="true" editing_lock="false">
                      <config_set name="lpuartConfig_t">
                         <struct name="lpuartConfig">
                            <setting name="clockSource" value="LpuartClock"/>
@@ -1117,23 +1116,6 @@
                            <setting name="rxIdleConfig" value="kLPUART_IdleCharacter1"/>
                            <setting name="enableTx" value="false"/>
                            <setting name="enableRx" value="true"/>
-                        </struct>
-                     </config_set>
-                     <config_set name="interruptsCfg">
-                        <set name="interrupts">
-                           <selected>
-                              <id>kLPUART_RxDataRegFullInterruptEnable</id>
-                           </selected>
-                        </set>
-                        <struct name="interrupt_vectors">
-                           <setting name="enable_rx_tx_irq" value="true"/>
-                           <struct name="interrupt_rx_tx">
-                              <setting name="IRQn" value="LPUART1_IRQn"/>
-                              <setting name="enable_interrrupt" value="enabled"/>
-                              <setting name="enable_priority" value="true"/>
-                              <setting name="priority" value="4"/>
-                              <setting name="enable_custom_name" value="false"/>
-                           </struct>
                         </struct>
                      </config_set>
                   </instance>
