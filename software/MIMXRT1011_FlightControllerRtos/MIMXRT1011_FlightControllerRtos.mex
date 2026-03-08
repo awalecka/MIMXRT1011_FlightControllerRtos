@@ -303,6 +303,7 @@
                   <clock_output id="SPDIF0_CLK_ROOT.outFreq" value="30 MHz" locked="false" accuracy=""/>
                   <clock_output id="TRACE_CLK_ROOT.outFreq" value="132 MHz" locked="false" accuracy=""/>
                   <clock_output id="UART_CLK_ROOT.outFreq" value="80 MHz" locked="false" accuracy=""/>
+                  <clock_output id="USBPHY_CLK.outFreq" value="480 MHz" locked="false" accuracy=""/>
                </clock_outputs>
                <clock_settings>
                   <setting id="CCM.ADC_ACLK_PODF.scale" value="12" locked="true"/>
@@ -336,6 +337,8 @@
                   <setting id="CCM_ANALOG.PLL3_PFD3_DIV.scale" value="18" locked="true"/>
                   <setting id="CCM_ANALOG.PLL3_PFD3_MUL.scale" value="18" locked="true"/>
                   <setting id="CCM_ANALOG.PLL6_BYPASS.sel" value="CCM_ANALOG.PLL6" locked="false"/>
+                  <setting id="CCM_ANALOG_PLL_USB1_EN_USB_CLKS_CFG" value="Enabled" locked="false"/>
+                  <setting id="CCM_ANALOG_PLL_USB1_EN_USB_CLKS_OUT_CFG" value="Enabled" locked="false"/>
                   <setting id="CCM_ANALOG_PLL_USB1_POWER_CFG" value="Yes" locked="false"/>
                </clock_settings>
                <called_from_default_init>true</called_from_default_init>
@@ -696,12 +699,12 @@
                         <setting name="enableDeinitPinsFnCustomName" value="false"/>
                         <setting name="deinitPinFunctionCustomID" value="LPI2C1_DeinitPins"/>
                         <struct name="edma_channel">
-                           <setting name="uid" value="1766284915321"/>
+                           <setting name="uid" value="1772939936977"/>
                            <setting name="eDMAn" value="4"/>
                            <setting name="eDMA_source" value="kDmaRequestMuxLPI2C1"/>
                         </struct>
                         <struct name="edma_channel_tx">
-                           <setting name="uid" value="1766284915324"/>
+                           <setting name="uid" value="1772939936978"/>
                            <setting name="eDMAn" value="5"/>
                         </struct>
                      </config_set>
@@ -1144,6 +1147,11 @@
                            <setting name="enableTx" value="false"/>
                            <setting name="enableRx" value="false"/>
                         </struct>
+                     </config_set>
+                  </instance>
+                  <instance name="MPU" uuid="cb64d2db-1110-4973-b132-f1c489573f1f" type="mpu_utility" type_id="mpu_utility" mode="MPU" peripheral="MPU" enabled="true" comment="" custom_name_enabled="false" editing_lock="false">
+                     <config_set name="mpu_init">
+                        <setting name="mpuInit" value="disabled"/>
                      </config_set>
                   </instance>
                </instances>

@@ -70,6 +70,11 @@
 #define GPS_DMA_CHANNEL         1U
 #define GPS_DMA_SOURCE          kDmaRequestMuxLPUART1Rx
 
+/* USB PHY configuration */
+#define BOARD_USB_PHY_D_CAL     (0x0CU)
+#define BOARD_USB_PHY_TXCAL45DP (0x06U)
+#define BOARD_USB_PHY_TXCAL45DM (0x06U)
+
 /*! @brief The flash size */
 #define BOARD_FLASH_SIZE (0x800000U)
 

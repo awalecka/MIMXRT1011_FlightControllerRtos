@@ -65,7 +65,7 @@ void BOARD_InitBootClocks(void);
 #define BOARD_BOOTCLOCKRUN_SPDIF0_EXTCLK_OUT          0UL            /* Clock consumers of SPDIF0_EXTCLK_OUT output : SPDIF */
 #define BOARD_BOOTCLOCKRUN_TRACE_CLK_ROOT             132000000UL    /* Clock consumers of TRACE_CLK_ROOT output : ARM */
 #define BOARD_BOOTCLOCKRUN_UART_CLK_ROOT              80000000UL     /* Clock consumers of UART_CLK_ROOT output : LPUART1, LPUART2, LPUART3, LPUART4 */
-#define BOARD_BOOTCLOCKRUN_USBPHY_CLK                 0UL            /* Clock consumers of USBPHY_CLK output : TEMPMON, USB */
+#define BOARD_BOOTCLOCKRUN_USBPHY_CLK                 480000000UL    /* Clock consumers of USBPHY_CLK output : TEMPMON, USB */
 
 /*! @brief Usb1 PLL set for BOARD_BootClockRUN configuration.
  */

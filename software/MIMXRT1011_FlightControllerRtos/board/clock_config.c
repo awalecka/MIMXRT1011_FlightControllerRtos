@@ -74,6 +74,7 @@ outputs:
 - {id: SPDIF0_CLK_ROOT.outFreq, value: 30 MHz}
 - {id: TRACE_CLK_ROOT.outFreq, value: 132 MHz}
 - {id: UART_CLK_ROOT.outFreq, value: 80 MHz}
+- {id: USBPHY_CLK.outFreq, value: 480 MHz}
 settings:
 - {id: CCM.ADC_ACLK_PODF.scale, value: '12', locked: true}
 - {id: CCM.AHB_PODF.scale, value: '1', locked: true}
@@ -106,6 +107,8 @@ settings:
 - {id: CCM_ANALOG.PLL3_PFD3_DIV.scale, value: '18', locked: true}
 - {id: CCM_ANALOG.PLL3_PFD3_MUL.scale, value: '18', locked: true}
 - {id: CCM_ANALOG.PLL6_BYPASS.sel, value: CCM_ANALOG.PLL6}
+- {id: CCM_ANALOG_PLL_USB1_EN_USB_CLKS_CFG, value: Enabled}
+- {id: CCM_ANALOG_PLL_USB1_EN_USB_CLKS_OUT_CFG, value: Enabled}
 - {id: CCM_ANALOG_PLL_USB1_POWER_CFG, value: 'Yes'}
 sources:
 - {id: XTALOSC24M.RTC_OSC.outFreq, value: 32.768 kHz, enabled: true}
@@ -264,8 +267,6 @@ void BOARD_BootClockRUN(void)
     CLOCK_InitUsb1Pfd(kCLOCK_Pfd2, 17);
     /* Init Usb1 pfd3. */
     CLOCK_InitUsb1Pfd(kCLOCK_Pfd3, 18);
-    /* Disable Usb1 PLL output for USBPHY1. */
-    CCM_ANALOG->PLL_USB1 &= ~CCM_ANALOG_PLL_USB1_EN_USB_CLKS_MASK;
 #endif
     /* Set periph clock source to use the USB1 PLL output (PLL3_SW_CLK) temporarily. */
     /* Set Pll3 SW clock source to use the USB1 PLL output. */

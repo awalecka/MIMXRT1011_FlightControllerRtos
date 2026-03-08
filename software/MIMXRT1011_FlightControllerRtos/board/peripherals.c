@@ -53,6 +53,29 @@ component:
  * BOARD_InitPeripherals functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
+ * MPU initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'MPU'
+- type: 'mpu_utility'
+- mode: 'MPU'
+- custom_name_enabled: 'false'
+- type_id: 'mpu_utility'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'MPU'
+- config_sets:
+  - mpu_init:
+    - mpuInit: 'disabled'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+
+/* Empty initialization function (commented out)
+static void MPU_init(void) {
+} */
+
+/***********************************************************************************************************************
  * DMA0 initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -169,11 +192,11 @@ instance:
     - enableDeinitPinsFnCustomName: 'false'
     - deinitPinFunctionCustomID: 'LPI2C1_DeinitPins'
     - edma_channel:
-      - uid: '1766284915321'
+      - uid: '1772939936977'
       - eDMAn: '4'
       - eDMA_source: 'kDmaRequestMuxLPI2C1'
     - edma_channel_tx:
-      - uid: '1766284915324'
+      - uid: '1772939936978'
       - eDMAn: '5'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -818,6 +841,7 @@ static void BOARD_InitPeripherals_CommonPostInit(void)
 void BOARD_InitPeripherals(void)
 {
   /* Global initialization */
+  ARM_MPU_Disable();
   DMAMUX_Init(DMA0_DMAMUX_BASEADDR);
   EDMA_Init(DMA0_DMA_BASEADDR, &DMA0_config);
 
