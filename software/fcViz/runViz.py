@@ -106,7 +106,7 @@ class TelemetryParser(QtCore.QObject):
     commands_received = QtCore.pyqtSignal(int, int, int, int)
     mag_received = QtCore.pyqtSignal(float, float, float)
     cal_status_received = QtCore.pyqtSignal(int, float)
-    system_status_received = QtCore.pyqtSignal(int, int)
+    system_status_received = QtCore.pyqtSignal(int, int, int)
     connection_status = QtCore.pyqtSignal(bool)
 
     def __init__(self, port, baudrate=57600):
@@ -182,7 +182,8 @@ class TelemetryParser(QtCore.QObject):
             elif msg_type == LOG_TYPE_CAL_STATUS:
                 self.cal_status_received.emit(*struct.unpack('<Bf', data))
             elif msg_type == LOG_TYPE_SYSTEM_STATUS:
-                self.system_status_received.emit(*struct.unpack('<BBH', data)[0:2])
+                # Removed [0:2] to emit all three fields: (state, reserved, cpuLoad)
+                self.system_status_received.emit(*struct.unpack('<BBH', data))
         except Exception:
             pass
 
@@ -222,14 +223,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.refresh_ports()
         self.btn_conn = QtWidgets.QPushButton("Connect")
         self.btn_conn.clicked.connect(self.toggle_conn)
+
         self.lbl_state = QtWidgets.QLabel("STATE: DISCONNECTED")
         self.style_label(self.lbl_state, "gray")
+
+        # Add CPU Load Label
+        self.lbl_cpu = QtWidgets.QLabel("CPU: ---%")
+        self.lbl_cpu.setStyleSheet(
+            "font-weight: bold; color: gray; border: 2px solid gray; padding: 5px; border-radius: 4px;")
 
         bar.addWidget(QtWidgets.QLabel("Port:"))
         bar.addWidget(self.combo)
         bar.addWidget(self.btn_conn)
         bar.addSpacing(20)
         bar.addWidget(self.lbl_state)
+        bar.addSpacing(10)
+        bar.addWidget(self.lbl_cpu)  # Add to the top bar
         bar.addStretch()
         layout.addLayout(bar)
 
@@ -475,12 +484,18 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.mag_points_raw) % 5 == 0:
             self.scatter_raw.setData(pos=np.array(self.mag_points_raw))
 
-    def on_status(self, state, cpu):
+    def on_status(self, state, reserved, cpu):
         name = STATE_MAP.get(state, f"UNK({state})")
         color_map = {0: "orange", 1: "#00AA00", 2: "red", 3: "magenta", 4: "#00AAFF"}
         color = color_map.get(state, "gray")
 
         self.style_label(self.lbl_state, color, name)
+
+        # Update CPU Label with dynamic coloring
+        cpu_color = "red" if cpu < 60 else "orange" if cpu < 85 else "lime"
+        self.lbl_cpu.setText(f"CPU IDLE: {cpu}%")
+        self.lbl_cpu.setStyleSheet(
+            f"font-weight: bold; color: {cpu_color}; border: 2px solid {cpu_color}; padding: 5px; border-radius: 4px;")
 
         # Update the visual circle on Cal tab
         if hasattr(self, 'lbl_cal_state'):

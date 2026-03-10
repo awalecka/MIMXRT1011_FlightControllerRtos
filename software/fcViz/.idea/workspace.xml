@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="088a3994-3603-4cc7-944c-dbf7dd088c2b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_mekf.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/src/gnc/attitude_ukf.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_mekf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_mekf.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_ukf.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../attitude_estimator/tests/test_attitude_ukf.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="088a3994-3603-4cc7-944c-dbf7dd088c2b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -34,24 +27,27 @@
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="383EX5UELk9Stt3eE6PwAE0tPqp" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.runViz.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Projects/flight_controller/software/fcViz&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.runViz.executor": "Run",
+    "Python.simvar_sanity_check.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Projects/flight_controller/software/fcViz",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-af26db0dccfe-c546a90a8094-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-242.26775.22" />
+        <option value="bundled-python-sdk-2653e85de345-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.31033.139" />
       </set>
     </attachedChunks>
   </component>

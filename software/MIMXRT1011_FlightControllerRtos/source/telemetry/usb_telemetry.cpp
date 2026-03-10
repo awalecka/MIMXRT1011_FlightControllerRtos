@@ -69,7 +69,6 @@ void UsbTelemetry::init() {
     USB_DeviceClassInit(CONTROLLER_ID, &s_cdcAcmConfigList, &s_cdcVcom.deviceHandle);
     s_cdcVcom.cdcAcmHandle = s_cdcAcmConfigList.config->classHandle;
 
-    // Fix: Assign the macro to a local array before indexing, matching the SDK pattern
     const IRQn_Type usbDeviceEhciIrqs[] = USBHS_IRQS;
     uint8_t irqNumber = usbDeviceEhciIrqs[CONTROLLER_ID - kUSB_ControllerEhci0];
 
