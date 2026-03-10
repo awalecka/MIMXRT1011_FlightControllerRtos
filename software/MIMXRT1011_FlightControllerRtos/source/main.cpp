@@ -1,70 +1,96 @@
-/**
- * @file    main.cpp
- * @brief   Application entry point.
- */
-
+#include "board.h"
+#include "peripherals.h"
 #include "pin_mux.h"
-#include "command_handler.h"
-#include "logging_task.h"
-#include "heartbeat_task.h"
-#include "flight_controller.h"
-#include "gps_handler.h"
-#include "global.h"
+#include "controllers/flight_controller.h"
+#include "radio/command_handler.h"
+#include "system/logging_task.h"
+#include "system/state_manager.h"
+#include "system/heartbeat_task.h"
+#include "io/gps_handler.h"
+#include "telemetry/usb_telemetry.h"
 
-/**
- * @brief Main Application Entry Point.
- * Initializes the board hardware, sets up FreeRTOS queues and tasks, and starts the scheduler.
- * @return Does not return.
- */
+// --- Static Queue Allocations ---
+static constexpr size_t CONTROLS_QUEUE_LENGTH = 30;
+static constexpr size_t COMMAND_QUEUE_LENGTH = 1;
+static constexpr size_t STATE_CHANGE_QUEUE_LENGTH = 2;
+static constexpr size_t IMU_QUEUE_LENGTH = 1;
+static constexpr size_t MAG_QUEUE_LENGTH = 1;
+static constexpr size_t GPS_DATA_QUEUE_LENGTH = 1;
+
+static StaticQueue_t s_controlsQueueControlBlock;
+static uint8_t s_controlsQueueStorage[CONTROLS_QUEUE_LENGTH * sizeof(LogMessage_t)];
+static QueueHandle_t s_controlsQueue;
+
+static StaticQueue_t s_commandQueueControlBlock;
+static uint8_t s_commandQueueStorage[COMMAND_QUEUE_LENGTH * sizeof(RC_Channels_t)];
+static QueueHandle_t s_commandQueue;
+
+static StaticQueue_t s_stateChangeQueueControlBlock;
+static uint8_t s_stateChangeQueueStorage[STATE_CHANGE_QUEUE_LENGTH * sizeof(FlightState_t)];
+static QueueHandle_t s_stateChangeQueue;
+
+static StaticQueue_t s_imuQueueControlBlock;
+static uint8_t s_imuQueueStorage[IMU_QUEUE_LENGTH * sizeof(FlightController::ImuData)];
+static QueueHandle_t s_imuQueue;
+
+static StaticQueue_t s_magQueueControlBlock;
+static uint8_t s_magQueueStorage[MAG_QUEUE_LENGTH * sizeof(FlightController::MagData)];
+static QueueHandle_t s_magQueue;
+
+static StaticQueue_t s_gpsDataQueueControlBlock;
+static uint8_t s_gpsDataQueueStorage[GPS_DATA_QUEUE_LENGTH * sizeof(firmware::sensors::GpsData)];
+static QueueHandle_t s_gpsDataQueue;
+
+// --- Shared System State ---
+static volatile FlightState_t s_flightState = STATE_BOOT;
+static volatile TickType_t s_heartbeatFrequency = pdMS_TO_TICKS(500);
+
 int main(void) {
-
-    /* Init board hardware. */
     BOARD_ConfigMPU();
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-    // Initialize custom hardware for IBUS via generic DMA UART setup
-	boardInitUartDma(IBUS_LPUART_INSTANCE, 115200, g_ibusDmaRxBuffer, IBUS_DMA_BUFFER_SIZE,
-					 ibus_idle_interrupt_callback, IBUS_DMA_BASE, IBUS_DMA_CHANNEL,
-					 IBUS_DMAMUX_BASE, IBUS_DMA_SOURCE, IBUS_LPUART_IRQn);
+    boardInitUartDma(IBUS_LPUART_INSTANCE, 115200, g_ibusDmaRxBuffer, IBUS_DMA_BUFFER_SIZE,
+                     ibus_idle_interrupt_callback, IBUS_DMA_BASE, IBUS_DMA_CHANNEL,
+                     IBUS_DMAMUX_BASE, IBUS_DMA_SOURCE, IBUS_LPUART_IRQn);
 
-	// Initialize GPS UART via generic DMA UART setup
-	boardInitUartDma(GPS_LPUART_INSTANCE, 9600, g_gpsDmaRxBuffer, GPS_DMA_BUFFER_SIZE,
-			         gps_idle_interrupt_callback, GPS_DMA_BASE, GPS_DMA_CHANNEL,
-					 GPS_DMAMUX_BASE, GPS_DMA_SOURCE, GPS_LPUART_IRQn);
+    boardInitUartDma(GPS_LPUART_INSTANCE, 9600, g_gpsDmaRxBuffer, GPS_DMA_BUFFER_SIZE,
+                     gps_idle_interrupt_callback, GPS_DMA_BASE, GPS_DMA_CHANNEL,
+                     GPS_DMAMUX_BASE, GPS_DMA_SOURCE, GPS_LPUART_IRQn);
 
-    // Create Queues
-    g_controls_data_queue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, CONTROLS_QUEUE_ITEM_SIZE, ucControlsQueueStorageArea, &xControlsQueueControlBlock);
-    g_command_data_queue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, COMMAND_QUEUE_ITEM_SIZE, ucCommandQueueStorageArea, &xCommandQueueControlBlock);
-    g_state_change_request_queue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, STATE_CHANGE_QUEUE_ITEM_SIZE, ucStateChangeQueueStorageArea, &xStateChangeQueueControlBlock);
-    g_imu_data_queue = xQueueCreateStatic(IMU_QUEUE_LENGTH, IMU_QUEUE_ITEM_SIZE, ucImuQueueStorageArea, &xImuQueueControlBlock);
-    g_mag_data_queue = xQueueCreateStatic(MAG_QUEUE_LENGTH, MAG_QUEUE_ITEM_SIZE, ucMagQueueStorageArea, &xMagQueueControlBlock);
-    g_gps_data_queue = xQueueCreateStatic(GPS_DATA_QUEUE_LENGTH, GPS_DATA_QUEUE_ITEM_SIZE, ucGpsDataQueueStorageArea, &xGpsDataQueueControlBlock);
+    // Create the queues
+    s_controlsQueue = xQueueCreateStatic(CONTROLS_QUEUE_LENGTH, sizeof(LogMessage_t), s_controlsQueueStorage, &s_controlsQueueControlBlock);
+    s_commandQueue = xQueueCreateStatic(COMMAND_QUEUE_LENGTH, sizeof(RC_Channels_t), s_commandQueueStorage, &s_commandQueueControlBlock);
+    s_stateChangeQueue = xQueueCreateStatic(STATE_CHANGE_QUEUE_LENGTH, sizeof(FlightState_t), s_stateChangeQueueStorage, &s_stateChangeQueueControlBlock);
+    s_imuQueue = xQueueCreateStatic(IMU_QUEUE_LENGTH, sizeof(FlightController::ImuData), s_imuQueueStorage, &s_imuQueueControlBlock);
+    s_magQueue = xQueueCreateStatic(MAG_QUEUE_LENGTH, sizeof(FlightController::MagData), s_magQueueStorage, &s_magQueueControlBlock);
+    s_gpsDataQueue = xQueueCreateStatic(GPS_DATA_QUEUE_LENGTH, sizeof(firmware::sensors::GpsData), s_gpsDataQueueStorage, &s_gpsDataQueueControlBlock);
 
-	if (g_controls_data_queue == NULL || g_command_data_queue == NULL || g_state_change_request_queue == NULL || g_imu_data_queue == NULL || g_mag_data_queue == NULL || g_gps_data_queue == NULL) {
-		while(1);
-	}
+    // Instantiate Active Objects HERE as block-scope statics so they receive valid queue handles
+    static FlightController s_flightController(FlightController::LOOP_DT_S);
+    static StateManager s_stateManager(s_flightController, s_stateChangeQueue, s_imuQueue, s_magQueue, s_flightState, s_heartbeatFrequency);
+    static CommandHandler s_commandHandler(s_commandQueue);
+    static GpsHandler s_gpsHandler(s_gpsDataQueue);
+    static HeartbeatTask s_heartbeatTask(s_heartbeatFrequency);
+    static LoggingTask s_loggingTask(s_controlsQueue);
 
-    // Create the State Manager Task
-    g_state_manager_task_handle = xTaskCreateStatic(stateManagerTask, "StateMgrTask", STATE_MGR_STACK_SIZE, NULL, STATE_MANAGER_TASK_PRIORITY, xStateMgrStack, &xStateMgrTaskControlBlock);
-    if (g_state_manager_task_handle == NULL) {
-        while(1);
-    }
+    // Inject dependencies into the flight controller
+    s_flightController.injectDependencies(s_gpsDataQueue, s_imuQueue, s_magQueue, s_commandQueue, s_controlsQueue, &s_flightState);
 
-    // Create the Other Tasks
-    g_heartbeat_task_handle = xTaskCreateStatic(heartbeatTask, "HeartbeatTask", HEARTBEAT_STACK_SIZE, NULL, HEARTBEAT_TASK_PRIORITY, s_heartbeatStack, &s_heartbeatTaskControlBlock);
-    g_command_handler_task_handle = xTaskCreateStatic(commandHandlerTask, "CommandTask", CMD_HANDLER_STACK_SIZE, NULL, COMMAND_HANDLER_TASK_PRIORITY, s_cmdHandlerStack, &s_cmdHandlerTaskControlBlock);
-    g_logging_task_handle = xTaskCreateStatic(loggingTask, "LoggingTask", LOGGING_STACK_SIZE, NULL, LOGGING_TASK_PRIORITY, s_loggingStack, &s_loggingTaskControlBlock);
-    s_imuTaskHandle = xTaskCreateStatic(imuTask, "ImuTask", IMU_TASK_STACK_SIZE, NULL, SENSOR_TASK_PRIORITY, s_imuStack, &s_imuTaskTCB);
-    s_magTaskHandle = xTaskCreateStatic(magTask, "MagTask", MAG_TASK_STACK_SIZE, NULL, SENSOR_TASK_PRIORITY, s_magStack, &s_magTaskTCB);
-    g_gps_task_handle = xTaskCreateStatic(gpsTask, "GpsTask", GPS_TASK_STACK_SIZE, NULL, GPS_TASK_PRIORITY, s_gpsStack, &s_gpsTaskControlBlock);
+    // Start all Active Objects
+    s_stateManager.start();
+    s_commandHandler.start();
+    s_gpsHandler.start();
+    s_heartbeatTask.start();
+    s_loggingTask.start();
 
-    // Start Scheduler
+    // Register ISR bounds
+    commandHandlerRegisterIsrTask(s_commandHandler.getTaskHandle());
+    gpsHandlerRegisterIsrTask(s_gpsHandler.getTaskHandle());
+
     vTaskStartScheduler();
 
-    // Should not reach here
-    while(1);
-
+    while(1) {}
     return 0;
 }

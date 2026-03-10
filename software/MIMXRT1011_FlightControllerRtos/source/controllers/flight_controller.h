@@ -82,16 +82,10 @@ static_assert(gnc::AttitudeFilter<ActiveFilter>,
 #include "sensor_system.h"
 #include "telemetry_manager.h"
 #include "settings.h"
-#include "state_manager.h"
 #include "nmea.h"
 
 #include "lsm6dsox_adapter.hpp"
 #include "lis3mdl_adapter.hpp"
-
-// Gesture Thresholds
-#define GESTURE_STICK_LOW   1050
-#define GESTURE_STICK_HIGH  1900
-#define GESTURE_TIME_MS     1000
 
 // ============================================================================
 // FlightController — templated on filter policy
@@ -109,6 +103,16 @@ template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
 class FlightControllerT {
 public:
+	/**
+	 * @brief Injects external dependencies safely into the controller.
+	 */
+	void injectDependencies(QueueHandle_t gpsQueue,
+							QueueHandle_t imuQueue,
+							QueueHandle_t magQueue,
+							QueueHandle_t commandQueue,
+							QueueHandle_t controlsQueue,
+							volatile FlightState_t* flightState);
+
     enum class ControlMode {
         STABILIZED,
         PASS_THROUGH
@@ -178,6 +182,9 @@ public:
     /** @brief Read the latest Magnetometer data into the provided structure. */
     int readMag(MagData& data);
 
+    /** @brief Queries the receiver for any active sustained stick gestures. */
+    Receiver::CommandGesture getActiveGesture();
+
     /**
      * @brief Return the number of hard covariance resets since boot.
      *
@@ -204,6 +211,11 @@ private:
      * @param magData Optional low-rate magnetometer data.
      */
     void estimateAttitude(const ImuData& imuData, const std::optional<MagData>& magData);
+
+    QueueHandle_t m_gpsQueue = nullptr;
+	QueueHandle_t m_imuQueue = nullptr;
+	QueueHandle_t m_magQueue = nullptr;
+	volatile FlightState_t* m_flightState = nullptr;
 
     // -------------------------------------------------------------------------
     // Subsystems
@@ -248,27 +260,5 @@ private:
  * automatically everywhere.
  */
 using FlightController = FlightControllerT<ActiveFilter>;
-
-// ============================================================================
-// Globals
-// ============================================================================
-
-extern TaskHandle_t g_state_manager_task_handle;
-extern TaskHandle_t g_command_handler_task_handle;
-extern TaskHandle_t g_idle_task_handle;
-extern TaskHandle_t g_flight_task_handle;
-extern TaskHandle_t g_calibrate_task_handle;
-extern TaskHandle_t g_logging_task_handle;
-extern TaskHandle_t g_heartbeat_task_handle;
-
-extern QueueHandle_t g_controls_data_queue;
-extern QueueHandle_t g_command_data_queue;
-extern QueueHandle_t g_state_change_request_queue;
-extern QueueHandle_t g_imu_data_queue;
-extern QueueHandle_t g_mag_data_queue;
-
-extern volatile TickType_t    g_heartbeat_frequency;
-extern volatile FlightState_t g_flight_state;
-extern FlightController       g_flightController;
 
 #endif // FLIGHT_CONTROLLER_H

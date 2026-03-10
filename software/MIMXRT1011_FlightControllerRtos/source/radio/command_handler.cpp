@@ -1,117 +1,113 @@
-/**
- * @file command_handler.cpp
- * @brief Implementation of the IBUS command handler using eDMA and Idle Line Interrupts.
- */
-#include "command_handler.h"
-#include "ibus_handler.hpp"
-#include "flight_controller.h"
-#include "fsl_lpuart.h"
+#include "radio/command_handler.h"
 #include "board.h"
 #include "fsl_cache.h"
+#include <span>
+#include <algorithm>
 
-using namespace firmware::drivers;
-using namespace firmware::protocols::ibus;
+static TaskHandle_t s_ibusNotifiedTaskHandle = nullptr;
 
-// --- Static Data ---
-static IbusHandler s_ibusHandler;
-static size_t s_readIndex = 0;
-
-// --- Private Function Prototypes ---
-static void processReceivedData(void);
+void commandHandlerRegisterIsrTask(TaskHandle_t taskHandle) {
+    s_ibusNotifiedTaskHandle = taskHandle;
+}
 
 extern "C" void ibus_idle_interrupt_callback(void) {
-    // Notify task
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (g_command_handler_task_handle != NULL) {
-        vTaskNotifyGiveFromISR(g_command_handler_task_handle, &xHigherPriorityTaskWoken);
+    if (s_ibusNotifiedTaskHandle != nullptr) {
+        vTaskNotifyGiveFromISR(s_ibusNotifiedTaskHandle, &xHigherPriorityTaskWoken);
     }
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-// --- Main Task (C++ Linkage) ---
-
-void commandHandlerTask(void* pvParameters) {
-    (void)pvParameters;
-
-    for (;;) {
-        // Wait for Idle Line (End of Packet)
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        processReceivedData();
-    }
+CommandHandler::CommandHandler(QueueHandle_t commandQueue)
+    : m_commandQueue(commandQueue),
+      m_assemblyIndex(0),
+      m_synced(false),
+      m_taskHandle(nullptr) {
 }
 
-static void processReceivedData(void) {
+void CommandHandler::start() {
+    m_taskHandle = xTaskCreateStatic(
+        taskEntry,
+        "CommandTask",
+        STACK_SIZE,
+        this,
+        tskIDLE_PRIORITY + 2,
+        m_taskStack,
+        &m_taskControlBlock
+    );
+}
 
-    DCACHE_InvalidateByRange(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_ibusDmaRxBuffer)), IBUS_DMA_BUFFER_SIZE);
+TaskHandle_t CommandHandler::getTaskHandle() const {
+    return m_taskHandle;
+}
 
-	// Strictly avoid pointer arithmetic (ptrA - ptrB) to calculate the index.
-    // Instead, cast addresses to `uintptr_t` and perform integer arithmetic.
+void CommandHandler::taskEntry(void* pvParameters) {
+    static_cast<CommandHandler*>(pvParameters)->run();
+}
 
-    // DADDR is a uint32_t register value, so we use static_cast (integer to integer)
-    uintptr_t dmaAddr = static_cast<uintptr_t>(IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR);
+void CommandHandler::run() {
+    size_t readIndex = 0;
 
-    // g_ibusDmaRxBuffer is a pointer, so we use reinterpret_cast (pointer to integer)
-    uintptr_t baseAddr = reinterpret_cast<uintptr_t>(g_ibusDmaRxBuffer);
+    for (;;) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-    // Calculate index based on integer offset
-    size_t writeIndex = (static_cast<size_t>(dmaAddr - baseAddr)) % IBUS_DMA_BUFFER_SIZE;
+        DCACHE_InvalidateByRange(static_cast<uint32_t>(reinterpret_cast<uintptr_t>(g_ibusDmaRxBuffer)), IBUS_DMA_BUFFER_SIZE);
 
-    while (s_readIndex != writeIndex) {
+        uintptr_t dmaAddr = static_cast<uintptr_t>(IBUS_DMA_BASE->TCD[IBUS_DMA_CHANNEL].DADDR);
+        uintptr_t baseAddr = reinterpret_cast<uintptr_t>(g_ibusDmaRxBuffer);
+        size_t writeIndex = (static_cast<size_t>(dmaAddr - baseAddr)) % IBUS_DMA_BUFFER_SIZE;
 
-        // Array Access via Subscript (Compliant with AV Rule 96)
-        uint8_t byte = g_ibusDmaRxBuffer[s_readIndex];
+        while (readIndex != writeIndex) {
+            uint8_t byte = g_ibusDmaRxBuffer[readIndex];
 
-        // --- Protocol State Machine ---
-        static uint8_t s_assemblyBuffer[PACKET_LENGTH];
-        static size_t s_assemblyIndex = 0;
-        static bool s_synced = false;
-
-        // Sync Logic: Find [0x20, 0x40]
-        if (!s_synced) {
-            if (s_assemblyIndex == 0) {
-                if (byte == PACKET_LENGTH) { // 0x20
-                    s_assemblyBuffer[s_assemblyIndex++] = byte;
-                }
-            } else if (s_assemblyIndex == 1) {
-                if (byte == COMMAND_SERVO) { // 0x40
-                    s_assemblyBuffer[s_assemblyIndex++] = byte;
-                    s_synced = true;
-                } else {
-                     // Sync failed. Was this byte 0x20?
-                     if (byte == PACKET_LENGTH) {
-                         s_assemblyBuffer[0] = byte;
-                         s_assemblyIndex = 1;
-                     } else {
-                         s_assemblyIndex = 0;
-                     }
-                }
-            }
-        } else {
-            // Payload Collection
-            s_assemblyBuffer[s_assemblyIndex++] = byte;
-
-            if (s_assemblyIndex == PACKET_LENGTH) {
-                // Parse Packet
-                std::span<const uint8_t> packetSpan(s_assemblyBuffer, PACKET_LENGTH);
-
-                if (s_ibusHandler.processBuffer(packetSpan)) {
-                    const auto& channels = s_ibusHandler.getAllChannels();
-                    RC_Channels_t rcData;
-                    for(size_t i = 0; i < std::min((size_t)IBUS_MAX_CHANNELS, channels.size()); i++) {
-                        rcData.channels[i] = channels[i];
+            // --- Protocol Sync Logic ---
+            if (!m_synced) {
+                if (m_assemblyIndex == 0) {
+                    if (byte == firmware::protocols::ibus::PACKET_LENGTH) {
+                        m_assemblyBuffer[m_assemblyIndex++] = byte;
                     }
-                    xQueueOverwrite(g_command_data_queue, &rcData);
+                } else if (m_assemblyIndex == 1) {
+                    if (byte == firmware::protocols::ibus::COMMAND_SERVO) {
+                        m_assemblyBuffer[m_assemblyIndex++] = byte;
+                        m_synced = true;
+                    } else {
+                         // Sync failed
+                         if (byte == firmware::protocols::ibus::PACKET_LENGTH) {
+                             m_assemblyBuffer[0] = byte;
+                             m_assemblyIndex = 1;
+                         } else {
+                             m_assemblyIndex = 0;
+                         }
+                    }
                 }
+            } else {
+                m_assemblyBuffer[m_assemblyIndex++] = byte;
 
-                s_synced = false;
-                s_assemblyIndex = 0;
+                if (m_assemblyIndex == firmware::protocols::ibus::PACKET_LENGTH) {
+                    std::span<const uint8_t> packetSpan(m_assemblyBuffer, firmware::protocols::ibus::PACKET_LENGTH);
+
+                    if (m_ibusHandler.processBuffer(packetSpan)) {
+                        const auto& channels = m_ibusHandler.getAllChannels();
+                        RC_Channels_t rcData;
+
+                        for (size_t i = 0; i < std::min((size_t)IBUS_MAX_CHANNELS, channels.size()); i++) {
+                            rcData.channels[i] = channels[i];
+                        }
+
+                        if (m_commandQueue != nullptr) {
+                            xQueueOverwrite(m_commandQueue, &rcData);
+                        }
+                    }
+
+                    m_synced = false;
+                    m_assemblyIndex = 0;
+                }
             }
-        }
 
-        // Advance and Wrap Read Index
-        s_readIndex++;
-        if (s_readIndex >= IBUS_DMA_BUFFER_SIZE) {
-            s_readIndex = 0;
+            readIndex++;
+            if (readIndex >= IBUS_DMA_BUFFER_SIZE) {
+                readIndex = 0;
+            }
         }
     }
 }

@@ -1,34 +1,48 @@
-/**
- * @file gps_handler.cpp
- * @brief FreeRTOS task handling the NMEA stream from the GPS module via DMA.
- */
-
-#include "gps_handler.h"
-#include "nmea.h"
-#include "FreeRTOS.h"
-#include "queue.h"
+#include "io/gps_handler.h"
 #include "board.h"
 #include "fsl_cache.h"
 
-extern QueueHandle_t g_gps_data_queue;
-extern TaskHandle_t g_gps_task_handle;
-extern uint8_t g_gpsDmaRxBuffer[];
+static TaskHandle_t s_gpsNotifiedTaskHandle = nullptr;
 
-using namespace firmware::sensors;
-
-static size_t s_readIndex = 0;
+void gpsHandlerRegisterIsrTask(TaskHandle_t taskHandle) {
+    s_gpsNotifiedTaskHandle = taskHandle;
+}
 
 extern "C" void gps_idle_interrupt_callback(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    if (g_gps_task_handle != NULL) {
-        vTaskNotifyGiveFromISR(g_gps_task_handle, &xHigherPriorityTaskWoken);
+    if (s_gpsNotifiedTaskHandle != nullptr) {
+        vTaskNotifyGiveFromISR(s_gpsNotifiedTaskHandle, &xHigherPriorityTaskWoken);
     }
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-extern "C" void gpsTask(void *pvParameters) {
-    (void)pvParameters;
-    NmeaParser parser;
+GpsHandler::GpsHandler(QueueHandle_t gpsDataQueue)
+    : m_gpsDataQueue(gpsDataQueue), m_taskHandle(nullptr) {
+}
+
+void GpsHandler::start() {
+    m_taskHandle = xTaskCreateStatic(
+        taskEntry,
+        "GpsTask",
+        STACK_SIZE,
+        this,
+        tskIDLE_PRIORITY + 2,
+        m_taskStack,
+        &m_taskControlBlock
+    );
+}
+
+TaskHandle_t GpsHandler::getTaskHandle() const {
+    return m_taskHandle;
+}
+
+void GpsHandler::taskEntry(void* pvParameters) {
+    static_cast<GpsHandler*>(pvParameters)->run();
+}
+
+void GpsHandler::run() {
+    size_t readIndex = 0;
+    firmware::sensors::NmeaParser parser;
 
     for (;;) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
@@ -39,21 +53,21 @@ extern "C" void gpsTask(void *pvParameters) {
         uintptr_t baseAddr = reinterpret_cast<uintptr_t>(g_gpsDmaRxBuffer);
         size_t writeIndex = (static_cast<size_t>(dmaAddr - baseAddr)) % GPS_DMA_BUFFER_SIZE;
 
-        while (s_readIndex != writeIndex) {
-            uint8_t byte = g_gpsDmaRxBuffer[s_readIndex];
+        while (readIndex != writeIndex) {
+            uint8_t byte = g_gpsDmaRxBuffer[readIndex];
 
             if (parser.processByte(byte)) {
-                GpsData data = parser.getLatestData();
-                
-                if (data.valid) {
+                firmware::sensors::GpsData data = parser.getLatestData();
+
+                if (data.valid && m_gpsDataQueue != nullptr) {
                     data.lastUpdateTick = xTaskGetTickCount();
-                    xQueueOverwrite(g_gps_data_queue, &data);
+                    xQueueOverwrite(m_gpsDataQueue, &data);
                 }
             }
 
-            s_readIndex++;
-            if (s_readIndex >= GPS_DMA_BUFFER_SIZE) {
-                s_readIndex = 0;
+            readIndex++;
+            if (readIndex >= GPS_DMA_BUFFER_SIZE) {
+                readIndex = 0;
             }
         }
     }

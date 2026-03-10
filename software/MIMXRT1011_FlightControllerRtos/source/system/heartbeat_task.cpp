@@ -1,19 +1,29 @@
-/**
- * @file heartbeat_task.cpp
- * @brief Implements the heartbeat task.
- */
-#include "heartbeat_task.h"
-#include "flight_controller.h"
+#include "system/heartbeat_task.h"
 #include "board.h"
 
-/**
- * @brief Task that generates a heartbeat.
- */
-void heartbeatTask(void *pvParameters) {
-    TickType_t xLastWakeTime = xTaskGetTickCount();
+HeartbeatTask::HeartbeatTask(volatile TickType_t& heartbeatFrequency)
+    : m_heartbeatFrequency(heartbeatFrequency), m_taskHandle(nullptr) {
+}
 
-    while (1) {
-        vTaskDelayUntil(&xLastWakeTime, g_heartbeat_frequency);
+void HeartbeatTask::start() {
+    m_taskHandle = xTaskCreateStatic(
+        taskEntry,
+        "HeartbeatTask",
+        STACK_SIZE,
+        this,
+        tskIDLE_PRIORITY,
+        m_taskStack,
+        &m_taskControlBlock
+    );
+}
+
+void HeartbeatTask::taskEntry(void* pvParameters) {
+    static_cast<HeartbeatTask*>(pvParameters)->run();
+}
+
+void HeartbeatTask::run() {
+    for (;;) {
         USER_LED_TOGGLE();
+        vTaskDelay(m_heartbeatFrequency);
     }
 }

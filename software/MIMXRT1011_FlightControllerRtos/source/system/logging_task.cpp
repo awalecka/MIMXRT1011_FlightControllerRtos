@@ -1,15 +1,9 @@
-// source/system/logging_task.cpp
-/**
- * @file logging_task.cpp
- * @brief Implements the data logging task for Telemetry via USB CDC or SiK Radio (UART3).
- */
-#include "flight_controller.h"
-#include "fsl_lpuart.h"
-#include "peripherals.h"
 #include "system/logging_task.h"
 #include "telemetry/usb_telemetry.h"
+#include "utils/common_types.h"
+#include "fsl_lpuart.h"
+#include "board.h"
 #include <cstring>
-#include <algorithm>
 
 namespace {
     constexpr uint8_t TELEM_SYNC_1 = 0x55;
@@ -24,7 +18,6 @@ namespace {
 
     constexpr size_t HEADER_SIZE = sizeof(TelemetryHeader);
     constexpr size_t CHECKSUM_SIZE = sizeof(uint8_t);
-    // Max payload is 4 * uint16_t (8 bytes) or 3 * float (12 bytes)
     constexpr size_t MAX_PAYLOAD_SIZE = 12;
     constexpr size_t MAX_PACKET_SIZE = HEADER_SIZE + MAX_PAYLOAD_SIZE + CHECKSUM_SIZE;
 
@@ -37,17 +30,34 @@ namespace {
     }
 }
 
-/**
- * @brief Task that waits for control data and transmits it via USB CDC or UART3.
- */
-void loggingTask(void *pvParameters) {
+LoggingTask::LoggingTask(QueueHandle_t controlsQueue)
+    : m_controlsQueue(controlsQueue), m_taskHandle(nullptr) {
+}
+
+void LoggingTask::start() {
+    m_taskHandle = xTaskCreateStatic(
+        taskEntry,
+        "LoggingTask",
+        STACK_SIZE,
+        this,
+        tskIDLE_PRIORITY + 1,
+        m_taskStack,
+        &m_taskControlBlock
+    );
+}
+
+void LoggingTask::taskEntry(void* pvParameters) {
+    static_cast<LoggingTask*>(pvParameters)->run();
+}
+
+void LoggingTask::run() {
     LogMessage_t message;
     uint8_t txBuffer[MAX_PACKET_SIZE];
 
     UsbTelemetry::init();
 
-    while (true) {
-        if (xQueueReceive(g_controls_data_queue, &message, portMAX_DELAY) == pdPASS) {
+    for (;;) {
+        if (xQueueReceive(m_controlsQueue, &message, portMAX_DELAY) == pdPASS) {
 
             size_t packetIndex = 0;
             size_t payloadSize = 0;
@@ -76,14 +86,14 @@ void loggingTask(void *pvParameters) {
             header.sync1 = TELEM_SYNC_1;
             header.sync2 = TELEM_SYNC_2;
             header.type = message.type;
-            header.payloadLen = (uint8_t)payloadSize;
+            header.payloadLen = static_cast<uint8_t>(payloadSize);
 
-            memcpy(&txBuffer[packetIndex], &header, HEADER_SIZE);
+            std::memcpy(&txBuffer[packetIndex], &header, HEADER_SIZE);
             packetIndex += HEADER_SIZE;
 
-            memcpy(&txBuffer[packetIndex], pPayloadData, payloadSize);
+            std::memcpy(&txBuffer[packetIndex], pPayloadData, payloadSize);
 
-            uint8_t checksum = calculateChecksum((uint8_t*)pPayloadData, payloadSize);
+            uint8_t checksum = calculateChecksum(static_cast<uint8_t*>(pPayloadData), payloadSize);
             packetIndex += payloadSize;
             txBuffer[packetIndex++] = checksum;
 
@@ -92,7 +102,7 @@ void loggingTask(void *pvParameters) {
                     UsbTelemetry::send(txBuffer, packetIndex);
                 }
             } else {
-                LPUART_WriteBlocking(LPUART3, txBuffer, packetIndex);
+                LPUART_WriteBlocking(TELE_LPUART_INSTANCE, txBuffer, packetIndex);
             }
         }
     }

@@ -17,8 +17,6 @@ using namespace firmware::drivers;
 
 FlightController g_flightController(FlightController::LOOP_DT_S);
 
-extern QueueHandle_t g_gps_data_queue;
-
 // ============================================================================
 // File-scope constants
 // ============================================================================
@@ -55,6 +53,29 @@ FlightControllerT<FilterPolicy>::FlightControllerT(float loopTime)
     , staleDataCounter(0)
     , lastUpdateTick(0)
 {
+}
+
+// ----------------------------------------------------------------------------
+// injectDependencies
+// ----------------------------------------------------------------------------
+
+template <typename FilterPolicy>
+    requires gnc::AttitudeFilter<FilterPolicy>
+void FlightControllerT<FilterPolicy>::injectDependencies(
+                            QueueHandle_t gpsQueue,
+                            QueueHandle_t imuQueue,
+                            QueueHandle_t magQueue,
+                            QueueHandle_t commandQueue,
+                            QueueHandle_t controlsQueue,
+                            volatile FlightState_t* flightState)
+{
+    m_gpsQueue = gpsQueue;
+    m_imuQueue = imuQueue;
+    m_magQueue = magQueue;
+    m_flightState = flightState;
+
+    receiver.injectQueue(commandQueue);
+    telemetry.injectQueue(controlsQueue);
 }
 
 // ----------------------------------------------------------------------------
@@ -96,7 +117,10 @@ int FlightControllerT<FilterPolicy>::init()
         sumMx += magRaw.magXGauss;
         sumMy += magRaw.magYGauss;
         sumMz += magRaw.magZGauss;
-        for (volatile int k = 0; k < 10000; ++k) {}
+
+        for (int k = 0; k < 10000; ++k) {
+			__asm volatile("nop");
+		}
     }
 
     typename FilterPolicy::Vector3 avgAccel;
@@ -213,6 +237,17 @@ void FlightControllerT<FilterPolicy>::saveCalibration()
 }
 
 // ----------------------------------------------------------------------------
+// getActiveGesture
+// ----------------------------------------------------------------------------
+
+template <typename FilterPolicy>
+    requires gnc::AttitudeFilter<FilterPolicy>
+Receiver::CommandGesture FlightControllerT<FilterPolicy>::getActiveGesture()
+{
+    return receiver.getActiveGesture();
+}
+
+// ----------------------------------------------------------------------------
 // update
 // ----------------------------------------------------------------------------
 
@@ -229,15 +264,15 @@ void FlightControllerT<FilterPolicy>::update()
 
     // Consume latest GPS fix from queue
     firmware::sensors::GpsData newGpsData;
-    if (xQueueReceive(g_gps_data_queue, &newGpsData, 0) == pdPASS) {
+    if (m_gpsQueue && xQueueReceive(m_gpsQueue, &newGpsData, 0) == pdPASS) {
         m_latestGps = newGpsData;
     }
 
     ImuData imuData;
     MagData magData;
 
-    const bool hasNewImu = (xQueueReceive(g_imu_data_queue, &imuData, 0) == pdTRUE);
-    const bool hasNewMag = (xQueueReceive(g_mag_data_queue, &magData, 0) == pdTRUE);
+    const bool hasNewImu = (m_imuQueue && xQueueReceive(m_imuQueue, &imuData, 0) == pdTRUE);
+    const bool hasNewMag = (m_magQueue && xQueueReceive(m_magQueue, &magData, 0) == pdTRUE);
 
     std::optional<MagData> optMagData = std::nullopt;
     if (hasNewMag) {
@@ -280,7 +315,7 @@ void FlightControllerT<FilterPolicy>::update()
         throttleOutput  = setpoint.throttle;
     }
 
-    if (g_flight_state == STATE_IDLE) {
+    if (m_flightState && *m_flightState == STATE_IDLE) {
         actuators.setRawOutputs(
             Actuators::CENTER_PULSE_US,
             Actuators::CENTER_PULSE_US,
@@ -303,12 +338,12 @@ void FlightControllerT<FilterPolicy>::update()
         );
     }
 
-    if (hasNewImu) {
+    if (hasNewImu && m_flightState) {
         FullSensorData teleData;
         teleData.rollDeg  = currentRollDeg;
         teleData.pitchDeg = currentPitchDeg;
         teleData.yawDeg   = currentYawDeg;
-        telemetry.update(teleData, receiver.getCachedData(), g_flight_state);
+        telemetry.update(teleData, receiver.getCachedData(), *m_flightState);
     }
 }
 
