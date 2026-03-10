@@ -70,6 +70,9 @@
 #define GPS_DMA_CHANNEL         1U
 #define GPS_DMA_SOURCE          kDmaRequestMuxLPUART1Rx
 
+// TELE Configuration Constants
+#define TELE_LPUART_INSTANCE    LPUART3
+
 /* USB PHY configuration */
 #define BOARD_USB_PHY_D_CAL     (0x0CU)
 #define BOARD_USB_PHY_TXCAL45DP (0x06U)
