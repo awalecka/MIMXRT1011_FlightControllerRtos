@@ -21,7 +21,7 @@ pin_labels:
 - {pin_num: '67', pin_signal: GPIO_SD_08, label: FlexSPI_D2_A, identifier: FlexSPI_D2_A}
 - {pin_num: '64', pin_signal: GPIO_SD_11, label: SD_CD, identifier: FlexSPI_D3_A;SD_CD}
 - {pin_num: '69', pin_signal: GPIO_SD_06, label: FlexSPI_SS0, identifier: FlexSPI_SS0}
-- {pin_num: '10', pin_signal: GPIO_03, label: LED_D13, identifier: SAI1_RXD0}
+- {pin_num: '10', pin_signal: GPIO_03, label: PWM1B, identifier: PWM1B}
 - {pin_num: '75', pin_signal: GPIO_SD_01, label: PWM0B, identifier: PWM1;PWM1B;PWM0B}
 - {pin_num: '74', pin_signal: GPIO_SD_02, label: PWM0A, identifier: PWM1;PWM1A;PWM0A}
 - {pin_num: '8', pin_signal: GPIO_05, label: PWM2B, identifier: PWM2B}
@@ -34,14 +34,13 @@ pin_labels:
 - {pin_num: '52', pin_signal: GPIO_AD_06, label: SD_CLK, identifier: SD_CLK}
 - {pin_num: '56', pin_signal: GPIO_AD_04, label: SD_MOSI, identifier: SD_MOSI}
 - {pin_num: '43', pin_signal: GPIO_AD_14, label: SD_CS, identifier: SD_CS}
-- {pin_num: '9', pin_signal: GPIO_04, label: MEAS_TIME, identifier: MEAS_TIME}
+- {pin_num: '9', pin_signal: GPIO_04, label: PWM1A, identifier: MEAS_TIME}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
 #include "fsl_common.h"
 #include "fsl_xbara.h"
 #include "fsl_iomuxc.h"
-#include "fsl_gpio.h"
 #include "pin_mux.h"
 
 /* FUNCTION ************************************************************************************************************
@@ -62,7 +61,6 @@ BOARD_InitPins:
   - {pin_num: '48', peripheral: ARM, signal: arm_trace_swo, pin_signal: GPIO_AD_09}
   - {pin_num: '12', peripheral: LPI2C1, signal: SDA, pin_signal: GPIO_01, slew_rate: Fast, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
   - {pin_num: '11', peripheral: LPI2C1, signal: SCL, pin_signal: GPIO_02, slew_rate: Fast, software_input_on: Enable, open_drain: Enable, pull_up_down_config: Pull_Up_22K_Ohm}
-  - {pin_num: '10', peripheral: GPIO1, signal: 'gpiomux_io, 03', pin_signal: GPIO_03, direction: OUTPUT}
   - {pin_num: '74', peripheral: PWM1, signal: 'A, 0', pin_signal: GPIO_SD_02, identifier: PWM0A, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable, pull_keeper_enable: Enable}
   - {pin_num: '8', peripheral: PWM1, signal: 'B, 2', pin_signal: GPIO_05, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '6', peripheral: PWM1, signal: 'A, 2', pin_signal: GPIO_06, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
@@ -74,12 +72,13 @@ BOARD_InitPins:
   - {peripheral: PWM1, signal: 'FAULT, 3', pin_signal: LOGIC_HIGH}
   - {pin_num: '80', peripheral: LPUART3, signal: TXD, pin_signal: GPIO_12, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '1', peripheral: LPUART3, signal: RXD, pin_signal: GPIO_11, slew_rate: Fast, software_input_on: Enable}
-  - {pin_num: '9', peripheral: GPIO1, signal: 'gpiomux_io, 04', pin_signal: GPIO_04, direction: OUTPUT, slew_rate: Fast, software_input_on: Enable}
   - {pin_num: '58', peripheral: LPUART4, signal: TXD, pin_signal: GPIO_AD_02}
   - {pin_num: '59', peripheral: LPUART4, signal: RXD, pin_signal: GPIO_AD_01}
   - {pin_num: '75', peripheral: PWM1, signal: 'B, 0', pin_signal: GPIO_SD_01, identifier: PWM0B, direction: OUTPUT}
   - {pin_num: '2', peripheral: LPUART1, signal: TXD, pin_signal: GPIO_10}
   - {pin_num: '3', peripheral: LPUART1, signal: RXD, pin_signal: GPIO_09}
+  - {pin_num: '9', peripheral: PWM1, signal: 'A, 1', pin_signal: GPIO_04, direction: OUTPUT}
+  - {pin_num: '10', peripheral: PWM1, signal: 'B, 1', pin_signal: GPIO_03, direction: OUTPUT}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 
@@ -93,28 +92,10 @@ void BOARD_InitPins(void) {
   CLOCK_EnableClock(kCLOCK_Iomuxc);           
   CLOCK_EnableClock(kCLOCK_Xbar1);            
 
-  /* GPIO configuration of SAI1_RXD0 on GPIO_03 (pin 10) */
-  gpio_pin_config_t SAI1_RXD0_config = {
-      .direction = kGPIO_DigitalOutput,
-      .outputLogic = 0U,
-      .interruptMode = kGPIO_NoIntmode
-  };
-  /* Initialize GPIO functionality on GPIO_03 (pin 10) */
-  GPIO_PinInit(GPIO1, 3U, &SAI1_RXD0_config);
-
-  /* GPIO configuration of MEAS_TIME on GPIO_04 (pin 9) */
-  gpio_pin_config_t MEAS_TIME_config = {
-      .direction = kGPIO_DigitalOutput,
-      .outputLogic = 0U,
-      .interruptMode = kGPIO_NoIntmode
-  };
-  /* Initialize GPIO functionality on GPIO_04 (pin 9) */
-  GPIO_PinInit(GPIO1, 4U, &MEAS_TIME_config);
-
   IOMUXC_SetPinMux(IOMUXC_GPIO_01_LPI2C1_SDA, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_02_LPI2C1_SCL, 1U); 
-  IOMUXC_SetPinMux(IOMUXC_GPIO_03_GPIOMUX_IO03, 0U); 
-  IOMUXC_SetPinMux(IOMUXC_GPIO_04_GPIOMUX_IO04, 1U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_03_FLEXPWM1_PWM1_B, 0U); 
+  IOMUXC_SetPinMux(IOMUXC_GPIO_04_FLEXPWM1_PWM1_A, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_05_FLEXPWM1_PWM2_B, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_06_FLEXPWM1_PWM2_A, 1U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_07_FLEXPWM1_PWM3_B, 1U); 
@@ -128,17 +109,12 @@ void BOARD_InitPins(void) {
   IOMUXC_SetPinMux(IOMUXC_GPIO_AD_09_ARM_TRACE_SWO, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_01_FLEXPWM1_PWM0_B, 0U); 
   IOMUXC_SetPinMux(IOMUXC_GPIO_SD_02_FLEXPWM1_PWM0_A, 1U); 
-  IOMUXC_GPR->GPR26 = ((IOMUXC_GPR->GPR26 &
-    (~(BOARD_INITPINS_IOMUXC_GPR_GPR26_GPIO_SEL_MASK))) 
-      | IOMUXC_GPR_GPR26_GPIO_SEL(0x00U)      
-    );
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault0); 
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault1); 
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault2); 
   XBARA_SetSignalsConnection(XBARA, kXBARA1_InputLogicHigh, kXBARA1_OutputFlexpwm1Fault3); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_01_LPI2C1_SDA, 0xD8A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_02_LPI2C1_SCL, 0xD8A1U); 
-  IOMUXC_SetPinConfig(IOMUXC_GPIO_04_GPIOMUX_IO04, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_05_FLEXPWM1_PWM2_B, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_06_FLEXPWM1_PWM2_A, 0x10A1U); 
   IOMUXC_SetPinConfig(IOMUXC_GPIO_07_FLEXPWM1_PWM3_B, 0x10A1U); 

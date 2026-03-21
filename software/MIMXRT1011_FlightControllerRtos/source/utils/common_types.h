@@ -11,6 +11,7 @@
 #define RC_CH_THROTTLE 2
 #define RC_CH_YAW      3
 #define RC_CH_AUX1     4
+#define RC_CH_AUX2     5
 
 // --- Enums ---
 typedef enum {
@@ -70,6 +71,8 @@ typedef struct {
     uint16_t elevator;
     uint16_t rudder;
     uint16_t throttle;
+    uint16_t aux1;
+    uint16_t aux2;
 } PACKED LogCommands_t;
 
 typedef struct {

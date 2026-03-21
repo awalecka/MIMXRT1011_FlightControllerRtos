@@ -42,6 +42,7 @@ void Receiver::getStickInput(Receiver::StickInput& input) {
     input.pitch = mapFloat(static_cast<float>(m_cachedRcData.channels[RC_CH_PITCH]), 1000.0f, 2000.0f, -1.0f, 1.0f);
     input.yaw = mapFloat(static_cast<float>(m_cachedRcData.channels[RC_CH_YAW]), 1000.0f, 2000.0f, -1.0f, 1.0f);
     input.throttle = mapFloat(static_cast<float>(m_cachedRcData.channels[RC_CH_THROTTLE]), 1000.0f, 2000.0f, 0.0f, 100.0f);
+    input.gear = mapFloat(static_cast<float>(m_cachedRcData.channels[RC_CH_AUX2]), 1000.0f, 2000.0f, -1.0f, 1.0f);
 }
 
 uint16_t Receiver::getChannel(uint8_t channel) const {

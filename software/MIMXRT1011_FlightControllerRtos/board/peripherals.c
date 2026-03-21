@@ -192,11 +192,11 @@ instance:
     - enableDeinitPinsFnCustomName: 'false'
     - deinitPinFunctionCustomID: 'LPI2C1_DeinitPins'
     - edma_channel:
-      - uid: '1772939936977'
+      - uid: '1774061399351'
       - eDMAn: '4'
       - eDMA_source: 'kDmaRequestMuxLPI2C1'
     - edma_channel_tx:
-      - uid: '1772939936978'
+      - uid: '1774061399352'
       - eDMAn: '5'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
@@ -427,6 +427,71 @@ instance:
           - enable_priority: 'false'
           - priority: '0'
           - enable_custom_name: 'false'
+      - 3:
+        - sm: 'kPWM_Module_1'
+        - sm_id: 'SM1'
+        - config:
+          - clockSource: 'kPWM_BusClock'
+          - prescale: 'kPWM_Prescale_Divide_64'
+          - pwmFreq: '50 hz'
+          - pairOperation: 'kPWM_Independent'
+          - operationMode: 'kPWM_EdgeAligned'
+          - initializationControl: 'kPWM_Initialize_LocalSync'
+          - reloadLogic: 'kPWM_ReloadPwmFullCycle'
+          - reloadSelect: 'kPWM_LocalReload'
+          - reloadFrequency: 'kPWM_LoadEveryOportunity'
+          - forceTrigger: 'kPWM_Force_Local'
+          - enableDebugMode: 'true'
+          - enableWait: 'false'
+          - outputTrigger_sel: ''
+          - loadOK: 'true'
+          - startCounter: 'true'
+          - interrupt_sel: ''
+          - dma_used: 'false'
+          - dma:
+            - pwmDMA_activate: 'false'
+            - captureDMA_enable: ''
+            - captureDMA_source: 'kPWM_DMARequestDisable'
+            - captureDMA_watermark_control: 'kPWM_FIFOWatermarksOR'
+        - channels:
+          - 0:
+            - channel_id: 'A'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 1:
+            - channel_id: 'B'
+            - functionSel: 'pwmOutput'
+            - pwm:
+              - dutyCyclePercent: '0'
+              - level: 'kPWM_HighTrue'
+              - fault_channel0:
+                - dismap: ''
+              - faultState: 'kPWM_PwmFaultState0'
+              - pwmchannelenable: 'true'
+              - deadtime_input_by_force: 'kPWM_UsePwm'
+              - clockSource: 'kPWM_BusClock'
+              - deadtimeValue: '0'
+              - interrupt_sel: ''
+          - 2:
+            - channel_id: 'X'
+            - functionSel: 'notUsed'
+        - common_interruptEn: 'false'
+        - common_interrupt:
+          - IRQn: 'PWM1_2_IRQn'
+          - enable_interrrupt: 'enabled'
+          - enable_priority: 'false'
+          - priority: '0'
+          - enable_custom_name: 'false'
     - faultChannels:
       - 0:
         - commonFaultSetting:
@@ -569,6 +634,38 @@ pwm_signal_param_t PWM1_SM3_pwm_function_config[2]= {
   },
 };
 
+pwm_config_t PWM1_SM1_config = {
+  .clockSource = kPWM_BusClock,
+  .prescale = kPWM_Prescale_Divide_64,
+  .pairOperation = kPWM_Independent,
+  .initializationControl = kPWM_Initialize_LocalSync,
+  .reloadLogic = kPWM_ReloadPwmFullCycle,
+  .reloadSelect = kPWM_LocalReload,
+  .reloadFrequency = kPWM_LoadEveryOportunity,
+  .forceTrigger = kPWM_Force_Local,
+  .enableDebugMode = true,
+  .enableWait = false
+};
+
+pwm_signal_param_t PWM1_SM1_pwm_function_config[2]= {
+  {
+    .pwmChannel = kPWM_PwmA,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+  {
+    .pwmChannel = kPWM_PwmB,
+    .dutyCyclePercent = 0U,
+    .level = kPWM_HighTrue,
+    .faultState = kPWM_PwmFaultState0,
+    .pwmchannelenable = true,
+    .deadtimeValue = 0U
+  },
+};
+
 const pwm_fault_input_filter_param_t PWM1_faultInputFilter_config = {
   .faultFilterPeriod = 1U,
   .faultFilterCount = 3U,
@@ -606,6 +703,8 @@ static void PWM1_init(void) {
   PWM_Init(PWM1_PERIPHERAL, PWM1_SM2, &PWM1_SM2_config);
   /* Initialize PWM submodule SM3 main configuration */
   PWM_Init(PWM1_PERIPHERAL, PWM1_SM3, &PWM1_SM3_config);
+  /* Initialize PWM submodule SM1 main configuration */
+  PWM_Init(PWM1_PERIPHERAL, PWM1_SM1, &PWM1_SM1_config);
   /* Initialize fault input filter configuration */
   PWM_SetupFaultInputFilter(PWM1_PERIPHERAL, &PWM1_faultInputFilter_config);
   /* Initialize fault channel 0 fault Fault0 configuration */
@@ -628,16 +727,22 @@ static void PWM1_init(void) {
   PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_A, kPWM_UsePwm);
   /* Initialize deadtime logic input for the channel B */
   PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_B, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel A */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM1, PWM1_SM1_A, kPWM_UsePwm);
+  /* Initialize deadtime logic input for the channel B */
+  PWM_SetupForceSignal(PWM1_PERIPHERAL, PWM1_SM1, PWM1_SM1_B, kPWM_UsePwm);
   /* Setup PWM output setting for submodule SM0 */
   PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM0, PWM1_SM0_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM0_COUNTER_FREQ_HZ, PWM1_SM0_SM_CLK_SOURCE_FREQ_HZ);
   /* Setup PWM output setting for submodule SM2 */
   PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM2, PWM1_SM2_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM2_COUNTER_FREQ_HZ, PWM1_SM2_SM_CLK_SOURCE_FREQ_HZ);
   /* Setup PWM output setting for submodule SM3 */
   PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM3, PWM1_SM3_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM3_COUNTER_FREQ_HZ, PWM1_SM3_SM_CLK_SOURCE_FREQ_HZ);
+  /* Setup PWM output setting for submodule SM1 */
+  PWM_SetupPwm(PWM1_PERIPHERAL, PWM1_SM1, PWM1_SM1_pwm_function_config, 2U, kPWM_EdgeAligned, PWM1_SM1_COUNTER_FREQ_HZ, PWM1_SM1_SM_CLK_SOURCE_FREQ_HZ);
   /* Initialize LDOK for update of the working registers */
-  PWM_SetPwmLdok(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3), true);
+  PWM_SetPwmLdok(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3 | kPWM_Control_Module_1), true);
   /* Start selected counters */
-  PWM_StartTimer(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3));
+  PWM_StartTimer(PWM1_PERIPHERAL, (kPWM_Control_Module_0 | kPWM_Control_Module_2 | kPWM_Control_Module_3 | kPWM_Control_Module_1));
 }
 
 /***********************************************************************************************************************

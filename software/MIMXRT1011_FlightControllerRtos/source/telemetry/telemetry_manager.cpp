@@ -35,6 +35,8 @@ void TelemetryManager::update(const FullSensorData& sensorData,
         cmdMsg.data.commands.elevator = rcData.channels[RC_CH_PITCH];
         cmdMsg.data.commands.rudder = rcData.channels[RC_CH_YAW];
         cmdMsg.data.commands.throttle = rcData.channels[RC_CH_THROTTLE];
+        cmdMsg.data.commands.aux1 = rcData.channels[RC_CH_AUX1];
+        cmdMsg.data.commands.aux2 = rcData.channels[RC_CH_AUX2];
         xQueueSend(telemetryQueue, &cmdMsg, 0);
 
         if (++statusDivider >= 5) {

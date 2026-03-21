@@ -103,7 +103,7 @@ class MagnetometerCalibrator:
 
 class TelemetryParser(QtCore.QObject):
     attitude_received = QtCore.pyqtSignal(float, float, float)
-    commands_received = QtCore.pyqtSignal(int, int, int, int)
+    commands_received = QtCore.pyqtSignal(int, int, int, int, int, int)
     mag_received = QtCore.pyqtSignal(float, float, float)
     cal_status_received = QtCore.pyqtSignal(int, float)
     system_status_received = QtCore.pyqtSignal(int, int, int)
@@ -147,7 +147,7 @@ class TelemetryParser(QtCore.QObject):
 
                     msg_type, payload_len = buffer[2], buffer[3]
 
-                    # Size check: Att(12), Cmd(8), Mag(12), Cal(5), Sys(4)
+                    # Size check: Att(12), Cmd(12), Mag(12), Cal(5), Sys(4)
                     if payload_len not in [8, 12, 5, 4]:
                         del buffer[:2]
                         continue
@@ -176,13 +176,12 @@ class TelemetryParser(QtCore.QObject):
             if msg_type == LOG_TYPE_ATTITUDE:
                 self.attitude_received.emit(*struct.unpack('<fff', data))
             elif msg_type == LOG_TYPE_COMMANDS:
-                self.commands_received.emit(*struct.unpack('<HHHH', data))
+                self.commands_received.emit(*struct.unpack('<HHHHHH', data))
             elif msg_type == LOG_TYPE_MAG_RAW:
                 self.mag_received.emit(*struct.unpack('<fff', data))
             elif msg_type == LOG_TYPE_CAL_STATUS:
                 self.cal_status_received.emit(*struct.unpack('<Bf', data))
             elif msg_type == LOG_TYPE_SYSTEM_STATUS:
-                # Removed [0:2] to emit all three fields: (state, reserved, cpuLoad)
                 self.system_status_received.emit(*struct.unpack('<BBH', data))
         except Exception:
             pass
@@ -212,7 +211,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Graph Buffers
         self.att_data = {k: collections.deque([0] * 200, maxlen=200) for k in ['r', 'p', 'y']}
-        self.cmd_data = {k: collections.deque([1500] * 200, maxlen=200) for k in ['a', 'e', 'r', 't']}
+        self.cmd_data = {k: collections.deque([1500] * 200, maxlen=200) for k in ['a', 'e', 'r', 't', 'x1', 'x2']}
 
     def setup_dashboard(self, widget):
         layout = QtWidgets.QVBoxLayout(widget)
@@ -279,7 +278,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.glw.nextRow()
 
-        # Commands Plot (Restored All Channels)
+        # Commands Plot
         p2 = self.glw.addPlot(title="RC Inputs")
         p2.showGrid(x=True, y=True)
         p2.setYRange(900, 2100)
@@ -288,6 +287,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.c_ele = p2.plot(pen='g', name="Ele")
         self.c_rud = p2.plot(pen='b', name="Rud")
         self.c_thr = p2.plot(pen='y', name="Thr")
+        self.c_aux1 = p2.plot(pen='c', name="Aux1")
+        self.c_aux2 = p2.plot(pen='m', name="Aux2")
 
     def setup_calibration(self, widget):
         # Main Layout: 3 Columns (Left Panel, Visualizer, Right Panel)
@@ -353,7 +354,6 @@ class MainWindow(QtWidgets.QMainWindow):
         center_layout = QtWidgets.QVBoxLayout(center_panel)
         center_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Made text smaller
         lbl_title = QtWidgets.QLabel("Ideal calibration is a perfectly centered sphere")
         lbl_title.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         lbl_title.setStyleSheet("font-size: 10pt; color: #777; margin-bottom: 5px;")
@@ -375,7 +375,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.gl_view.addItem(self.scatter_cal)
 
         center_layout.addWidget(lbl_title)
-        # Added stretch=1 to force graph to take all available space
         center_layout.addWidget(self.gl_view, stretch=1)
 
         # --- RIGHT PANEL: Results ---
@@ -468,16 +467,20 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ai.setAttitude(r, p)
         self.hi.setValue(y)
 
-    def on_cmd(self, a, e, r, t):
+    def on_cmd(self, a, e, r, t, x1, x2):
         self.cmd_data['a'].append(a)
         self.cmd_data['e'].append(e)
         self.cmd_data['r'].append(r)
         self.cmd_data['t'].append(t)
+        self.cmd_data['x1'].append(x1)
+        self.cmd_data['x2'].append(x2)
 
         self.c_ail.setData(self.cmd_data['a'])
         self.c_ele.setData(self.cmd_data['e'])
         self.c_rud.setData(self.cmd_data['r'])
         self.c_thr.setData(self.cmd_data['t'])
+        self.c_aux1.setData(self.cmd_data['x1'])
+        self.c_aux2.setData(self.cmd_data['x2'])
 
     def on_mag(self, x, y, z):
         self.mag_points_raw.append([x, y, z])
@@ -567,6 +570,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print("=" * 40 + "\n")
 
         QtWidgets.QMessageBox.information(self, "Success", "Calibration Complete!")
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

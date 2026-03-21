@@ -33,7 +33,7 @@
                <pin_label pin_num="67" pin_signal="GPIO_SD_08" label="FlexSPI_D2_A" identifier="FlexSPI_D2_A"/>
                <pin_label pin_num="64" pin_signal="GPIO_SD_11" label="SD_CD" identifier="FlexSPI_D3_A;SD_CD"/>
                <pin_label pin_num="69" pin_signal="GPIO_SD_06" label="FlexSPI_SS0" identifier="FlexSPI_SS0"/>
-               <pin_label pin_num="10" pin_signal="GPIO_03" label="LED_D13" identifier="SAI1_RXD0"/>
+               <pin_label pin_num="10" pin_signal="GPIO_03" label="PWM1B" identifier="PWM1B"/>
                <pin_label pin_num="75" pin_signal="GPIO_SD_01" label="PWM0B" identifier="PWM1;PWM1B;PWM0B"/>
                <pin_label pin_num="74" pin_signal="GPIO_SD_02" label="PWM0A" identifier="PWM1;PWM1A;PWM0A"/>
                <pin_label pin_num="8" pin_signal="GPIO_05" label="PWM2B" identifier="PWM2B"/>
@@ -46,7 +46,7 @@
                <pin_label pin_num="52" pin_signal="GPIO_AD_06" label="SD_CLK" identifier="SD_CLK"/>
                <pin_label pin_num="56" pin_signal="GPIO_AD_04" label="SD_MOSI" identifier="SD_MOSI"/>
                <pin_label pin_num="43" pin_signal="GPIO_AD_14" label="SD_CS" identifier="SD_CS"/>
-               <pin_label pin_num="9" pin_signal="GPIO_04" label="MEAS_TIME" identifier="MEAS_TIME"/>
+               <pin_label pin_num="9" pin_signal="GPIO_04" label="PWM1A" identifier="MEAS_TIME"/>
             </pin_labels>
             <external_user_signals>
                <properties/>
@@ -102,11 +102,6 @@
                         <data>true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="SWComponent" resourceId="platform.drivers.igpio" description="Pins initialization requires the IGPIO Driver in the project." problem_level="2" source="Pins:BOARD_InitPins">
-                     <feature name="enabled" evaluation="equal" configuration="core0">
-                        <data>true</data>
-                     </feature>
-                  </dependency>
                   <dependency resourceType="SWComponent" resourceId="platform.drivers.xbara" description="Pins initialization requires the XBARA Driver in the project." problem_level="2" source="Pins:BOARD_InitPins">
                      <feature name="enabled" evaluation="equal" configuration="core0">
                         <data>true</data>
@@ -129,11 +124,6 @@
                         <pin_feature name="software_input_on" value="Enable"/>
                         <pin_feature name="open_drain" value="Enable"/>
                         <pin_feature name="pull_up_down_config" value="Pull_Up_22K_Ohm"/>
-                     </pin_features>
-                  </pin>
-                  <pin peripheral="GPIO1" signal="gpiomux_io, 03" pin_num="10" pin_signal="GPIO_03">
-                     <pin_features>
-                        <pin_feature name="direction" value="OUTPUT"/>
                      </pin_features>
                   </pin>
                   <pin peripheral="PWM1" signal="A, 0" pin_num="74" pin_signal="GPIO_SD_02">
@@ -189,13 +179,6 @@
                         <pin_feature name="software_input_on" value="Enable"/>
                      </pin_features>
                   </pin>
-                  <pin peripheral="GPIO1" signal="gpiomux_io, 04" pin_num="9" pin_signal="GPIO_04">
-                     <pin_features>
-                        <pin_feature name="direction" value="OUTPUT"/>
-                        <pin_feature name="slew_rate" value="Fast"/>
-                        <pin_feature name="software_input_on" value="Enable"/>
-                     </pin_features>
-                  </pin>
                   <pin peripheral="LPUART4" signal="TXD" pin_num="58" pin_signal="GPIO_AD_02"/>
                   <pin peripheral="LPUART4" signal="RXD" pin_num="59" pin_signal="GPIO_AD_01"/>
                   <pin peripheral="PWM1" signal="B, 0" pin_num="75" pin_signal="GPIO_SD_01">
@@ -206,6 +189,16 @@
                   </pin>
                   <pin peripheral="LPUART1" signal="TXD" pin_num="2" pin_signal="GPIO_10"/>
                   <pin peripheral="LPUART1" signal="RXD" pin_num="3" pin_signal="GPIO_09"/>
+                  <pin peripheral="PWM1" signal="A, 1" pin_num="9" pin_signal="GPIO_04">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="PWM1" signal="B, 1" pin_num="10" pin_signal="GPIO_03">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
          </functions_list>
@@ -608,6 +601,26 @@
                         <data type="String">OUTPUT</data>
                      </feature>
                   </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="PWM1.pwm_a.1" description="PWM1.PWM_A, 1 pin needs to be routed" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="PWM1.pwm_a.1" description="PWM1.PWM_A, 1 pin needs to be routed as output" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="direction" evaluation="equal">
+                        <data type="String">OUTPUT</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="PWM1.pwm_b.1" description="PWM1.PWM_B, 1 pin needs to be routed" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="routed" evaluation="equal">
+                        <data type="Boolean">true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="PWM1.pwm_b.1" description="PWM1.PWM_B, 1 pin needs to be routed as output" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="direction" evaluation="equal">
+                        <data type="String">OUTPUT</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="PWM1.pwm_fault.0" description="PWM1.FAULT, 0 pin needs to be routed" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="equal">
                         <data type="Boolean">true</data>
@@ -699,12 +712,12 @@
                         <setting name="enableDeinitPinsFnCustomName" value="false"/>
                         <setting name="deinitPinFunctionCustomID" value="LPI2C1_DeinitPins"/>
                         <struct name="edma_channel">
-                           <setting name="uid" value="1772939936977"/>
+                           <setting name="uid" value="1774061399351"/>
                            <setting name="eDMAn" value="4"/>
                            <setting name="eDMA_source" value="kDmaRequestMuxLPI2C1"/>
                         </struct>
                         <struct name="edma_channel_tx">
-                           <setting name="uid" value="1772939936978"/>
+                           <setting name="uid" value="1774061399352"/>
                            <setting name="eDMAn" value="5"/>
                         </struct>
                      </config_set>
@@ -991,6 +1004,97 @@
                                        </struct>
                                        <setting name="faultState" value="kPWM_PwmFaultState0"/>
                                        <setting name="pwmchannelenable" value="false"/>
+                                       <setting name="deadtime_input_by_force" value="kPWM_UsePwm"/>
+                                       <setting name="clockSource" value="kPWM_BusClock"/>
+                                       <setting name="deadtimeValue" value="0"/>
+                                       <set name="interrupt_sel">
+                                          <selected/>
+                                       </set>
+                                    </struct>
+                                 </struct>
+                                 <struct name="2">
+                                    <setting name="channel_id" value="X"/>
+                                    <setting name="functionSel" value="notUsed"/>
+                                 </struct>
+                              </array>
+                              <setting name="common_interruptEn" value="false"/>
+                              <struct name="common_interrupt">
+                                 <setting name="IRQn" value="PWM1_2_IRQn"/>
+                                 <setting name="enable_interrrupt" value="enabled"/>
+                                 <setting name="enable_priority" value="false"/>
+                                 <setting name="priority" value="0"/>
+                                 <setting name="enable_custom_name" value="false"/>
+                              </struct>
+                           </struct>
+                           <struct name="3">
+                              <setting name="sm" value="kPWM_Module_1"/>
+                              <setting name="sm_id" value="SM1"/>
+                              <struct name="config">
+                                 <setting name="clockSource" value="kPWM_BusClock"/>
+                                 <setting name="prescale" value="kPWM_Prescale_Divide_64"/>
+                                 <setting name="pwmFreq" value="50 hz"/>
+                                 <setting name="pairOperation" value="kPWM_Independent"/>
+                                 <setting name="operationMode" value="kPWM_EdgeAligned"/>
+                                 <setting name="initializationControl" value="kPWM_Initialize_LocalSync"/>
+                                 <setting name="reloadLogic" value="kPWM_ReloadPwmFullCycle"/>
+                                 <setting name="reloadSelect" value="kPWM_LocalReload"/>
+                                 <setting name="reloadFrequency" value="kPWM_LoadEveryOportunity"/>
+                                 <setting name="forceTrigger" value="kPWM_Force_Local"/>
+                                 <setting name="enableDebugMode" value="true"/>
+                                 <setting name="enableWait" value="false"/>
+                                 <set name="outputTrigger_sel">
+                                    <selected/>
+                                 </set>
+                                 <setting name="loadOK" value="true"/>
+                                 <setting name="startCounter" value="true"/>
+                                 <set name="interrupt_sel">
+                                    <selected/>
+                                 </set>
+                                 <setting name="dma_used" value="false"/>
+                                 <struct name="dma">
+                                    <setting name="pwmDMA_activate" value="false"/>
+                                    <set name="captureDMA_enable">
+                                       <selected/>
+                                    </set>
+                                    <setting name="captureDMA_source" value="kPWM_DMARequestDisable"/>
+                                    <setting name="captureDMA_watermark_control" value="kPWM_FIFOWatermarksOR"/>
+                                 </struct>
+                              </struct>
+                              <array name="channels">
+                                 <struct name="0">
+                                    <setting name="channel_id" value="A"/>
+                                    <setting name="functionSel" value="pwmOutput"/>
+                                    <struct name="pwm">
+                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="level" value="kPWM_HighTrue"/>
+                                       <struct name="fault_channel0">
+                                          <set name="dismap">
+                                             <selected/>
+                                          </set>
+                                       </struct>
+                                       <setting name="faultState" value="kPWM_PwmFaultState0"/>
+                                       <setting name="pwmchannelenable" value="true"/>
+                                       <setting name="deadtime_input_by_force" value="kPWM_UsePwm"/>
+                                       <setting name="clockSource" value="kPWM_BusClock"/>
+                                       <setting name="deadtimeValue" value="0"/>
+                                       <set name="interrupt_sel">
+                                          <selected/>
+                                       </set>
+                                    </struct>
+                                 </struct>
+                                 <struct name="1">
+                                    <setting name="channel_id" value="B"/>
+                                    <setting name="functionSel" value="pwmOutput"/>
+                                    <struct name="pwm">
+                                       <setting name="dutyCyclePercent" value="0"/>
+                                       <setting name="level" value="kPWM_HighTrue"/>
+                                       <struct name="fault_channel0">
+                                          <set name="dismap">
+                                             <selected/>
+                                          </set>
+                                       </struct>
+                                       <setting name="faultState" value="kPWM_PwmFaultState0"/>
+                                       <setting name="pwmchannelenable" value="true"/>
                                        <setting name="deadtime_input_by_force" value="kPWM_UsePwm"/>
                                        <setting name="clockSource" value="kPWM_BusClock"/>
                                        <setting name="deadtimeValue" value="0"/>

@@ -46,6 +46,7 @@ public:
         float pitch;
         float yaw;
         float throttle;
+        float gear;
     };
 
     /**

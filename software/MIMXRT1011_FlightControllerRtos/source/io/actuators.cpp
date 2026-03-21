@@ -1,28 +1,30 @@
 #include "io/actuators.h"
 #include "utils/utils.h"
 #include "board.h"
-#include "peripherals.h" // For PWM defines
+#include "peripherals.h"
 
 using namespace firmware::drivers;
 
 // Static configuration for servo channels.
 static const ServoChannelConfig s_servoConfig[] = {
     { PWM1, kPWM_Module_0, kPWM_PwmA }, // Aileron - Left
-	{ PWM1, kPWM_Module_0, kPWM_PwmB }, // Aileron - Right
-	{ PWM1, kPWM_Module_2, kPWM_PwmA }, // Elevator
+    { PWM1, kPWM_Module_0, kPWM_PwmB }, // Aileron - Right
+    { PWM1, kPWM_Module_2, kPWM_PwmA }, // Elevator
     { PWM1, kPWM_Module_2, kPWM_PwmB }, // Rudder
     { PWM1, kPWM_Module_3, kPWM_PwmA }, // Throttle
+    { PWM1, kPWM_Module_1, kPWM_PwmA }, // Gear - Left
+    { PWM1, kPWM_Module_1, kPWM_PwmB }, // Gear - Right
 };
 
 void Actuators::init() {
     m_servoDriver.init(s_servoConfig);
 
     // Set safe defaults immediately upon startup
-	// Surfaces to Center, Throttle to Minimum
-	setRawOutputs(CENTER_PULSE_US, CENTER_PULSE_US, CENTER_PULSE_US, THROTTLE_MIN_PULSE_US);
+    // Surfaces to Center, Throttle to Minimum, Gear to Center
+    setRawOutputs(CENTER_PULSE_US, CENTER_PULSE_US, CENTER_PULSE_US, THROTTLE_MIN_PULSE_US, CENTER_PULSE_US);
 }
 
-void Actuators::setOutputs(float aileron, float elevator, float rudder, float throttle) {
+void Actuators::setOutputs(float aileron, float elevator, float rudder, float throttle, float gear) {
     // Control Surfaces: Use extended range for max throw
     m_servoDriver.setNormalizedOutput(0, aileron, MIN_PULSE_US, MAX_PULSE_US);   // Left Aileron
     m_servoDriver.setNormalizedOutput(1, -aileron, MIN_PULSE_US, MAX_PULSE_US);  // Right Aileron
@@ -36,11 +38,15 @@ void Actuators::setOutputs(float aileron, float elevator, float rudder, float th
     // We pass the same Min/Max limits to ensure the driver doesn't re-scale it further.
     m_servoDriver.setPulseWidthUs(4, throttleUs, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
 
+    // Gear Output
+    m_servoDriver.setNormalizedOutput(5, gear, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setNormalizedOutput(6, gear, MIN_PULSE_US, MAX_PULSE_US);
+
     // Latch all values at once
     m_servoDriver.commitUpdates();
 }
 
-void Actuators::setRawOutputs(uint16_t aileronUs, uint16_t elevatorUs, uint16_t rudderUs, uint16_t throttleUs) {
+void Actuators::setRawOutputs(uint16_t aileronUs, uint16_t elevatorUs, uint16_t rudderUs, uint16_t throttleUs, uint16_t gearUs) {
     // Channel 0: Left Aileron (Direct)
     m_servoDriver.setPulseWidthUs(0, aileronUs, MIN_PULSE_US, MAX_PULSE_US);
 
@@ -57,6 +63,10 @@ void Actuators::setRawOutputs(uint16_t aileronUs, uint16_t elevatorUs, uint16_t 
 
     // Channel 4: Throttle (Direct 1:1 mapping typically, but clamped to limits)
     m_servoDriver.setPulseWidthUs(4, throttleUs, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
+
+    // Channel 5 & 6: Gear
+    m_servoDriver.setPulseWidthUs(5, gearUs, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setPulseWidthUs(6, gearUs, MIN_PULSE_US, MAX_PULSE_US);
 
     // Latch all values at once
     m_servoDriver.commitUpdates();

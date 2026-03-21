@@ -320,21 +320,27 @@ void FlightControllerT<FilterPolicy>::update()
             Actuators::CENTER_PULSE_US,
             Actuators::CENTER_PULSE_US,
             Actuators::CENTER_PULSE_US,
-            Actuators::THROTTLE_MIN_PULSE_US
+            Actuators::THROTTLE_MIN_PULSE_US,
+            receiver.getChannel(RC_CH_AUX2)
         );
     } else if (currentControlMode == ControlMode::PASS_THROUGH) {
         actuators.setRawOutputs(
             receiver.getChannel(RC_CH_ROLL),
             receiver.getChannel(RC_CH_PITCH),
             receiver.getChannel(RC_CH_YAW),
-            receiver.getChannel(RC_CH_THROTTLE)
+            receiver.getChannel(RC_CH_THROTTLE),
+            receiver.getChannel(RC_CH_AUX2)
         );
     } else if (hasNewImu) {
+        Receiver::StickInput stickInput;
+        receiver.getStickInput(stickInput);
+
         actuators.setOutputs(
             surfaceCommands.aileron,
             surfaceCommands.elevator,
             surfaceCommands.rudder,
-            throttleOutput
+            throttleOutput,
+            stickInput.gear
         );
     }
 
@@ -417,4 +423,3 @@ void FlightControllerT<FilterPolicy>::estimateAttitude(
 // ============================================================================
 
 template class FlightControllerT<ActiveFilter>;
-

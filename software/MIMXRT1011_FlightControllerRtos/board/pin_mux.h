@@ -37,23 +37,6 @@ extern "C" {
  */
 void BOARD_InitBootPins(void);
 
-#define BOARD_INITPINS_IOMUXC_GPR_GPR26_GPIO_SEL_MASK 0x18U /*!< Select GPIO1 or GPIO2: affected bits mask */
-
-/* GPIO_03 (number 10), LED_D13 */
-/* Routed pin properties */
-#define BOARD_INITPINS_SAI1_RXD0_PERIPHERAL                                GPIO1   /*!< Peripheral name */
-#define BOARD_INITPINS_SAI1_RXD0_SIGNAL                               gpiomux_io   /*!< Signal name */
-#define BOARD_INITPINS_SAI1_RXD0_CHANNEL                                      3U   /*!< Signal channel */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_INITPINS_SAI1_RXD0_GPIO                                      GPIO1   /*!< GPIO peripheral base pointer */
-#define BOARD_INITPINS_SAI1_RXD0_INIT_GPIO_VALUE                              0U   /*!< GPIO output initial state */
-#define BOARD_INITPINS_SAI1_RXD0_GPIO_PIN                                     3U   /*!< GPIO pin number */
-#define BOARD_INITPINS_SAI1_RXD0_GPIO_PIN_MASK                        (1U << 3U)   /*!< GPIO pin mask */
-#define BOARD_INITPINS_SAI1_RXD0_PORT                                      GPIO1   /*!< PORT peripheral base pointer */
-#define BOARD_INITPINS_SAI1_RXD0_PIN                                          3U   /*!< PORT pin number */
-#define BOARD_INITPINS_SAI1_RXD0_PIN_MASK                             (1U << 3U)   /*!< PORT pin mask */
-
 /* GPIO_SD_02 (number 74), PWM0A */
 /* Routed pin properties */
 #define BOARD_INITPINS_PWM0A_PERIPHERAL                                     PWM1   /*!< Peripheral name */
@@ -94,21 +77,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_UART3_RXD_PERIPHERAL                              LPUART3   /*!< Peripheral name */
 #define BOARD_INITPINS_UART3_RXD_SIGNAL                                      RXD   /*!< Signal name */
 
-/* GPIO_04 (number 9), MEAS_TIME */
-/* Routed pin properties */
-#define BOARD_INITPINS_MEAS_TIME_PERIPHERAL                                GPIO1   /*!< Peripheral name */
-#define BOARD_INITPINS_MEAS_TIME_SIGNAL                               gpiomux_io   /*!< Signal name */
-#define BOARD_INITPINS_MEAS_TIME_CHANNEL                                      4U   /*!< Signal channel */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_INITPINS_MEAS_TIME_GPIO                                      GPIO1   /*!< GPIO peripheral base pointer */
-#define BOARD_INITPINS_MEAS_TIME_INIT_GPIO_VALUE                              0U   /*!< GPIO output initial state */
-#define BOARD_INITPINS_MEAS_TIME_GPIO_PIN                                     4U   /*!< GPIO pin number */
-#define BOARD_INITPINS_MEAS_TIME_GPIO_PIN_MASK                        (1U << 4U)   /*!< GPIO pin mask */
-#define BOARD_INITPINS_MEAS_TIME_PORT                                      GPIO1   /*!< PORT peripheral base pointer */
-#define BOARD_INITPINS_MEAS_TIME_PIN                                          4U   /*!< PORT pin number */
-#define BOARD_INITPINS_MEAS_TIME_PIN_MASK                             (1U << 4U)   /*!< PORT pin mask */
-
 /* GPIO_SD_01 (number 75), PWM0B */
 /* Routed pin properties */
 #define BOARD_INITPINS_PWM0B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
@@ -124,6 +92,18 @@ void BOARD_InitBootPins(void);
 /* Routed pin properties */
 #define BOARD_INITPINS_UART1_RXD_PERIPHERAL                              LPUART1   /*!< Peripheral name */
 #define BOARD_INITPINS_UART1_RXD_SIGNAL                                      RXD   /*!< Signal name */
+
+/* GPIO_04 (number 9), PWM1A */
+/* Routed pin properties */
+#define BOARD_INITPINS_MEAS_TIME_PERIPHERAL                                 PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_MEAS_TIME_SIGNAL                                        A   /*!< Signal name */
+#define BOARD_INITPINS_MEAS_TIME_CHANNEL                                      1U   /*!< Signal channel */
+
+/* GPIO_03 (number 10), PWM1B */
+/* Routed pin properties */
+#define BOARD_INITPINS_PWM1B_PERIPHERAL                                     PWM1   /*!< Peripheral name */
+#define BOARD_INITPINS_PWM1B_SIGNAL                                            B   /*!< Signal name */
+#define BOARD_INITPINS_PWM1B_CHANNEL                                          1U   /*!< Signal channel */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

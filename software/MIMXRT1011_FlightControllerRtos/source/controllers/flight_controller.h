@@ -103,15 +103,15 @@ template <typename FilterPolicy>
     requires gnc::AttitudeFilter<FilterPolicy>
 class FlightControllerT {
 public:
-	/**
-	 * @brief Injects external dependencies safely into the controller.
-	 */
-	void injectDependencies(QueueHandle_t gpsQueue,
-							QueueHandle_t imuQueue,
-							QueueHandle_t magQueue,
-							QueueHandle_t commandQueue,
-							QueueHandle_t controlsQueue,
-							volatile FlightState_t* flightState);
+    /**
+     * @brief Injects external dependencies safely into the controller.
+     */
+    void injectDependencies(QueueHandle_t gpsQueue,
+                            QueueHandle_t imuQueue,
+                            QueueHandle_t magQueue,
+                            QueueHandle_t commandQueue,
+                            QueueHandle_t controlsQueue,
+                            volatile FlightState_t* flightState);
 
     enum class ControlMode {
         STABILIZED,
@@ -213,9 +213,9 @@ private:
     void estimateAttitude(const ImuData& imuData, const std::optional<MagData>& magData);
 
     QueueHandle_t m_gpsQueue = nullptr;
-	QueueHandle_t m_imuQueue = nullptr;
-	QueueHandle_t m_magQueue = nullptr;
-	volatile FlightState_t* m_flightState = nullptr;
+    QueueHandle_t m_imuQueue = nullptr;
+    QueueHandle_t m_magQueue = nullptr;
+    volatile FlightState_t* m_flightState = nullptr;
 
     // -------------------------------------------------------------------------
     // Subsystems
