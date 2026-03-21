@@ -2,181 +2,188 @@
 
 This repository contains the embedded C++ firmware for a custom flight controller based on the **NXP i.MX RT1011 (ARM Cortex-M7)** microcontroller. The system is built on **FreeRTOS** and utilizes a modular, object-oriented architecture to manage sensor fusion, flight control laws, and actuator outputs in real-time.
 
-## 🚀 Features
+## Features
 
 * **Real-Time Operating System**: Built on FreeRTOS v10.5.1 with static memory allocation for deterministic behavior.
 * **Control Modes**:
     * **Stabilized Mode**: Angle-based PID control with coordinated turn capabilities.
     * **Pass-Through Mode**: Direct mapping of RC inputs to servos for manual control.
 * **Sensor Fusion**:
-    * AHRS (Attitude and Heading Reference System) using the Madgwick algorithm.
+    * AHRS utilizing a Multiplicative Extended Kalman Filter (MEKF) or Unscented Kalman Filter (UKF), selectable at compile time.
     * Online Recursive Least Squares (RLS) Magnetometer Calibration.
 * **Connectivity**:
     * **RC Protocol**: FlySky IBUS protocol support using DMA and Idle Line detection for low-latency input.
-    * **Telemetry**: Real-time logging of sensor data and PID outputs via debug console.
+    * **Telemetry**: High-speed real-time logging (100Hz via USB / 10Hz via UART) of sensor data, RC commands, and system status.
+* **Ground Station**: Includes `runViz.py`, a PyQt6/PyQtGraph-based ground station for 3D attitude visualization, live RC input monitoring, and interactive 3D ellipsoid fitting for magnetometer calibration.
 * **Safety**:
     * Failsafe state triggering on initialization failure.
     * Watchdog-like hardfault handling for semihosting environments.
 
-## 🛠 Hardware Architecture
+## Hardware Architecture
 
 ### Target Platform
-* **MCU**: NXP i.MX RT1011 (MIMXRT1011)
-* **Clock Speed**: 500 MHz (Configured via `clock_config.h`)
+* **MCU**: NXP i.MX RT1011 (MIMXRT1011DAE5A)
+* **Core**: Cortex-M7F running at 500 MHz
 
-### Peripherals & Pinout
+### Pinout Mapping
 
-| Peripheral | Component | Details |
+#### Pulse Width Modulation (PWM) - Motors & Servos
+All configured PWM signals are routed from the **PWM1** peripheral block and explicitly mapped in `actuators.cpp`.
+
+| Pin | MCU Signal | Function / Label | Module & Channel |
+| :--- | :--- | :--- | :--- |
+| **74** | GPIO_SD_02 | PWM0A | PWM1, Module 0, Channel A (Aileron Left) |
+| **75** | GPIO_SD_01 | PWM0B | PWM1, Module 0, Channel B (Aileron Right) |
+| **9** | GPIO_04 | PWM1A | PWM1, Module 1, Channel A (Gear Left) |
+| **10** | GPIO_03 | PWM1B | PWM1, Module 1, Channel B (Gear Right) |
+| **6** | GPIO_06 | PWM2A | PWM1, Module 2, Channel A (Elevator) |
+| **8** | GPIO_05 | PWM2B | PWM1, Module 2, Channel B (Rudder) |
+| **4** | GPIO_08 | PWM3A | PWM1, Module 3, Channel A (Throttle) |
+
+#### UART - Serial Communications
+
+| Pin | MCU Signal | Function / Label | Subsystem / Notes |
+| :--- | :--- | :--- | :--- |
+| **3** | GPIO_09 | UART1_RXD | LPUART1 |
+| **2** | GPIO_10 | UART1_TXD | LPUART1 |
+| **1** | GPIO_11 | UART3_RXD | LPUART3 (Telemetry) |
+| **80** | GPIO_12 | UART3_TXD | LPUART3 (Telemetry) |
+| **59** | GPIO_AD_01 | UART4_RXD | LPUART4 (IBUS Receiver) |
+| **58** | GPIO_AD_02 | UART4_TXD | LPUART4 (IBUS Receiver) |
+
+#### I2C - Sensors
+The I2C pins are configured with internal 22K Ohm pull-up resistors and open-drain enabled.
+
+| Pin | MCU Signal | Function / Label |
 | :--- | :--- | :--- |
-| **LPI2C1** | IMU / Mag | Shared bus for LSM6DSOX and LIS3MDL. |
-| **LPUART1** | RC Receiver | Configured for IBUS (115200 baud, 8N1). Uses DMA Channel 0. |
-| **PWM1 Mod 0 A** | Servo | Aileron Output. |
-| **PWM1 Mod 0 B** | Servo | Elevator Output. |
-| **PWM1 Mod 2 A** | ESC | Throttle Output. |
-| **PWM1 Mod 2 B** | Servo | Rudder Output. |
+| **11** | GPIO_02 | LPI2C1_SCL |
+| **12** | GPIO_01 | LPI2C1_SDA |
 
-### Supported Sensors
-* **Accelerometer/Gyroscope**: STMicroelectronics LSM6DSOX.
-* **Magnetometer**: STMicroelectronics LIS3MDL.
+#### SPI / SD Card Interface & Memory
 
-## 📂 Software Architecture
+| Pin | MCU Signal | Function / Label |
+| :--- | :--- | :--- |
+| **52** | GPIO_AD_06 | SD_CLK |
+| **56** | GPIO_AD_04 | SD_MOSI |
+| **57** | GPIO_AD_03 | SD_MISO |
+| **43** | GPIO_AD_14 | SD_CS |
+| **64** | GPIO_SD_11 | SD_CD (Card Detect) |
+| **65** | GPIO_SD_10 | FlexSPI_CLK (Flash) |
+| **69** | GPIO_SD_06 | FlexSPI_SS0 (Flash CS) |
 
-The application is structured around a central **State Manager** that controls the lifecycle of various FreeRTOS tasks.
+### Hardware Block Diagram
+```mermaid
+graph LR
+    %% Main Microcontroller
+    MCU[NXP i.MX RT1011 <br> Cortex-M7 @ 500MHz]
 
+    %% Actuators & PWM
+    subgraph Actuators [PWM1: Servo & Motor Control]
+        MCU -->|Pin 74/75| M0[Module 0: Ailerons L/R]
+        MCU -->|Pin 9/10| M1[Module 1: Landing Gear L/R]
+        MCU -->|Pin 6/8| M2[Module 2: Elevator & Rudder]
+        MCU -->|Pin 4| M3[Module 3: Throttle]
+    end
+
+    %% Serial Communications
+    subgraph Serial [UART Communications]
+        MCU <-->|Pin 2/3| UART1[LPUART1: General]
+        MCU <-->|Pin 80/1| UART3[LPUART3: Telemetry / Ground Station]
+        MCU <-->|Pin 58/59| UART4[LPUART4: FlySky IBUS Receiver]
+    end
+
+    %% I2C Bus
+    subgraph I2C [I2C Sensor Bus]
+        MCU <-->|Pin 11/12| I2C1[LPI2C1: AHRS IMU & Magnetometer]
+    end
+
+    %% SPI and Storage
+    subgraph Storage [SPI & External Memory]
+        MCU <-->|Pin 52/56/57/43/64| SD[SD Card Interface]
+        MCU <-->|Pin 65/66/67/68/69| FLASH[FlexSPI Flash Memory]
+    end
+
+    %% Debugging
+    subgraph Debug [Programming & Debug]
+        MCU -->|Pin 48| SWO[ARM Trace SWO]
+    end
+
+    %% Styling
+    classDef mcu fill:#2a3b4c,stroke:#fff,stroke-width:2px,color:#fff,font-weight:bold;
+    classDef peripheral fill:#4b6584,stroke:#a5b1c2,stroke-width:1px,color:#fff;
+    
+    class MCU mcu;
+    class M0,M1,M2,M3,UART1,UART3,UART4,I2C1,SD,FLASH,SWO peripheral;
+```
+
+## System Controller
+
+```mermaid
+flowchart LR
+    %% Inputs
+    subgraph Inputs [Inputs & Sensors]
+        RC[FlySky Receiver\nIBUS]
+        IMU[LSM6DSOX\nAccel & Gyro]
+        MAG[LIS3MDL\nMagnetometer]
+    end
+
+    %% State Estimation
+    subgraph Estimator [State Estimation]
+        FILTER{Active Filter\nMEKF or UKF}
+    end
+
+    %% Control Laws
+    subgraph Control [Attitude Control]
+        SETPOINT[Target Setpoints\nRoll, Pitch, Throttle]
+        PID[PID Controller\nCascaded Angle & Rate]
+    end
+
+    %% Outputs
+    subgraph Outputs [Actuator Output]
+        MIX[Control Mixer\nLimits & Scaling]
+        PWM[PWM Driver\nServos & ESC]
+    end
+
+    %% Routing
+    IMU -->|Raw Rad/s & m/s²| FILTER
+    MAG -->|Gauss| FILTER
+    RC -->|Mode Switch| MIX
+    RC -->|Stick Deflection| SETPOINT
+
+    FILTER -->|Current Euler Angles\nRoll, Pitch, Yaw| PID
+    SETPOINT -->|Desired Angles| PID
+
+    PID -->|Surface Commands\nAil, Ele, Rud| MIX
+    RC -->|Direct Throttle & Gear| MIX
+
+    MIX -->|Pulse Widths us| PWM
+
+    %% Styling
+    classDef input fill:#2c3e50,stroke:#34495e,stroke-width:2px,color:#fff
+    classDef compute fill:#8e44ad,stroke:#9b59b6,stroke-width:2px,color:#fff
+    classDef control fill:#27ae60,stroke:#2ecc71,stroke-width:2px,color:#fff
+    classDef output fill:#c0392b,stroke:#e74c3c,stroke-width:2px,color:#fff
+
+    class RC,IMU,MAG input
+    class FILTER compute
+    class SETPOINT,PID control
+    class MIX,PWM output
+```
+
+## System State Machine
 ```mermaid
 stateDiagram-v2
-    [*] --> BOOT
+    [*] --> STATE_BOOT : Power On / Reset
     
-    state "STATE_BOOT" as BOOT {
-        [*] --> HardwareInit
-        HardwareInit --> SensorCheck
-    }
+    STATE_BOOT --> STATE_IDLE : Init Success
+    STATE_BOOT --> STATE_FAILSAFE : Init Failed (Sensors/I2C)
 
-    BOOT --> FAILSAFE : Init Failed
-    BOOT --> IDLE : Init Success
-
-    state "STATE_IDLE" as IDLE {
-        [*] --> WaitForArming
-        WaitForArming --> RequestCalibrate : Timer/Command
-    }
-
-    IDLE --> CALIBRATE
-
-    state "STATE_CALIBRATE" as CALIBRATE {
-        [*] --> CalibrateGyro
-        CalibrateGyro --> CalibrationDone
-    }
-
-    CALIBRATE --> FLIGHT : Calibration Complete
-
-    state "STATE_FLIGHT" as FLIGHT {
-        [*] --> UpdateLoop
-        
-        state UpdateLoop {
-            [*] --> ReadSensors
-            ReadSensors --> CheckFailsafe
-            CheckFailsafe --> PID_Stabilized : Normal
-            CheckFailsafe --> PassThrough : Sensor Error / Aux Switch
-            PID_Stabilized --> WriteActuators
-            PassThrough --> WriteActuators
-        }
-    }
+    STATE_IDLE --> STATE_FLIGHT : Stick Gesture: Arm\n(Thr Low, Yaw Right)
+    STATE_IDLE --> STATE_CALIBRATE : Stick Gesture: Calibrate\n(Thr Low, Yaw Left, Pitch Up)
     
-    FAILSAFE --> [*]
+    STATE_CALIBRATE --> STATE_IDLE : Gyro Calibration Complete
+    
+    STATE_FLIGHT --> STATE_IDLE : Stick Gesture: Disarm\n(Thr Low, Yaw Left)
+    
+    STATE_FAILSAFE --> [*] : Requires Reboot
 ```
-The controller has the following architecture:
-
-```mermaid
-graph TD
-    %% Styling
-    classDef hardware fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef software fill:#e1f5fe,stroke:#333,stroke-width:2px;
-    classDef logic fill:#fff9c4,stroke:#333,stroke-width:2px;
-
-    subgraph "External Hardware"
-        Pilot("RC Receiver<br>(FlySky/FrSky)"):::hardware
-        Sensors("Sensors<br>(LSM6DSOX / LIS3MDL)"):::hardware
-        Motors("ESCs / Servos"):::hardware
-    end
-
-    subgraph "Flight Controller Firmware"
-        direction TB
-        
-        %% Input Processing
-        RC_Driver("Receiver Class<br>(ibus_handler)"):::software
-        IMU_Driver("IMU Class<br>(readData)"):::software
-        
-        %% Logic
-        subgraph "Control Loop (100 Hz)"
-            Fusion("Fusion AHRS<br>(Attitude Est)"):::logic
-            Attitude("Attitude Controller<br>(Cascaded PIDs)"):::logic
-            Mixer("Mixer<br>(Stabilization)"):::logic
-        end
-        
-        Actuators("Actuators Class<br>(PWM Gen)"):::software
-    end
-
-    %% Connections
-    Pilot ==>|UART/IBUS| RC_Driver
-    Sensors ==>|I2C| IMU_Driver
-    
-    RC_Driver -->|Setpoint| Attitude
-    IMU_Driver -->|Raw Accel/Gyro| Fusion
-    IMU_Driver -->|Gyro Rates| Attitude
-    
-    Fusion -->|Euler Angles| Attitude
-    Attitude -->|PID Output| Mixer
-    
-    Mixer -->|Surface Cmds| Actuators
-    RC_Driver -->|Throttle| Actuators
-    
-    Actuators ==>|PWM| Motors
-```
-
-### State Machine
-1.  **BOOT**: Hardware initialization and sensor self-checks.
-2.  **IDLE**: System standby, waiting for arming/calibration commands.
-3.  **CALIBRATE**: Performs sensor bias calculation.
-4.  **FLIGHT**: High-frequency (100Hz) control loop execution.
-5.  **FAILSAFE**: Error state with reduced functionality.
-
-### Key Modules
-* **`FlightController`**: The main facade class coordinating the IMU, Receiver, and AttitudeController.
-* **`AttitudeController`**: Implements cascaded PID logic (Rate and Angle loops).
-* **`ServoDriver`**: Abstraction over NXP FSL PWM drivers, handling microsecond-to-tick conversion.
-* **`IbusHandler`**: Zero-copy parser for RC packets using C++23 `std::span`.
-
-## 🔨 Build & Development
-
-### Toolchain Requirements
-* **IDE**: MCUXpresso IDE.
-* **Compiler**: GNU Arm Embedded Toolchain.
-* **Standard**: **C++23** (GNU C++23) and **C17** (GNU C17).
-* **SDK**: NXP MCUXpresso SDK for EVK-MIMXRT1011.
-
-### Style Guide
-This project enforces a strict coding style:
-* **Indentation**: 4 Spaces.
-* **Naming**: `PascalCase` (Classes), `camelCase` (Methods/Variables), `snake_case` (C-Structs/Files).
-* **Memory**: No dynamic allocation (heap) permitted; use `xTaskCreateStatic` and static buffers.
-
-### Compilation
-1.  Import the project into MCUXpresso.
-2.  Ensure the C++ dialect is set to **C++23**.
-3.  Verify the preprocessor symbol `CPP_NO_HEAP` is defined to disable `malloc`/`free` stubs.
-4.  Build the `Debug` or `Release` configuration.
-
-## 🕹 Usage
-
-### RC Channel Mapping (AETR)
-* **Channel 1**: Roll
-* **Channel 2**: Pitch
-* **Channel 3**: Throttle
-* **Channel 4**: Yaw
-* **Channel 5 (AUX1)**: Mode Switch (Low = Stabilized, High = Pass-Through).
-
-### Calibration
-To enter calibration mode, ensure the system is in **IDLE** and trigger the calibration request via the state queue (logic implemented in `idleTask`). The system will perform gyro bias calculation and return to IDLE upon completion.
-
-## 📄 License
-This project is provided "AS IS" without warranty of any kind. See `freertos_config.h` for FreeRTOS licensing details.
