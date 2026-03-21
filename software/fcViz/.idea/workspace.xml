@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="088a3994-3603-4cc7-944c-dbf7dd088c2b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/MIMXRT1011_FlightControllerRtos.mex" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/MIMXRT1011_FlightControllerRtos.mex" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/peripherals.c" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/peripherals.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/peripherals.h" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/peripherals.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/pin_mux.c" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/pin_mux.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/pin_mux.h" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/board/pin_mux.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/controllers/flight_controller.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/controllers/flight_controller.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/controllers/flight_controller.h" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/controllers/flight_controller.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/actuators.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/actuators.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/actuators.h" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/actuators.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/receiver.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/receiver.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/receiver.h" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/io/receiver.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/telemetry/telemetry_manager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/telemetry/telemetry_manager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/utils/common_types.h" beforeDir="false" afterPath="$PROJECT_DIR$/../MIMXRT1011_FlightControllerRtos/source/utils/common_types.h" afterDir="false" />
-    </list>
+    <list default="true" id="088a3994-3603-4cc7-944c-dbf7dd088c2b" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

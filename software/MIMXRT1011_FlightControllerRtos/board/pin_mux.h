@@ -105,6 +105,31 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_PWM1B_SIGNAL                                            B   /*!< Signal name */
 #define BOARD_INITPINS_PWM1B_CHANNEL                                          1U   /*!< Signal channel */
 
+/* GPIO_SD_10 (number 65), FlexSPI_CLK */
+/* Routed pin properties */
+#define BOARD_INITPINS_FlexSPI_CLK_PERIPHERAL                            FLEXSPI   /*!< Peripheral name */
+#define BOARD_INITPINS_FlexSPI_CLK_SIGNAL                         FLEXSPI_A_SCLK   /*!< Signal name */
+
+/* GPIO_SD_09 (number 66), FlexSPI_D0_A */
+/* Routed pin properties */
+#define BOARD_INITPINS_FlexSPI_D0_A_PERIPHERAL                           FLEXSPI   /*!< Peripheral name */
+#define BOARD_INITPINS_FlexSPI_D0_A_SIGNAL                       FLEXSPI_A_DATA0   /*!< Signal name */
+
+/* GPIO_SD_08 (number 67), FlexSPI_D2_A */
+/* Routed pin properties */
+#define BOARD_INITPINS_FlexSPI_D2_A_PERIPHERAL                           FLEXSPI   /*!< Peripheral name */
+#define BOARD_INITPINS_FlexSPI_D2_A_SIGNAL                       FLEXSPI_A_DATA2   /*!< Signal name */
+
+/* GPIO_SD_07 (number 68), FlexSPI_D1_A */
+/* Routed pin properties */
+#define BOARD_INITPINS_FlexSPI_D1_A_PERIPHERAL                           FLEXSPI   /*!< Peripheral name */
+#define BOARD_INITPINS_FlexSPI_D1_A_SIGNAL                       FLEXSPI_A_DATA1   /*!< Signal name */
+
+/* GPIO_SD_06 (number 69), FlexSPI_SS0 */
+/* Routed pin properties */
+#define BOARD_INITPINS_FlexSPI_SS0_PERIPHERAL                            FLEXSPI   /*!< Peripheral name */
+#define BOARD_INITPINS_FlexSPI_SS0_SIGNAL                        FLEXSPI_A_SS0_B   /*!< Signal name */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
