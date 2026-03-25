@@ -7,6 +7,7 @@
  */
 
 #include "flight_controller.h"
+#include "math.h"
 #include <cmath>
 
 using namespace firmware::drivers;
@@ -410,6 +411,49 @@ void FlightControllerT<FilterPolicy>::estimateAttitude(
     currentRollDeg  = euler.x();
     currentPitchDeg = euler.y();
     currentYawDeg   = euler.z();
+}
+
+// ----------------------------------------------------------------------------
+// performPreflightSweep
+// ----------------------------------------------------------------------------
+
+template <typename FilterPolicy>
+    requires gnc::AttitudeFilter<FilterPolicy>
+void FlightControllerT<FilterPolicy>::performPreflightSweep()
+{
+    Receiver::StickInput stickInput;
+    receiver.getStickInput(stickInput);
+
+    // 300 steps at 10ms per step = 3.0 second sweep per control surface
+    constexpr int SWEEP_STEPS = 300;
+    constexpr TickType_t SWEEP_DELAY = pdMS_TO_TICKS(10);
+
+    float aileronPos = 0.0f;
+    float elevatorPos = 0.0f;
+    float rudderPos = 0.0f;
+
+    // Helper lambda to sweep a single targeted surface using a full sine wave period
+    auto sweepSurface = [&](float& activeSurface) {
+        for (int i = 0; i <= SWEEP_STEPS; ++i) {
+            // Map the current step [0, SWEEP_STEPS] to a phase angle [0, 2π]
+            float phase = (static_cast<float>(i) / static_cast<float>(SWEEP_STEPS)) * M_TWOPI;
+
+            // sin(phase) smoothly maps exactly to our -1.0f to 1.0f output requirement
+            activeSurface = std::sin(phase);
+
+            actuators.setOutputs(aileronPos, elevatorPos, rudderPos, 0.0f, stickInput.gear);
+            vTaskDelay(SWEEP_DELAY);
+        }
+
+        // Ensure the surface is explicitly clamped to dead-center before moving to the next
+        activeSurface = 0.0f;
+        actuators.setOutputs(aileronPos, elevatorPos, rudderPos, 0.0f, stickInput.gear);
+    };
+
+    // Execute the sweep sequence
+    sweepSurface(aileronPos);
+    sweepSurface(elevatorPos);
+    sweepSurface(rudderPos);
 }
 
 // ============================================================================

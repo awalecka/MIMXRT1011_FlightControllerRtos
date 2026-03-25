@@ -122,7 +122,11 @@ FlightState_t StateManager::runIdleState(TickType_t& lastWakeTime) {
     Receiver::CommandGesture gesture = m_flightController.getActiveGesture();
 
     if (gesture == Receiver::CommandGesture::Arm) {
-        vTaskDelay(pdMS_TO_TICKS(500));
+        // Execute the visual control surface check
+        m_flightController.performPreflightSweep();
+
+        // Provide a brief pause to let surfaces settle at center before flight loop takes over
+        vTaskDelay(pdMS_TO_TICKS(250));
         return STATE_FLIGHT;
     } else if (gesture == Receiver::CommandGesture::Calibrate) {
         vTaskDelay(pdMS_TO_TICKS(500));

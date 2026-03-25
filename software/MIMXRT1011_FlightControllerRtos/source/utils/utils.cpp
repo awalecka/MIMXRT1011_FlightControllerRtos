@@ -3,6 +3,7 @@
  * @brief Utility functions for range mapping.
  */
 #include "utils.h"
+#include <algorithm> // For std::clamp
 
 float mapFloat(float value, float inMin, float inMax, float outMin, float outMax) {
     if (inMax == inMin) {
@@ -18,6 +19,6 @@ unsigned short mapUshort(unsigned short value, unsigned short inMin, unsigned sh
 
     long result = (static_cast<long>(value) - inMin) * (static_cast<long>(outMax) - outMin) /
                   (static_cast<long>(inMax) - inMin) + outMin;
-
+    result = std::clamp(result, static_cast<long>(outMin), static_cast<long>(outMax));
     return static_cast<unsigned short>(result);
 }

@@ -182,6 +182,13 @@ public:
     /** @brief Read the latest Magnetometer data into the provided structure. */
     int readMag(MagData& data);
 
+    /**
+	 * @brief Performs a smooth full-range sweep of the control surfaces.
+	 * Keeps throttle at zero to ensure safety while sweeping aileron,
+	 * elevator, and rudder from center, to extremes, and back to center.
+	 */
+	void performPreflightSweep();
+
     /** @brief Queries the receiver for any active sustained stick gestures. */
     Receiver::CommandGesture getActiveGesture();
 
