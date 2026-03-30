@@ -41,8 +41,8 @@ private:
     volatile FlightState_t& m_flightState;
     volatile TickType_t& m_heartbeatFrequency;
 
-    static constexpr uint32_t STATE_STACK_SIZE = configMINIMAL_STACK_SIZE + 512;
-    static constexpr uint32_t SENSOR_STACK_SIZE = configMINIMAL_STACK_SIZE + 512;
+    static constexpr uint32_t STATE_STACK_SIZE = configMINIMAL_STACK_SIZE + 1024;
+    static constexpr uint32_t SENSOR_STACK_SIZE = configMINIMAL_STACK_SIZE + 768;
 
     StackType_t m_stateStack[STATE_STACK_SIZE];
     StaticTask_t m_stateTaskControlBlock;
