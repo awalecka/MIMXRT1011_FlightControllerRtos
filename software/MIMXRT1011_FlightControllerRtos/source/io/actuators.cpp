@@ -26,10 +26,10 @@ void Actuators::init() {
 
 void Actuators::setOutputs(float aileron, float elevator, float rudder, float throttle, float gear) {
     // Control Surfaces: Use extended range for max throw
-    m_servoDriver.setNormalizedOutput(0, aileron, MIN_PULSE_US, MAX_PULSE_US);
-    m_servoDriver.setNormalizedOutput(1, aileron, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setNormalizedOutput(0, -aileron, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setNormalizedOutput(1, -aileron, MIN_PULSE_US, MAX_PULSE_US);
     m_servoDriver.setNormalizedOutput(2, elevator, MIN_PULSE_US, MAX_PULSE_US);
-    m_servoDriver.setNormalizedOutput(3, rudder, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setNormalizedOutput(3, -rudder, MIN_PULSE_US, MAX_PULSE_US);
 
     // Throttle: Map 0-100% directly to target microseconds
     uint16_t throttleUs = mapFloat(throttle, 0.0f, 100.0f, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
@@ -43,12 +43,20 @@ void Actuators::setOutputs(float aileron, float elevator, float rudder, float th
 }
 
 void Actuators::setRawOutputs(uint16_t aileronUs, uint16_t elevatorUs, uint16_t rudderUs, uint16_t throttleUs, uint16_t gearUs) {
+
+    // Invert the standard 1000-2000us RC signal by subtracting from 3000
+    uint16_t invertedAileronUs = 3000U - aileronUs;
+    uint16_t invertedRudderUs = 3000U - rudderUs;
+
     // Pass identical microseconds to both ailerons to achieve opposite aerodynamic throw
-    m_servoDriver.setPulseWidthUs(0, aileronUs, MIN_PULSE_US, MAX_PULSE_US);
-    m_servoDriver.setPulseWidthUs(1, aileronUs, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setPulseWidthUs(0, invertedAileronUs, MIN_PULSE_US, MAX_PULSE_US);
+    m_servoDriver.setPulseWidthUs(1, invertedAileronUs, MIN_PULSE_US, MAX_PULSE_US);
 
     m_servoDriver.setPulseWidthUs(2, elevatorUs, MIN_PULSE_US, MAX_PULSE_US);
-    m_servoDriver.setPulseWidthUs(3, rudderUs, MIN_PULSE_US, MAX_PULSE_US);
+
+    // Apply the inverted rudder here
+    m_servoDriver.setPulseWidthUs(3, invertedRudderUs, MIN_PULSE_US, MAX_PULSE_US);
+
     m_servoDriver.setPulseWidthUs(4, throttleUs, THROTTLE_MIN_PULSE_US, THROTTLE_MAX_PULSE_US);
     m_servoDriver.setPulseWidthUs(5, gearUs, MIN_PULSE_US, MAX_PULSE_US);
     m_servoDriver.setPulseWidthUs(6, gearUs, MIN_PULSE_US, MAX_PULSE_US);
