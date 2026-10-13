@@ -22,8 +22,8 @@ static constexpr float degToRad(float deg)
  * -------------------------------------------------------------------------- */
 
 AttitudeController::AttitudeController()
-    : kpRollAngle(6.0f),
-      kpPitchAngle(6.0f),
+    : kpRollAngle(2.0f),
+      kpPitchAngle(2.0f),
       rollRateController(0.1f, 0.01f, 0.0f, RATE_PID_FILTER_CUTOFF_RADS),
       pitchRateController(0.1f, 0.01f, 0.0f, RATE_PID_FILTER_CUTOFF_RADS),
       yawRateController(0.15f, 0.01f, 0.0f, RATE_PID_FILTER_CUTOFF_RADS),

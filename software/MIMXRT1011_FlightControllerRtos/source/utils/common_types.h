@@ -2,7 +2,6 @@
 #define COMMON_TYPES_H
 
 #include <stdint.h>
-#include "lsm6dsox.h"
 
 // --- Constants ---
 #define IBUS_MAX_CHANNELS 14
