@@ -113,6 +113,10 @@ void NmeaParser::parsePacket(std::string_view packet) {
         parseGga(body);
     } else if (sentenceId == "RMC") {
         parseRmc(body);
+    } else if (sentenceId == "VTG") {
+        parseVtg(body);
+    } else if (sentenceId == "GST") {
+        parseGst(body);
     }
 }
 
@@ -126,7 +130,11 @@ void NmeaParser::parseGga(std::string_view body) {
     std::string_view ewStr = getToken(body, 4);
     std::string_view fixStr = getToken(body, 5);
     std::string_view satsStr = getToken(body, 6);
+    std::string_view hdopStr = getToken(body, 7);
     std::string_view altStr = getToken(body, 8);
+
+    const std::optional<uint32_t> timeMs = parseUtcTime(getToken(body, 0));
+    noteTime(timeMs);
 
     int fixQuality = parseInt(fixStr);
 
@@ -136,7 +144,9 @@ void NmeaParser::parseGga(std::string_view body) {
         m_currentData.altitude = parseFloat(altStr);
         m_currentData.satellites = static_cast<uint8_t>(parseInt(satsStr));
         m_currentData.fixType = static_cast<uint8_t>(fixQuality);
+        if (!hdopStr.empty()) m_currentData.hdop = parseFloat(hdopStr);
         m_currentData.valid = true;
+        notePosition(timeMs);
     } else {
         m_currentData.valid = false;
         m_currentData.fixType = 0;
@@ -155,6 +165,9 @@ void NmeaParser::parseRmc(std::string_view body) {
     std::string_view speedStr = getToken(body, 6);
     std::string_view courseStr = getToken(body, 7);
 
+    const std::optional<uint32_t> timeMs = parseUtcTime(getToken(body, 0));
+    noteTime(timeMs);
+
     if (statusStr.starts_with('A')) { // A = Active/Valid
         m_currentData.latitude = nmeaToDecimal(latStr, nsStr);
         m_currentData.longitude = nmeaToDecimal(lonStr, ewStr);
@@ -164,8 +177,119 @@ void NmeaParser::parseRmc(std::string_view body) {
         m_currentData.speed = parseFloat(speedStr) * 0.514444f;
         m_currentData.course = parseFloat(courseStr);
         m_currentData.valid = true;
+        m_currentData.hasVelocity = !speedStr.empty();
         // RMC implies at least a basic fix
         if (m_currentData.fixType == 0) m_currentData.fixType = 1;
+
+        notePosition(timeMs);
+        if (m_currentData.hasVelocity) noteVelocity(timeMs);
+    } else {
+        m_currentData.hasVelocity = false;
+    }
+}
+
+void NmeaParser::parseVtg(std::string_view body) {
+    // VTG Format: CourseTrue, T, CourseMag, M, Knots, N, Km/h, K, Mode
+    // Indexes:    0           1  2          3  4      5  6     7  8
+    // VTG carries no UTC time. u-blox emits it after RMC in the same epoch,
+    // so the most recent time-stamped sentence identifies the epoch.
+
+    std::string_view courseStr = getToken(body, 0);
+    std::string_view kmhStr = getToken(body, 6);
+    std::string_view modeStr = getToken(body, 8);
+
+    // Mode 'N' = data not valid. A missing mode field (NMEA < 2.3) is accepted.
+    const bool modeInvalid = modeStr.starts_with('N');
+    if (kmhStr.empty() || modeInvalid) {
+        m_currentData.hasVelocity = false;
+        return;
+    }
+
+    m_currentData.speed = parseFloat(kmhStr) / 3.6f;
+    // Course is empty at standstill; keep the previous value in that case.
+    if (!courseStr.empty()) m_currentData.course = parseFloat(courseStr);
+    m_currentData.hasVelocity = true;
+
+    if (m_lastEpochTimeMs != NO_TIME) {
+        noteVelocity(m_lastEpochTimeMs);
+    } else {
+        noteVelocity(std::nullopt);
+    }
+}
+
+void NmeaParser::parseGst(std::string_view body) {
+    // GST Format: Time, RMS, SMajor, SMinor, Orient, SigLat, SigLon, SigAlt
+    // Indexes:    0     1    2       3       4       5       6       7
+
+    const std::optional<uint32_t> timeMs = parseUtcTime(getToken(body, 0));
+    noteTime(timeMs);
+
+    std::string_view latStr = getToken(body, 5);
+    std::string_view lonStr = getToken(body, 6);
+    std::string_view altStr = getToken(body, 7);
+    if (latStr.empty() || lonStr.empty()) return;
+
+    m_currentData.sigmaLat = parseFloat(latStr);
+    m_currentData.sigmaLon = parseFloat(lonStr);
+    m_currentData.sigmaAlt = altStr.empty() ? 0.0f : parseFloat(altStr);
+    m_currentData.gstTimeMs = timeMs.value_or(m_currentData.utcTimeMs);
+    m_currentData.hasGst = true;
+}
+
+// --- Epoch helpers ---
+
+std::optional<uint32_t> NmeaParser::parseUtcTime(std::string_view str) const {
+    // hhmmss or hhmmss.sss
+    if (str.size() < 6) return std::nullopt;
+    for (size_t i = 0; i < 6; i++) {
+        if (str[i] < '0' || str[i] > '9') return std::nullopt;
+    }
+    auto d2 = [&](size_t i) { return static_cast<uint32_t>((str[i] - '0') * 10 + (str[i + 1] - '0')); };
+    const uint32_t hh = d2(0), mm = d2(2), ss = d2(4);
+    if (hh > 23 || mm > 59 || ss > 60) return std::nullopt;
+
+    uint32_t ms = 0;
+    if (str.size() > 7 && str[6] == '.') {
+        // Up to 3 fractional digits, right-padded.
+        uint32_t scale = 100;
+        for (size_t i = 7; i < str.size() && scale > 0; i++) {
+            if (str[i] < '0' || str[i] > '9') break;
+            ms += static_cast<uint32_t>(str[i] - '0') * scale;
+            scale /= 10;
+        }
+    }
+    return ((hh * 60u + mm) * 60u + ss) * 1000u + ms;
+}
+
+void NmeaParser::noteTime(std::optional<uint32_t> timeMs) {
+    if (!timeMs) return;
+    m_currentData.utcTimeMs = *timeMs;
+    if (*timeMs != m_lastEpochTimeMs) {
+        m_lastEpochTimeMs = *timeMs;
+        m_currentData.epochId++;
+    }
+}
+
+void NmeaParser::notePosition(std::optional<uint32_t> timeMs) {
+    // Without a time stamp we cannot de-duplicate; count every sentence.
+    if (!timeMs) {
+        m_currentData.posEpochId++;
+        return;
+    }
+    if (*timeMs != m_lastPosTimeMs) {
+        m_lastPosTimeMs = *timeMs;
+        m_currentData.posEpochId++;
+    }
+}
+
+void NmeaParser::noteVelocity(std::optional<uint32_t> timeMs) {
+    if (!timeMs) {
+        m_currentData.velEpochId++;
+        return;
+    }
+    if (*timeMs != m_lastVelTimeMs) {
+        m_lastVelTimeMs = *timeMs;
+        m_currentData.velEpochId++;
     }
 }
 

@@ -235,3 +235,106 @@ int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
+
+// ============================================================================
+// Extended fields: HDOP, UTC time, epochs, VTG, GST
+// ============================================================================
+
+TEST_F(NmeaParserTest, GGA_HdopAndTime) {
+    EXPECT_TRUE(feedParser(makePacket("GNGGA,123519.250,4807.038,N,01131.000,E,1,08,0.90,545.4,M,46.9,M,,")));
+    GpsData d = parser.getLatestData();
+    EXPECT_NEAR(d.hdop, 0.90f, 1e-4f);
+    EXPECT_EQ(d.utcTimeMs, ((12u * 60u + 35u) * 60u + 19u) * 1000u + 250u);
+    EXPECT_EQ(d.epochId, 1u);
+    EXPECT_EQ(d.posEpochId, 1u);
+}
+
+TEST_F(NmeaParserTest, VTG_Valid) {
+    EXPECT_TRUE(feedParser(makePacket("GNVTG,054.7,T,034.4,M,005.5,N,010.2,K,A")));
+    GpsData d = parser.getLatestData();
+    EXPECT_TRUE(d.hasVelocity);
+    EXPECT_NEAR(d.speed, 10.2f / 3.6f, 1e-3f);
+    EXPECT_NEAR(d.course, 54.7f, 1e-3f);
+}
+
+TEST_F(NmeaParserTest, VTG_ModeN_Invalid) {
+    EXPECT_TRUE(feedParser(makePacket("GNVTG,054.7,T,034.4,M,005.5,N,010.2,K,N")));
+    GpsData d = parser.getLatestData();
+    EXPECT_FALSE(d.hasVelocity);
+    EXPECT_EQ(d.velEpochId, 0u);
+}
+
+TEST_F(NmeaParserTest, VTG_EmptyCourseKeepsPrevious) {
+    feedParser(makePacket("GNVTG,120.0,T,,M,005.5,N,010.0,K,A"));
+    feedParser(makePacket("GNVTG,,T,,M,000.0,N,000.0,K,A"));
+    GpsData d = parser.getLatestData();
+    EXPECT_TRUE(d.hasVelocity);
+    EXPECT_NEAR(d.speed, 0.0f, 1e-6f);
+    EXPECT_NEAR(d.course, 120.0f, 1e-3f);
+}
+
+TEST_F(NmeaParserTest, GST_Valid) {
+    EXPECT_TRUE(feedParser(makePacket("GNGST,082356.00,1.8,,,,1.7,1.3,2.2")));
+    GpsData d = parser.getLatestData();
+    EXPECT_TRUE(d.hasGst);
+    EXPECT_NEAR(d.sigmaLat, 1.7f, 1e-4f);
+    EXPECT_NEAR(d.sigmaLon, 1.3f, 1e-4f);
+    EXPECT_NEAR(d.sigmaAlt, 2.2f, 1e-4f);
+    EXPECT_EQ(d.gstTimeMs, ((8u * 60u + 23u) * 60u + 56u) * 1000u);
+}
+
+TEST_F(NmeaParserTest, GST_EmptySigmasIgnored) {
+    feedParser(makePacket("GNGST,082356.00,1.8,,,,,,"));
+    EXPECT_FALSE(parser.getLatestData().hasGst);
+}
+
+TEST_F(NmeaParserTest, EpochId_IncrementsOncePerTime) {
+    // GGA + RMC + VTG + GST of one epoch, then a second epoch.
+    feedParser(makePacket("GNGGA,100000.00,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,"));
+    feedParser(makePacket("GNRMC,100000.00,A,4404.14036,N,12118.85961,W,10.0,90.0,130694,,"));
+    feedParser(makePacket("GNVTG,90.0,T,,M,10.0,N,18.5,K,A"));
+    feedParser(makePacket("GNGST,100000.00,1.0,,,,1.5,1.5,3.0"));
+    GpsData d = parser.getLatestData();
+    EXPECT_EQ(d.epochId, 1u);
+    EXPECT_EQ(d.posEpochId, 1u) << "GGA and RMC of one epoch must count once";
+    EXPECT_EQ(d.velEpochId, 1u) << "RMC and VTG of one epoch must count once";
+
+    feedParser(makePacket("GNGGA,100000.20,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,"));
+    feedParser(makePacket("GNRMC,100000.20,A,4404.14036,N,12118.85961,W,10.0,90.0,130694,,"));
+    d = parser.getLatestData();
+    EXPECT_EQ(d.epochId, 2u);
+    EXPECT_EQ(d.posEpochId, 2u);
+    EXPECT_EQ(d.velEpochId, 2u);
+}
+
+TEST_F(NmeaParserTest, VelocityFromVtgWhenRmcVoid) {
+    // RMC void (no velocity), VTG valid for the same epoch: velocity counts.
+    feedParser(makePacket("GNGGA,100000.00,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,"));
+    feedParser(makePacket("GNRMC,100000.00,V,,,,,,,130694,,"));
+    feedParser(makePacket("GNVTG,90.0,T,,M,10.0,N,18.5,K,A"));
+    GpsData d = parser.getLatestData();
+    EXPECT_EQ(d.velEpochId, 1u);
+    EXPECT_TRUE(d.hasVelocity);
+}
+
+TEST_F(NmeaParserTest, UtcTime_Midnight_Wrap) {
+    feedParser(makePacket("GNGGA,235959.80,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,"));
+    EXPECT_EQ(parser.getLatestData().utcTimeMs, 86399800u);
+    feedParser(makePacket("GNGGA,000000.00,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,"));
+    GpsData d = parser.getLatestData();
+    EXPECT_EQ(d.utcTimeMs, 0u);
+    EXPECT_EQ(d.epochId, 2u) << "Midnight rollover is a new epoch";
+}
+
+TEST_F(NmeaParserTest, FirstEpochAtZeroTimeCounts) {
+    feedParser(makePacket("GNGGA,000000.00,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,"));
+    EXPECT_EQ(parser.getLatestData().posEpochId, 1u);
+}
+
+TEST_F(NmeaParserTest, NoFixGgaDoesNotAdvancePosEpoch) {
+    feedParser(makePacket("GNGGA,100000.00,,,,,0,00,99.99,,,,,,"));
+    GpsData d = parser.getLatestData();
+    EXPECT_EQ(d.posEpochId, 0u);
+    EXPECT_EQ(d.epochId, 1u);
+}

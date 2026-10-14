@@ -63,3 +63,4 @@ add_subdirectory(attitude_controller)  # Can now safely link against 'flight_pid
 add_subdirectory(nmea)
 add_subdirectory(attitude_estimator)
 add_subdirectory(rls_mag_calibration)
+add_subdirectory(nav_estimator)

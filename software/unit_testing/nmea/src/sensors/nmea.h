@@ -23,6 +23,21 @@ struct GpsData {
     uint8_t fixType = 0;     ///< 0=No Fix, 1=GPS Fix, 2=Diff Fix
     bool valid = false;      ///< True if the last packet indicated valid data
     uint32_t lastUpdateTick = 0; ///< System tick of last successful parse
+
+    // ---- Extended fields (navigation use) ----
+    float hdop = 99.9f;          ///< Horizontal dilution of precision (GGA field 7)
+    uint32_t utcTimeMs = 0;      ///< UTC time of day [ms] of the latest time-stamped sentence
+    uint32_t epochId = 0;        ///< Increments each time a sentence carries a new UTC time
+    uint32_t posEpochId = 0;     ///< Increments once per fresh valid position (GGA/RMC, de-duplicated by UTC time)
+    uint32_t velEpochId = 0;     ///< Increments once per fresh valid velocity (RMC/VTG, de-duplicated by UTC time)
+    bool hasVelocity = false;    ///< Speed/course valid (RMC 'A' or VTG mode != 'N')
+
+    // GST (optional, receiver-dependent; off by default on u-blox)
+    bool hasGst = false;         ///< True once a GST sentence has been parsed
+    float sigmaLat = 0.0f;       ///< 1-sigma latitude error [m]
+    float sigmaLon = 0.0f;       ///< 1-sigma longitude error [m]
+    float sigmaAlt = 0.0f;       ///< 1-sigma altitude error [m]
+    uint32_t gstTimeMs = 0;      ///< UTC time [ms] of the latest GST (to detect stale sigmas)
 };
 
 class NmeaParser {
@@ -48,10 +63,25 @@ private:
     bool m_inPacket = false;
     GpsData m_currentData;
 
+    // Epoch de-duplication state. UINT32_MAX = "no time seen yet" so that a
+    // legitimate 00:00:00.000 fix is still counted as new.
+    static constexpr uint32_t NO_TIME = 0xFFFFFFFFu;
+    uint32_t m_lastEpochTimeMs = NO_TIME;
+    uint32_t m_lastPosTimeMs = NO_TIME;
+    uint32_t m_lastVelTimeMs = NO_TIME;
+
     void parsePacket(std::string_view packet);
     bool validateChecksum(std::string_view packet) const;
     void parseGga(std::string_view body);
     void parseRmc(std::string_view body);
+    void parseVtg(std::string_view body);
+    void parseGst(std::string_view body);
+
+    // Epoch helpers
+    std::optional<uint32_t> parseUtcTime(std::string_view str) const;
+    void noteTime(std::optional<uint32_t> timeMs);
+    void notePosition(std::optional<uint32_t> timeMs);
+    void noteVelocity(std::optional<uint32_t> timeMs);
 
     // Modern C++23 helpers
     double nmeaToDecimal(std::string_view val, std::string_view quadrant);
